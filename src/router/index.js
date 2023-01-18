@@ -1,9 +1,15 @@
 import { createRouter, createWebHistory } from "vue-router";
 import BuyView from "../views/BuyView.vue";
+import MarketView from "../views/MarketView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    {
+      path: "/market/:aa(.*)?",
+      name: "market",
+      component: MarketView,
+    },
     {
       path: "/buy/:aa(.*)?",
       name: "buy",

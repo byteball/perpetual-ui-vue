@@ -23,9 +23,7 @@ import { RouterView } from "vue-router";
 }
 
 .menu > a {
+  @apply link;
   margin-left: 8px;
-  color: blue;
-  text-decoration: underline;
-  cursor: pointer;
 }
 </style>
