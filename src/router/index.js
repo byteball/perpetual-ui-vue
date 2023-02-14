@@ -6,7 +6,7 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: "/market/:aa(.*)?",
+      path: "/market",
       name: "market",
       component: MarketView,
     },
