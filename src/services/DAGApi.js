@@ -36,3 +36,17 @@ export async function getMetaForPerpAAs(aas) {
 
   return meta;
 }
+
+export async function getJoint(unit) {
+  try {
+    const joint = await client.api.getJoint(unit);
+
+    if (joint.joint_not_found) {
+      return null;
+    }
+
+    return joint;
+  } catch (e) {
+    console.error(e);
+  }
+}
