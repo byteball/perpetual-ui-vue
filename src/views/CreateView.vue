@@ -313,7 +313,7 @@ watch(
         </span>
       </div>
       <div class="form-control mt-6">
-        <button class="btn btn-primary">Create</button>
+        <a class="btn btn-primary" :href="link">Create</a>
       </div>
     </div>
   </div>
