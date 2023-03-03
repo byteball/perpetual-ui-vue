@@ -61,3 +61,8 @@ export function getPairedAssetsByAsset(asset, assetsByAA) {
 
   return assocAAByAsset;
 }
+
+export function getAssetInfoFromMeta(asset, aa, meta) {
+  const info = meta[aa]["asset_" + asset];
+  return info || null;
+}

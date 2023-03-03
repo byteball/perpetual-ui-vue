@@ -5,6 +5,7 @@ export const getExchangeResultByState = (
   assetInfo,
   state,
   varsAndParams
+  // trigger_initial_address = "ADDRESS"
 ) => {
   console.log("f", {
     tokens,
@@ -32,6 +33,7 @@ export const getExchangeResultByState = (
     return { error: "Invalid input" };
   }
 
+  const op = tokens ? "sell" : "buy";
   const bAsset0 = state.asset0 === asset;
 
   const reserve = state.reserve;
@@ -41,6 +43,20 @@ export const getExchangeResultByState = (
   const oldPrice = oldSupply ? (coef * coef * a * oldSupply) / reserve : 0;
 
   console.log("p = ", oldPrice);
+
+  const key = "last_" || op;
+  const last_trade = bAsset0 ? state[key] : assetInfo[key];
+  // const bMerge =
+  //   Math.round(Date.now() / 1000) <= last_trade.ts + tradeMergePeriod &&
+  //   trigger_initial_address == last_trade.address;
+  const bMerge = false;
+  const recent_tax = bMerge ? last_trade.tax : 0;
+  const recent_delta_s = bMerge ? last_trade.delta_s : 0;
+  const initial_p = bMerge
+    ? tokens
+      ? Math.max(oldPrice, last_trade.initial_p)
+      : Math.min(oldPrice, last_trade.initial_p)
+    : oldPrice;
 
   const swapFeeRate = getSwapFee();
   const arbProfitTaxRate = getArbProfitTaxRate();
@@ -65,13 +81,17 @@ export const getExchangeResultByState = (
   let fullFeeRate;
   let swapFee;
   let deltaSupply;
+
   if (tokens) {
+    deltaSupply = -tokens;
     newSupply = oldSupply - tokens;
     const newReserve1 = getNewReserve(newSupply, swapFeeRate);
     const newPrice1 = (coef * coef * a * newSupply) / newReserve1;
 
     arbProfitTax =
-      (arbProfitTaxRate * (newPrice1 - oldPrice) * (newSupply - oldSupply)) / 2;
+      (arbProfitTaxRate * (initial_p - newPrice1) * (tokens - recent_delta_s)) /
+        2 -
+      recent_tax;
     fullFeeRate = swapFeeRate + arbProfitTax / (reserve - newReserve1);
 
     if (fullFeeRate > 1) {
@@ -79,6 +99,11 @@ export const getExchangeResultByState = (
     }
 
     newReserve = Math.ceil(getNewReserve(newSupply, fullFeeRate));
+
+    if (newReserve > reserve) {
+      return { error: `New reserve would increase to ${newReserve}!` };
+    }
+
     swapFee = swapFeeRate * (reserve - newReserve);
 
     state.a0 = bAsset0
@@ -102,7 +127,11 @@ export const getExchangeResultByState = (
     console.log("new_p1", newP1);
 
     arbProfitTax =
-      (arbProfitTaxRate * (newP1 - oldPrice) * (newSupply1 - oldSupply)) / 2;
+      (arbProfitTaxRate *
+        (newP1 - initial_p) *
+        (newSupply1 - oldSupply + recent_delta_s)) /
+        2 -
+      recent_tax;
 
     fullFeeRate = swapFeeRate + arbProfitTax / deltaReserve;
 
@@ -116,6 +145,10 @@ export const getExchangeResultByState = (
 
     deltaSupply = newSupply - oldSupply;
 
+    if (deltaSupply < 0) {
+      return { error: `New reserve would decrease by ${deltaSupply}!` };
+    }
+
     state.a0 = bAsset0
       ? (state.a0 * oldSupply * oldSupply +
           (newReserve * newReserve - reserve * reserve) / coef / coef) /
@@ -127,6 +160,10 @@ export const getExchangeResultByState = (
           coef /
           state.s0 /
           state.s0;
+  }
+
+  if (state.a0 < 0) {
+    return { error: `a0 would become ${state.a0}` };
   }
 
   state.reserve = newReserve;
@@ -156,7 +193,7 @@ export const getExchangeResultByState = (
 
   return {
     payout: payout,
-    delta_s: tokens ? -tokens : deltaSupply,
+    delta_s: deltaSupply,
     old_reserve: reserve,
     new_reserve: newReserve,
     delta_reserve: newReserve - reserve,
