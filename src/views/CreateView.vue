@@ -1,9 +1,18 @@
 <script setup>
 import { ref, watch } from "vue";
+import { useRouter } from "vue-router";
 import { generateLink } from "@/utils/generateLink";
-import { getJoint } from "../services/DAGApi";
+import { clearObject } from "@/utils/clearObject";
+import { parseDataForFactoryRequest } from "@/utils/parseDataForFactoryRequest";
+import { getJoint } from "@/services/DAGApi";
+import emitter from "@/services/emitter";
 import IntegerInput from "../components/IntegerInput.vue";
 
+import Client from "@/services/Obyte";
+
+const router = useRouter();
+
+const awaiting = ref(false);
 const link = ref("");
 const reserveAsset = ref({ value: "base", error: "" });
 const swapFee = ref({ value: "0.003", error: "" });
@@ -13,6 +22,47 @@ const presalePeriod = ref({ value: "", error: "" });
 const auctionPriceHalvingPeriod = ref({ value: "", error: "" });
 const tokenShareThreshhold = ref({ value: "", error: "" });
 const minS0Share = ref({ value: "", error: "" });
+
+function setAwaiting(value) {
+  awaiting.value = value;
+}
+
+emitter.on("aa_request", async (data) => {
+  if (!awaiting.value) return;
+
+  const _d = parseDataForFactoryRequest(data);
+  const obj = clearObject({
+    reserve_asset: reserveAsset.value.value,
+    swap_fee: swapFee.value.value,
+    arb_profit_tax: arbProfitTax.value.value,
+    adjustment_period: adjustmentPeriod.value.value,
+    presale_period: presalePeriod.value.value,
+    auction_price_halving_period: auctionPriceHalvingPeriod.value.value,
+    token_share_threshold: tokenShareThreshhold.value.value,
+    min_s0_share: minS0Share.value.value,
+  });
+
+  if (JSON.stringify(_d) === JSON.stringify(obj)) {
+    const result = await Client.api.dryRunAa({
+      trigger: {
+        address: "K237YYRMBYWCJBLSZGLJTXLZVVEXLI2Y",
+        outputs: {
+          base: 10000,
+        },
+        data: obj,
+      },
+      address: import.meta.env.VITE_FACTORY_AA, // sent to AA address
+    });
+    const r = result.find(
+      (r) => r.aa_address === import.meta.env.VITE_FACTORY_AA
+    );
+    if (r.response?.responseVars?.address) {
+      const address = r.response.responseVars.address;
+      console.log("aa address: ", address);
+      await router.push(`/create/${address}`);
+    }
+  }
+});
 
 watch(
   [
@@ -28,7 +78,7 @@ watch(
   () => {
     link.value = generateLink(
       10000,
-      {
+      clearObject({
         reserve_asset: reserveAsset.value.value,
         swap_fee: swapFee.value.value,
         arb_profit_tax: arbProfitTax.value.value,
@@ -37,7 +87,7 @@ watch(
         auction_price_halving_period: auctionPriceHalvingPeriod.value.value,
         token_share_threshold: tokenShareThreshhold.value.value,
         min_s0_share: minS0Share.value.value,
-      },
+      }),
       null,
       import.meta.env.VITE_FACTORY_AA,
       "base",
@@ -46,6 +96,7 @@ watch(
   },
   {
     immediate: true,
+    deep: true,
   }
 );
 
@@ -167,7 +218,18 @@ watch(
 </script>
 
 <template>
-  <div class="card flex w-full max-w-sm bg-base-100 justify-center">
+  <div v-if="awaiting">
+    <div>Awaiting...</div>
+    <div>
+      <button class="btn btn-primary" @click="setAwaiting(false)">
+        Cancel
+      </button>
+    </div>
+  </div>
+  <div
+    v-show="!awaiting"
+    class="card flex w-full max-w-sm bg-base-100 justify-center"
+  >
     <div class="card-body">
       <div class="form-control">
         <label class="label">
@@ -313,7 +375,9 @@ watch(
         </span>
       </div>
       <div class="form-control mt-6">
-        <a class="btn btn-primary" :href="link">Create</a>
+        <a class="btn btn-primary" :href="link" @click="setAwaiting(true)"
+          >Create</a
+        >
       </div>
     </div>
   </div>

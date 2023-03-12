@@ -36,6 +36,11 @@ const router = createRouter({
       component: () => import("../views/PresaleView.vue"),
     },
     {
+      path: "/create/:aa",
+      name: "createSymbols",
+      component: () => import("../views/CreateSymbols.vue"),
+    },
+    {
       path: "/create",
       name: "create",
       component: () => import("../views/CreateView.vue"),

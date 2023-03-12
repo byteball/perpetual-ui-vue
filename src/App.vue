@@ -5,8 +5,7 @@ import { RouterView } from "vue-router";
 <template>
   <header>
     <nav class="menu">
-      <RouterLink to="/buy">Buy</RouterLink>
-      <RouterLink to="/sell">Sell</RouterLink>
+      <RouterLink to="/market">Market</RouterLink>
       <RouterLink to="/stake">Stake</RouterLink>
       <RouterLink to="/vote">Vote</RouterLink>
       <RouterLink to="/presale">Presale</RouterLink>
