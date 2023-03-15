@@ -97,7 +97,7 @@ watch(
     const amountValue = amount.value.value;
 
     if (!amountValue) {
-      amountValue.value.error = "Amount is required field";
+      amount.value.error = "Amount is required field";
     }
   },
   {

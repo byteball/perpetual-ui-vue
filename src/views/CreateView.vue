@@ -27,7 +27,7 @@ function setAwaiting(value) {
   awaiting.value = value;
 }
 
-emitter.on("aa_request", async (data) => {
+emitter.on(`aa_request_${import.meta.env.VITE_FACTORY_AA}`, async (data) => {
   if (!awaiting.value) return;
 
   const _d = parseDataForFactoryRequest(data);

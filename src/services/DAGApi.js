@@ -50,3 +50,20 @@ export async function getJoint(unit) {
     console.error(e);
   }
 }
+
+export async function getAssetMetadata(asset) {
+  try {
+    const registryUnit = await client.api.getAssetMetadata(asset);
+
+    const result = await client.api.getJoint(registryUnit.metadata_unit);
+
+    const metadata = result.joint.unit.messages.find(
+      (item) => item.app === "data"
+    );
+
+    return metadata.payload;
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
+}

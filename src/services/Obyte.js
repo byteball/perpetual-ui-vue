@@ -3,6 +3,20 @@ import { getMetaForPerpAAs, getAasCreatedByFactory } from "@/services/DAGApi";
 import emitter from "@/services/emitter";
 import { useAaInfoStore } from "@/stores/aaInfo";
 
+const factoryAaAdress = import.meta.env.VITE_FACTORY_AA;
+const registryAaAdress = import.meta.env.VITE_REGISTRY_AA;
+
+const aaEventNames = {
+  [factoryAaAdress]: {
+    request: `aa_request_${factoryAaAdress}`,
+    response: `aa_response_${factoryAaAdress}`,
+  },
+  [registryAaAdress]: {
+    request: `aa_request_${registryAaAdress}`,
+    response: `aa_response_${registryAaAdress}`,
+  },
+};
+
 const client = new obyte.Client(
   `wss://obyte.org/bb${
     import.meta.env.VITE_NETWORK === "testnet" ? "-test" : ""
@@ -32,6 +46,10 @@ client.onConnect(async () => {
     aa: import.meta.env.VITE_FACTORY_AA,
   });
 
+  client.justsaying("light/new_aa_to_watch", {
+    aa: import.meta.env.VITE_REGISTRY_AA,
+  });
+
   client.subscribe(function (err, result) {
     if (err) return null;
     const { subject, body } = result[1];
@@ -43,9 +61,12 @@ client.onConnect(async () => {
     }
 
     if (subject === "light/aa_request") {
-      emitter.emit("aa_request", body);
-    } else if (subject === "light/aa_response") {
-      emitter.emit("aa_response", body);
+      emitter.emit(aaEventNames[body.aa_address].request, body);
+      return;
+    }
+
+    if (subject === "light/aa_response") {
+      emitter.emit(aaEventNames[body.aa_address].response, body);
     }
   });
 
