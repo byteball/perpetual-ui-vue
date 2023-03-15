@@ -1,46 +1,90 @@
 <script setup>
 import { onMounted, ref, watch } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import emitter from "@/services/emitter";
 
 import Client from "@/services/Obyte";
 import { getAssetMetadata, getMetaForPerpAAs } from "@/services/DAGApi";
 import { generateLink } from "@/utils/generateLink";
+import { parseDataForFactoryRequest } from "@/utils/parseDataForFactoryRequest";
 
 const route = useRoute();
+const router = useRouter();
 
 const exists = ref(false);
-const step = ref(0);
 const link = ref("");
 const asset = ref("");
-const symbol = ref({ value: "", error: "" });
-const decimals = ref({ value: 0, error: "" });
-const description = ref({ value: "", error: "" });
+const symbol = ref("");
+const decimals = ref(0);
+const description = ref("");
+const buttonEnabled = ref(false);
+
+const fillInputsForStep = (assetUnit) => {
+  asset.value = assetUnit;
+  symbol.value = "";
+  decimals.value = 0;
+  description.value = "";
+
+  if (route.query.step === "2") {
+    description.value = `Asset0 for perpetual futures AA ${route.params.aa}`;
+  }
+};
 
 watch(exists, async () => {
   const currentPerpetualMeta = await getMetaForPerpAAs([route.params.aa]);
   const reserveAsset = currentPerpetualMeta[route.params.aa].reserve_asset;
-  console.log("123", currentPerpetualMeta[route.params.aa].reserve_asset);
-  console.log("1234", currentPerpetualMeta[route.params.aa].state.asset0);
+
   if (reserveAsset === "base") {
-    step.value = 2;
+    await router.push({
+      path: `/create/${route.params.aa}`,
+      query: { step: 2 },
+    });
+    fillInputsForStep(currentPerpetualMeta[route.params.aa].state.asset0);
+
     return;
   }
 
   const reserveAssetMetadata = await getAssetMetadata(reserveAsset);
 
   if (!reserveAssetMetadata) {
-    step.value = 1;
+    await router.push({
+      path: `/create/${route.params.aa}`,
+      query: { step: 1 },
+    });
+    fillInputsForStep(currentPerpetualMeta[route.params.aa].reserve_asset);
+
     return;
   }
 
-  step.value = 2;
+  await router.push({
+    path: `/create/${route.params.aa}`,
+    query: { step: 2 },
+  });
+  fillInputsForStep(currentPerpetualMeta[route.params.aa].state.asset0);
 });
 
-// emitter.on(
-//   `aa_request_${import.meta.env.VITE_REGISTRY_AA}`,
-//   async (data) => {}
-// );
+emitter.on(`aa_request_${import.meta.env.VITE_REGISTRY_AA}`, async (data) => {
+  const payload = parseDataForFactoryRequest(data);
+
+  if (payload.asset === asset.value && route.query.step === "1") {
+    const currentPerpetualMeta = await getMetaForPerpAAs([route.params.aa]);
+
+    await router.push({
+      path: `/create/${route.params.aa}`,
+      query: { step: 2 },
+    });
+    fillInputsForStep(currentPerpetualMeta[route.params.aa].state.asset0);
+
+    return;
+  }
+
+  if (payload.asset === asset.value && route.query.step === "2") {
+    await router.push({
+      path: `/create/${route.params.aa}`,
+      query: { step: 3 },
+    });
+  }
+});
 
 emitter.on(`aa_response_${import.meta.env.VITE_FACTORY_AA}`, (data) => {
   console.log("aa_res", data);
@@ -53,34 +97,35 @@ emitter.on(`aa_response_${import.meta.env.VITE_FACTORY_AA}`, (data) => {
 });
 
 watch([asset, symbol, decimals, description], () => {
-  if (!symbol.value.value) {
-    symbol.value.error = "Symbol is required field!";
+  buttonEnabled.value = false;
+
+  if (!symbol.value) {
     return;
   }
 
-  if (!decimals.value.value) {
-    decimals.value.error = "Decimals is required field!";
+  if (decimals.value === "") {
     return;
   }
 
-  if (!description.value.value) {
-    description.value.error = "Description is required field!";
+  if (!description.value) {
     return;
   }
 
   link.value = generateLink(
     10000,
     {
-      asset: asset.value.value,
-      symbol: symbol.value.value,
-      decimals: decimals.value.value,
-      description: description.value.value,
+      asset: asset.value,
+      symbol: symbol.value,
+      decimals: decimals.value,
+      description: description.value,
     },
     null,
     import.meta.env.VITE_REGISTRY_AA,
     "base",
     true
   );
+
+  buttonEnabled.value = true;
 });
 
 onMounted(() => {
@@ -93,76 +138,54 @@ onMounted(() => {
 </script>
 
 <template>
-  <div v-if="!exists">Please await</div>
-  <div v-if="exists">
-    ZBS
-    <div v-if="step === 1"></div>
-
-    <div v-if="step === 2">
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Asset</span>
-        </label>
-        <input
-          type="text"
-          v-model="asset.value"
-          class="input input-bordered"
-          readonly
-        />
+  <div class="card flex w-full max-w-sm bg-base-100 justify-center">
+    <div class="card-body">
+      <div v-if="!exists">Please await</div>
+      <div v-if="exists && route.query.step !== '3'">
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Asset</span>
+          </label>
+          <input
+            type="text"
+            v-model="asset"
+            class="input input-bordered"
+            readonly
+          />
+        </div>
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Symbol</span>
+          </label>
+          <input type="text" v-model="symbol" class="input input-bordered" />
+        </div>
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Decimals</span>
+          </label>
+          <input
+            type="number"
+            v-model="decimals"
+            min="0"
+            class="input input-bordered"
+          />
+        </div>
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text">Description</span>
+          </label>
+          <textarea v-model="description" class="textarea textarea-bordered" />
+        </div>
+        <div class="form-control mt-6">
+          <a
+            class="btn btn-primary"
+            :href="link"
+            :class="{ 'btn-disabled': !buttonEnabled }"
+            >Register symbol</a
+          >
+        </div>
       </div>
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Symbol</span>
-        </label>
-        <input
-          type="text"
-          v-model="symbol.value"
-          class="input input-bordered"
-          :class="{ 'input-error': symbol.error }"
-        />
-        <span
-          v-if="symbol.error"
-          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"
-        >
-          {{ symbol.error }}
-        </span>
-      </div>
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Decimals</span>
-        </label>
-        <input
-          type="number"
-          v-model="decimals.value"
-          class="input input-bordered"
-          :class="{ 'input-error': decimals.error }"
-        />
-        <span
-          v-if="decimals.error"
-          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"
-        >
-          {{ decimals.error }}
-        </span>
-      </div>
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Description</span>
-        </label>
-        <textarea
-          v-model="description.value"
-          class="textarea textarea-bordered"
-          :class="{ 'textarea-error': description.error }"
-        />
-        <span
-          v-if="description.error"
-          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"
-        >
-          {{ description.error }}
-        </span>
-      </div>
-      <div class="form-control mt-6">
-        <a class="btn btn-primary" :href="link">Register symbol</a>
-      </div>
+      <div v-if="exists && route.query.step === '3'">Finish</div>
     </div>
   </div>
 </template>
