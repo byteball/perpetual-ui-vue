@@ -1,9 +1,12 @@
-function getNotDefaultAssetsFromMeta(meta) {
+function getNotDefaultAssetsFromMeta(meta, onlyNotPresale) {
   const keys = Object.keys(meta);
   const assets = [];
 
   keys.forEach((key) => {
-    if (key.startsWith("asset_")) {
+    if (
+      key.startsWith("asset_") &&
+      (!onlyNotPresale || (onlyNotPresale && !meta[key].presale))
+    ) {
       assets.push(key.substring(6));
     }
   });
@@ -11,7 +14,7 @@ function getNotDefaultAssetsFromMeta(meta) {
   return assets;
 }
 
-export function getAssetsFromMeta(meta) {
+export function getAssetsFromMeta(meta, onlyNotPresale) {
   const assetList = [];
   const assetsByAA = {};
 
@@ -30,7 +33,10 @@ export function getAssetsFromMeta(meta) {
       assetList.push(metaByAA.state.asset0);
     }
 
-    const notDefaultAssets = getNotDefaultAssetsFromMeta(metaByAA);
+    const notDefaultAssets = getNotDefaultAssetsFromMeta(
+      metaByAA,
+      onlyNotPresale
+    );
     for (const asset of notDefaultAssets) {
       assetsByAA[aa].assets.push(asset);
       if (!assetList.includes(asset)) {

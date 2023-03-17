@@ -13,7 +13,7 @@ import { getExchangeResultByState } from "@/utils/getExchangeResultByState";
 const store = useAaInfoStore();
 const { aas, meta, status } = storeToRefs(store);
 
-const assets = ref({ assetList: [], assetsByAA: {} });
+const assets = ref({ assetList: [], assetsByAA: {}, nameAndDecimals: {} });
 const pairedAssets = ref([]);
 const asset1 = ref("");
 const asset1Amount = ref("");
@@ -25,12 +25,12 @@ const modalForAsset2 = ref();
 
 const link = ref("");
 const percent = ref(0);
+const newPrice = ref(0);
 
 function initSelectedAA() {
   if (status.value !== "initialized") return;
   console.log("meta", meta.value);
-  assets.value = getAssetsFromMeta(meta.value);
-  console.log("assets", assets.value);
+  assets.value = getAssetsFromMeta(meta.value, true);
 }
 
 function asset1Handler() {
@@ -150,6 +150,7 @@ function calcAndSetDataForMetaAndLink() {
 
   link.value = data.link;
   percent.value = data.result.fee_percent;
+  newPrice.value = data.result.new_price;
   console.log("result", data.result);
 }
 
@@ -172,7 +173,7 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
         <input
           type="text"
           placeholder="0"
-          class="input input-bordered"
+          class="input input-bordered w-full"
           v-model="asset1Amount"
           :disabled="!asset1"
         />
@@ -184,7 +185,7 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
         <input
           type="text"
           placeholder="0"
-          class="input input-bordered"
+          class="input input-bordered w-full"
           :disabled="!asset2"
           v-model="asset2Amount"
           readonly
@@ -196,11 +197,16 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
           >{{ asset2 ? asset2 : "Select asset" }}</label
         >
       </div>
-      <div v-if="percent" class="mt-2">
-        Fee: {{ Number(percent.toFixed(4)) }}%
+      <div v-if="asset2Amount" class="mt-4">
+        <div>Fee: {{ Number(percent.toFixed(4)) }}%</div>
+        <div>New price: {{ newPrice }}</div>
+        <div></div>
       </div>
       <div class="mt-4 text-center">
-        <a class="btn" :href="link" :class="{ 'btn-disabled': !link }"
+        <a
+          class="btn"
+          :href="link"
+          :class="{ 'btn-disabled': !link || !(Number(asset2Amount) > 0) }"
           >Exchange</a
         >
       </div>
