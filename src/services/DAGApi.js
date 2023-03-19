@@ -51,7 +51,12 @@ export async function getJoint(unit) {
   }
 }
 
+const cacheForAssetMetadata = {};
+
 export async function getAssetMetadata(asset) {
+  if (cacheForAssetMetadata[asset]) {
+    return cacheForAssetMetadata[asset];
+  }
   try {
     const registryUnit = await client.api.getAssetMetadata(asset);
 
@@ -61,6 +66,7 @@ export async function getAssetMetadata(asset) {
       (item) => item.app === "data"
     );
 
+    cacheForAssetMetadata[asset] = metadata.payload;
     return metadata.payload;
   } catch (e) {
     console.error(e);
