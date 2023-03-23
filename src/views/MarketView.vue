@@ -6,14 +6,20 @@ import {
   getAssetsFromMeta,
   getPairedAssetsByAsset,
   getAssetInfoFromMeta,
+  getAssetsOnlyWithSymbolsAndDecimals,
 } from "@/utils/assetsUtils";
 import { generateLink } from "@/utils/generateLink";
 import { getExchangeResultByState } from "@/utils/getExchangeResultByState";
+import { getPlaceholderForAmount } from "@/utils/placeholder";
 
 const store = useAaInfoStore();
 const { aas, meta, status } = storeToRefs(store);
 
-const assets = ref({ assetList: [], assetsByAA: {}, nameAndDecimals: {} });
+const assets = ref({
+  assetList: [],
+  assetsByAA: {},
+  nameAndDecimalsByAsset: {},
+});
 const pairedAssets = ref([]);
 const asset1 = ref("");
 const asset1Amount = ref("");
@@ -27,10 +33,10 @@ const link = ref("");
 const percent = ref(0);
 const newPrice = ref(0);
 
-function initSelectedAA() {
+async function initSelectedAA() {
   if (status.value !== "initialized") return;
-  console.log("meta", meta.value);
-  assets.value = getAssetsFromMeta(meta.value, true);
+  const a = getAssetsFromMeta(meta.value, true);
+  assets.value = await getAssetsOnlyWithSymbolsAndDecimals(a);
 }
 
 function asset1Handler() {
@@ -66,8 +72,11 @@ function calcDataForBuy() {
 
   const l = generateLink(
     reserve_asset === "base"
-      ? Number(asset1Amount.value) + 1000
-      : asset1Amount.value,
+      ? Number(asset1Amount.value) * 10 ** 9 + 1000
+      : Number(
+          asset1Amount.value *
+            10 ** assets.value.nameAndDecimalsByAsset[asset1.value].decimals
+        ),
     {
       asset: asset2.value,
     },
@@ -77,11 +86,10 @@ function calcDataForBuy() {
     true
   );
 
-  console.log("info", getAssetInfoFromMeta(asset2.value, aa, meta.value));
-
   const r = getExchangeResultByState(
     0,
-    Number(asset1Amount.value),
+    Number(asset1Amount.value) *
+      10 ** assets.value.nameAndDecimalsByAsset[asset1.value].decimals,
     asset2.value,
     asset2.value === asset0
       ? null
@@ -105,7 +113,8 @@ function calcDataForSell() {
   const aa = pairedAssets.value[asset2.value];
 
   const l = generateLink(
-    asset1Amount.value,
+    Number(asset1Amount.value) *
+      10 ** assets.value.nameAndDecimalsByAsset[asset1.value].decimals,
     {
       asset: asset1.value,
     },
@@ -116,7 +125,8 @@ function calcDataForSell() {
   );
 
   const r = getExchangeResultByState(
-    Number(asset1Amount.value),
+    Number(asset1Amount.value) *
+      10 ** assets.value.nameAndDecimalsByAsset[asset1.value].decimals,
     0,
     asset1.value,
     asset1.value === asset0
@@ -142,10 +152,14 @@ function calcAndSetDataForMetaAndLink() {
   let data;
   if (metaByActiveAA.value.reserve_asset === asset1.value) {
     data = calcDataForBuy();
-    asset2Amount.value = data.result.delta_s;
+    asset2Amount.value =
+      Number(data.result.delta_s) /
+      10 ** assets.value.nameAndDecimalsByAsset[asset2.value].decimals;
   } else {
     data = calcDataForSell();
-    asset2Amount.value = data.result.payout;
+    asset2Amount.value =
+      Number(data.result.payout) /
+      10 ** assets.value.nameAndDecimalsByAsset[asset2.value].decimals;
   }
 
   link.value = data.link;
@@ -166,19 +180,23 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
 </script>
 
 <template>
-  <div class="w-[512px] m-auto mt-48 mb-36">
+  <div class="container w-[512px] m-auto mt-48 mb-36 p-8">
     <div v-if="!assets.assetList.length">Loading...</div>
     <div class="form-control" v-if="assets.assetList.length">
       <div class="input-group">
         <input
           type="text"
-          placeholder="0"
+          :placeholder="
+            getPlaceholderForAmount(
+              assets.nameAndDecimalsByAsset[asset1]?.decimals
+            )
+          "
           class="input input-bordered w-full"
-          v-model="asset1Amount"
+          v-model.number="asset1Amount"
           :disabled="!asset1"
         />
         <label for="asset1Modal" class="btn">{{
-          asset1 ? asset1 : "Select asset"
+          asset1 ? assets.nameAndDecimalsByAsset[asset1].name : "Select asset"
         }}</label>
       </div>
       <div class="input-group mt-4">
@@ -187,14 +205,16 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
           placeholder="0"
           class="input input-bordered w-full"
           :disabled="!asset2"
-          v-model="asset2Amount"
+          v-model.number="asset2Amount"
           readonly
         />
         <label
           for="asset2Modal"
           class="btn"
           :class="{ 'btn-disabled': !asset1 }"
-          >{{ asset2 ? asset2 : "Select asset" }}</label
+          >{{
+            asset2 ? assets.nameAndDecimalsByAsset[asset2].name : "Select asset"
+          }}</label
         >
       </div>
       <div v-if="asset2Amount" class="mt-4">
@@ -202,9 +222,9 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
         <div>New price: {{ newPrice }}</div>
         <div></div>
       </div>
-      <div class="mt-4 text-center">
+      <div class="mt-8 text-center">
         <a
-          class="btn"
+          class="btn btn-primary"
           :href="link"
           :class="{ 'btn-disabled': !link || !(Number(asset2Amount) > 0) }"
           >Exchange</a
@@ -228,7 +248,7 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
         class="my-2 mx-4 cursor-pointer hover:text-gray-600"
         @click="setAsset1(asset)"
       >
-        {{ asset }}
+        {{ assets.nameAndDecimalsByAsset[asset].name }}
       </div>
     </label>
   </label>
@@ -241,12 +261,12 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
   <label for="asset2Modal" class="modal cursor-pointer">
     <label class="modal-box relative" for="">
       <div
-        v-for="(_key, value) in pairedAssets"
-        :key="value"
+        v-for="(_key, asset) in pairedAssets"
+        :key="asset"
         class="my-2 mx-4 cursor-pointer hover:text-gray-600"
-        @click="setAsset2(value)"
+        @click="setAsset2(asset)"
       >
-        {{ value }}
+        {{ assets.nameAndDecimalsByAsset[asset].name }}
       </div>
     </label>
   </label>

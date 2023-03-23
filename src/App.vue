@@ -1,15 +1,35 @@
 <script setup>
-import { RouterView } from "vue-router";
+import { RouterView, useRoute } from "vue-router";
+const route = useRoute();
+console.log(route);
 </script>
 
 <template>
   <header>
     <nav class="menu">
-      <RouterLink to="/market">Market</RouterLink>
-      <RouterLink to="/stake">Stake</RouterLink>
-      <RouterLink to="/vote">Vote</RouterLink>
-      <RouterLink to="/presale">Presale</RouterLink>
-      <RouterLink to="/create">Create</RouterLink>
+      <RouterLink
+        to="/market"
+        class="btn btn-outline btn-sm"
+        :class="{ 'btn-active': route.name === 'market' }"
+        >Market</RouterLink
+      >
+      <RouterLink
+        to="/stake"
+        class="btn btn-outline btn-sm ml-4"
+        :class="{ 'btn-active': route.name === 'stake' }"
+        >Stake</RouterLink
+      >
+      <!--      <RouterLink to="/vote">Vote</RouterLink>-->
+      <!--      <RouterLink to="/presale">Presale</RouterLink>-->
+      <RouterLink
+        to="/create"
+        class="btn btn-outline btn-sm ml-4"
+        :class="{
+          'btn-active':
+            route.name === 'create' || route.name === 'createSymbols',
+        }"
+        >Create</RouterLink
+      >
     </nav>
   </header>
 
@@ -19,10 +39,6 @@ import { RouterView } from "vue-router";
 <style scoped>
 .menu {
   flex-direction: row;
-}
-
-.menu > a {
-  @apply link;
-  margin-left: 8px;
+  padding: 16px;
 }
 </style>

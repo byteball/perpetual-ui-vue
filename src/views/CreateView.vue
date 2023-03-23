@@ -6,7 +6,6 @@ import { clearObject } from "@/utils/clearObject";
 import { parseDataForFactoryRequest } from "@/utils/parseDataForFactoryRequest";
 import { getJoint } from "@/services/DAGApi";
 import emitter from "@/services/emitter";
-import IntegerInput from "../components/IntegerInput.vue";
 
 import Client from "@/services/Obyte";
 
@@ -58,7 +57,6 @@ emitter.on(`aa_request_${import.meta.env.VITE_FACTORY_AA}`, async (data) => {
     );
     if (r.response?.responseVars?.address) {
       const address = r.response.responseVars.address;
-      console.log("aa address: ", address);
       await router.push(`/create/${address}`);
     }
   }
@@ -218,19 +216,16 @@ watch(
 </script>
 
 <template>
-  <div v-if="awaiting">
-    <div>Awaiting...</div>
-    <div>
-      <button class="btn btn-primary" @click="setAwaiting(false)">
-        Cancel
-      </button>
+  <div class="container w-[512px] m-auto mt-40 mb-36 p-8">
+    <div v-if="awaiting">
+      <div>Awaiting...</div>
+      <div>
+        <button class="btn btn-primary" @click="setAwaiting(false)">
+          Cancel
+        </button>
+      </div>
     </div>
-  </div>
-  <div
-    v-show="!awaiting"
-    class="card flex w-full max-w-sm bg-base-100 justify-center"
-  >
-    <div class="card-body">
+    <div v-show="!awaiting">
       <div class="form-control">
         <label class="label">
           <span class="label-text">Reserve asset</span>
@@ -239,7 +234,7 @@ watch(
           type="text"
           placeholder="Reserve asset"
           v-model="reserveAsset.value"
-          class="input input-bordered"
+          class="input input-bordered w-full"
           :class="{ 'input-error': reserveAsset.error }"
         />
         <span
@@ -249,133 +244,137 @@ watch(
           {{ reserveAsset.error }}
         </span>
       </div>
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Swap fee</span>
-        </label>
-        <input
-          type="text"
-          placeholder="Swap fee"
-          v-model="swapFee.value"
-          class="input input-bordered"
-          :class="{ 'input-error': swapFee.error }"
-        />
-        <span
-          v-if="swapFee.error"
-          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"
-        >
-          {{ swapFee.error }}
-        </span>
-      </div>
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Arb profit tax</span>
-        </label>
-        <input
-          type="text"
-          placeholder="Arb profit tax"
-          v-model="arbProfitTax.value"
-          class="input input-bordered"
-          :class="{ 'input-error': arbProfitTax.error }"
-        />
-        <span
-          v-if="arbProfitTax.error"
-          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"
-        >
-          {{ arbProfitTax.error }}
-        </span>
-      </div>
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Adjustment period</span>
-        </label>
-        <IntegerInput
-          :inputType="'integer'"
-          :inputProperty="adjustmentPeriod"
-        />
-        <span
-          v-if="adjustmentPeriod.error"
-          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"
-        >
-          {{ adjustmentPeriod.error }}
-        </span>
-      </div>
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Presale period</span>
-        </label>
-        <input
-          type="text"
-          placeholder="Presale period"
-          v-model="presalePeriod.value"
-          @input="handleIntegerInput"
-          class="input input-bordered"
-          :class="{ 'input-error': presalePeriod.error }"
-        />
-        <span
-          v-if="presalePeriod.error"
-          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"
-        >
-          {{ presalePeriod.error }}
-        </span>
-      </div>
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Auction price halving period</span>
-        </label>
-        <input
-          type="text"
-          placeholder="Auction price halving period"
-          v-model="auctionPriceHalvingPeriod.value"
-          @input="handleIntegerInput"
-          class="input input-bordered"
-          :class="{ 'input-error': auctionPriceHalvingPeriod.error }"
-        />
-        <span
-          v-if="auctionPriceHalvingPeriod.error"
-          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"
-        >
-          {{ auctionPriceHalvingPeriod.error }}
-        </span>
-      </div>
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Token share threshhold</span>
-        </label>
-        <input
-          type="text"
-          placeholder="Token share threshhold"
-          v-model="tokenShareThreshhold.value"
-          class="input input-bordered"
-          :class="{ 'input-error': tokenShareThreshhold.error }"
-        />
-        <span
-          v-if="tokenShareThreshhold.error"
-          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"
-        >
-          {{ tokenShareThreshhold.error }}
-        </span>
-      </div>
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Min s0 share</span>
-        </label>
-        <input
-          type="text"
-          placeholder="Min s0 share"
-          v-model="minS0Share.value"
-          class="input input-bordered"
-          :class="{ 'input-error': minS0Share.error }"
-        />
-        <span
-          v-if="minS0Share.error"
-          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"
-        >
-          {{ minS0Share.error }}
-        </span>
-      </div>
+      <!--      <div class="form-control">-->
+      <!--        <label class="label">-->
+      <!--          <span class="label-text">Swap fee</span>-->
+      <!--        </label>-->
+      <!--        <input-->
+      <!--          type="text"-->
+      <!--          placeholder="Swap fee"-->
+      <!--          v-model="swapFee.value"-->
+      <!--          class="input input-bordered"-->
+      <!--          :class="{ 'input-error': swapFee.error }"-->
+      <!--        />-->
+      <!--        <span-->
+      <!--          v-if="swapFee.error"-->
+      <!--          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"-->
+      <!--        >-->
+      <!--          {{ swapFee.error }}-->
+      <!--        </span>-->
+      <!--      </div>-->
+      <!--      <div class="form-control">-->
+      <!--        <label class="label">-->
+      <!--          <span class="label-text">Arb profit tax</span>-->
+      <!--        </label>-->
+      <!--        <input-->
+      <!--          type="text"-->
+      <!--          placeholder="Arb profit tax"-->
+      <!--          v-model="arbProfitTax.value"-->
+      <!--          class="input input-bordered"-->
+      <!--          :class="{ 'input-error': arbProfitTax.error }"-->
+      <!--        />-->
+      <!--        <span-->
+      <!--          v-if="arbProfitTax.error"-->
+      <!--          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"-->
+      <!--        >-->
+      <!--          {{ arbProfitTax.error }}-->
+      <!--        </span>-->
+      <!--      </div>-->
+      <!--      <div class="form-control">-->
+      <!--        <label class="label">-->
+      <!--          <span class="label-text">Adjustment period</span>-->
+      <!--        </label>-->
+      <!--        <IntegerInput-->
+      <!--          :inputType="'integer'"-->
+      <!--          :inputProperty="adjustmentPeriod"-->
+      <!--        />-->
+      <!--        <span-->
+      <!--          v-if="adjustmentPeriod.error"-->
+      <!--          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"-->
+      <!--        >-->
+      <!--          {{ adjustmentPeriod.error }}-->
+      <!--        </span>-->
+      <!--      </div>-->
+      <!--      <div class="form-control">-->
+      <!--        <label class="label">-->
+      <!--          <span class="label-text">Presale period</span>-->
+      <!--        </label>-->
+      <!--        <input-->
+      <!--          type="text"-->
+      <!--          placeholder="Presale period"-->
+      <!--          v-model="presalePeriod.value"-->
+      <!--          @input="handleIntegerInput"-->
+      <!--          class="input input-bordered"-->
+      <!--          :class="{ 'input-error': presalePeriod.error }"-->
+      <!--        />-->
+      <!--        <span-->
+      <!--          v-if="presalePeriod.error"-->
+      <!--          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"-->
+      <!--        >-->
+      <!--          {{ presalePeriod.error }}-->
+      <!--        </span>-->
+      <!--      </div>-->
+      <!--      <div class="form-control">-->
+      <!--        <label class="label">-->
+      <!--          <span class="label-text">Auction price halving period</span>-->
+      <!--        </label>-->
+      <!--        <input-->
+      <!--          type="text"-->
+      <!--          placeholder="Auction price halving period"-->
+      <!--          v-model="auctionPriceHalvingPeriod.value"-->
+      <!--          @input="handleIntegerInput"-->
+      <!--          class="input input-bordered"-->
+      <!--          :class="{ 'input-error': auctionPriceHalvingPeriod.error }"-->
+      <!--        />-->
+      <!--        <span-->
+      <!--          v-if="auctionPriceHalvingPeriod.error"-->
+      <!--          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"-->
+      <!--        >-->
+      <!--          {{ auctionPriceHalvingPeriod.error }}-->
+      <!--        </span>-->
+      <!--      </div>-->
+      <!--      <div class="form-control">-->
+      <!--        <label class="label">-->
+      <!--          <span class="label-text">Token share threshhold</span>-->
+      <!--        </label>-->
+      <!--        <input-->
+      <!--          type="text"-->
+      <!--          placeholder="Token share threshhold"-->
+      <!--          v-model="tokenShareThreshhold.value"-->
+      <!--          class="input input-bordered"-->
+      <!--          :class="{ 'input-error': tokenShareThreshhold.error }"-->
+      <!--        />-->
+      <!--        <span-->
+      <!--          v-if="tokenShareThreshhold.error"-->
+      <!--          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"-->
+      <!--        >-->
+      <!--          {{ tokenShareThreshhold.error }}-->
+      <!--        </span>-->
+      <!--      </div>-->
+      <!--      <div class="form-control">-->
+      <!--        <label class="label">-->
+      <!--          <span class="label-text">Min s0 share</span>-->
+      <!--        </label>-->
+      <!--        <input-->
+      <!--          type="text"-->
+      <!--          placeholder="Min s0 share"-->
+      <!--          v-model="minS0Share.value"-->
+      <!--          class="input input-bordered"-->
+      <!--          :class="{ 'input-error': minS0Share.error }"-->
+      <!--        />-->
+      <!--        <span-->
+      <!--          v-if="minS0Share.error"-->
+      <!--          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"-->
+      <!--        >-->
+      <!--          {{ minS0Share.error }}-->
+      <!--        </span>-->
+      <!--      </div>-->
       <div class="form-control mt-6">
-        <a class="btn btn-primary" :href="link" @click="setAwaiting(true)"
+        <a
+          class="btn btn-primary"
+          :href="link"
+          :class="{ 'btn-disabled': reserveAsset.value === '' }"
+          @click="setAwaiting(true)"
           >Create</a
         >
       </div>

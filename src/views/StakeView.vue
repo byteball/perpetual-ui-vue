@@ -1,16 +1,21 @@
 <script setup>
-import { ref, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useRoute, useRouter } from "vue-router";
 
 import { generateLink } from "@/utils/generateLink";
+import { getPlaceholderForAmount } from "@/utils/placeholder";
 import { useAaInfoStore } from "@/stores/aaInfo";
+import { getAssetMetadata } from "@/services/DAGApi";
 
 const router = useRouter();
 const route = useRoute();
 
 const store = useAaInfoStore();
-const { aas, meta } = storeToRefs(store);
+const { aas, meta, status } = storeToRefs(store);
+
+const pools = ref([]);
+const poolSymbolAndDecimalByAA = ref({});
 
 const selectedAA = ref("");
 const link = ref("");
@@ -19,6 +24,28 @@ const amount = ref({ value: "", error: "" });
 const term = ref({ value: "360", error: "" });
 const votedGroupKey = ref({ value: "g1", error: "" });
 const percentages = ref({ value: "100", error: "" });
+const buttonDisabled = ref(true);
+
+async function initPools() {
+  if (status.value !== "initialized") return;
+
+  const p = [];
+  for (let aa of aas.value) {
+    const data = await getAssetMetadata(meta.value[aa].state.asset0);
+    if (!data) continue;
+
+    p.push(aa);
+    poolSymbolAndDecimalByAA.value[aa] = data;
+  }
+
+  pools.value = p;
+}
+
+onMounted(() => {
+  initPools();
+});
+watch(aas, initPools);
+watch(status, initPools);
 
 watch(
   () => {
@@ -31,7 +58,7 @@ watch(
     const aa = route.params.aa;
     if (aa && meta.value[aa]) {
       selectedAA.value = aa;
-      metaByAA.value = meta.value[aa];
+      metaByAA.value = { ...meta.value[aa], aa };
       return;
     }
 
@@ -42,66 +69,56 @@ watch(
 );
 
 watch(selectedAA, () => {
+  if (!selectedAA.value) return;
   router.push(`/stake/${selectedAA.value}`);
 });
 
-watch([amount, term, votedGroupKey, percentages], () => {
-  if (!metaByAA.value) return;
-
-  if (!amount.value.value) {
-    amount.value.error = "Amount is required field!";
-    return;
-  }
-
-  if (!term.value.value) {
-    term.value.error = "Term is required field!";
-    return;
-  }
-
-  if (!votedGroupKey.value.value) {
-    votedGroupKey.value.error = "Voted group key is required field!";
-    return;
-  }
-
-  if (!percentages.value.value) {
-    percentages.value.error = "Percentages group key is required field!";
-    return;
-  }
-
-  link.value = generateLink(
-    amount.value,
-    {
-      deposit: 1,
-      term: Number(term.value),
-      voted_group_key: votedGroupKey.value,
-      percentages: { a0: Number(percentages.value.value) },
-    },
-    null,
-    metaByAA.value.staking_aa,
-    metaByAA.value.state.asset0,
-    true
-  );
-  console.log({
-    deposit: 1,
-    term: Number(term.value.value),
-    voted_group_key: votedGroupKey.value.value,
-    percentages: { a0: Number(percentages.value.value) },
-  });
-});
-
 watch(
-  () => amount.value.value,
+  [amount, term, votedGroupKey, percentages],
   () => {
-    amount.value.error = "";
+    if (!metaByAA.value) return;
 
-    const amountValue = amount.value.value;
-
-    if (!amountValue) {
-      amount.value.error = "Amount is required field";
+    if (!amount.value.value) {
+      buttonDisabled.value = true;
+      return;
     }
+
+    if (!term.value.value) {
+      buttonDisabled.value = true;
+      term.value.error = "Term is required field!";
+      return;
+    }
+
+    if (!votedGroupKey.value.value) {
+      buttonDisabled.value = true;
+      votedGroupKey.value.error = "Voted group key is required field!";
+      return;
+    }
+
+    if (!percentages.value.value) {
+      buttonDisabled.value = true;
+      percentages.value.error = "Percentages group key is required field!";
+      return;
+    }
+
+    buttonDisabled.value = false;
+
+    link.value = generateLink(
+      amount.value.value,
+      {
+        deposit: 1,
+        term: Number(term.value.value),
+        voted_group_key: votedGroupKey.value.value,
+        percentages: { a0: Number(percentages.value.value) },
+      },
+      null,
+      metaByAA.value.staking_aa,
+      metaByAA.value.state.asset0,
+      true
+    );
   },
   {
-    immediate: true,
+    deep: true,
   }
 );
 
@@ -155,85 +172,92 @@ watch(
 </script>
 
 <template>
-  <div class="card flex w-full max-w-sm bg-base-100 justify-center">
-    <div class="card-body">
+  <div class="container w-[512px] m-auto mt-40 mb-36 p-8">
+    <div class="form-control">
+      <label class="label">
+        <span class="label-text">Pool</span>
+      </label>
+      <select class="select select-bordered" v-model="selectedAA">
+        <option value="" disabled>Please select aa</option>
+        <option v-for="aa in pools" :key="aa" :value="aa">{{ aa }}</option>
+      </select>
+    </div>
+    <div v-if="metaByAA && poolSymbolAndDecimalByAA[metaByAA.aa]">
       <div class="form-control">
         <label class="label">
-          <span class="label-text">Pool</span>
+          <span class="label-text">Amount</span>
         </label>
-        <select class="select select-bordered" v-model="selectedAA">
-          <option value="" disabled>Please select aa</option>
-          <option v-for="aa in aas" :key="aa" :value="aa">{{ aa }}</option>
-        </select>
-      </div>
-      <div v-show="metaByAA">
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text">Amount</span>
-          </label>
+        <div class="input-group">
           <input
             type="text"
             v-model="amount.value"
-            class="input input-bordered"
+            :placeholder="
+              getPlaceholderForAmount(
+                poolSymbolAndDecimalByAA[metaByAA.aa].decimals
+              )
+            "
+            class="input input-bordered w-full"
           />
-          <span
-            v-if="amount.error"
-            class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"
-          >
-            {{ amount.error }}
-          </span>
+          <span>{{ poolSymbolAndDecimalByAA[metaByAA.aa].name }}</span>
         </div>
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text">Term</span>
-          </label>
-          <input
-            type="text"
-            v-model="term.value"
-            class="input input-bordered"
-          />
-          <span
-            v-if="term.error"
-            class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"
-          >
-            {{ term.error }}
-          </span>
-        </div>
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text">Voted group key</span>
-          </label>
-          <input
-            type="text"
-            v-model="votedGroupKey.value"
-            class="input input-bordered"
-          />
-          <span
-            v-if="votedGroupKey.error"
-            class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"
-          >
-            {{ votedGroupKey.error }}
-          </span>
-        </div>
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text">Percentages</span>
-          </label>
-          <input
-            type="text"
-            v-model="percentages.value"
-            class="input input-bordered"
-          />
-          <span
-            v-if="percentages.error"
-            class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"
-          >
-            {{ percentages.error }}
-          </span>
-        </div>
-        <div class="form-control mt-6">
-          <a class="btn btn-primary" :href="link">Stake</a>
-        </div>
+        <span
+          v-if="amount.error"
+          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"
+        >
+          {{ amount.error }}
+        </span>
+      </div>
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text">Term</span>
+        </label>
+        <input type="text" v-model="term.value" class="input input-bordered" />
+        <span
+          v-if="term.error"
+          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"
+        >
+          {{ term.error }}
+        </span>
+      </div>
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text">Voted group key</span>
+        </label>
+        <input
+          type="text"
+          v-model="votedGroupKey.value"
+          class="input input-bordered"
+        />
+        <span
+          v-if="votedGroupKey.error"
+          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"
+        >
+          {{ votedGroupKey.error }}
+        </span>
+      </div>
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text">Percentages</span>
+        </label>
+        <input
+          type="text"
+          v-model="percentages.value"
+          class="input input-bordered"
+        />
+        <span
+          v-if="percentages.error"
+          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"
+        >
+          {{ percentages.error }}
+        </span>
+      </div>
+      <div class="form-control mt-6">
+        <a
+          class="btn btn-primary"
+          :class="{ 'btn-disabled': buttonDisabled }"
+          :href="link"
+          >Stake</a
+        >
       </div>
     </div>
   </div>

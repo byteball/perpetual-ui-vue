@@ -87,7 +87,6 @@ emitter.on(`aa_request_${import.meta.env.VITE_REGISTRY_AA}`, async (data) => {
 });
 
 emitter.on(`aa_response_${import.meta.env.VITE_FACTORY_AA}`, (data) => {
-  console.log("aa_res", data);
   if (
     data.response.responseVars &&
     data.response.responseVars.address === route.params.aa
@@ -112,7 +111,7 @@ watch([asset, symbol, decimals, description], () => {
   }
 
   link.value = generateLink(
-    10000,
+    100000000,
     {
       asset: asset.value,
       symbol: symbol.value,
@@ -129,7 +128,6 @@ watch([asset, symbol, decimals, description], () => {
 });
 
 onMounted(() => {
-  console.log("aa:", route.params.aa);
   Client.api.getDefinition(route.params.aa, function (err, result) {
     if (err) return console.error(err);
     exists.value = !!result;
@@ -138,54 +136,59 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="card flex w-full max-w-sm bg-base-100 justify-center">
-    <div class="card-body">
-      <div v-if="!exists">Please await</div>
-      <div v-if="exists && route.query.step !== '3'">
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text">Asset</span>
-          </label>
-          <input
-            type="text"
-            v-model="asset"
-            class="input input-bordered"
-            readonly
-          />
-        </div>
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text">Symbol</span>
-          </label>
-          <input type="text" v-model="symbol" class="input input-bordered" />
-        </div>
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text">Decimals</span>
-          </label>
-          <input
-            type="number"
-            v-model="decimals"
-            min="0"
-            class="input input-bordered"
-          />
-        </div>
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text">Description</span>
-          </label>
-          <textarea v-model="description" class="textarea textarea-bordered" />
-        </div>
-        <div class="form-control mt-6">
-          <a
-            class="btn btn-primary"
-            :href="link"
-            :class="{ 'btn-disabled': !buttonEnabled }"
-            >Register symbol</a
-          >
-        </div>
+  <div class="container w-[512px] m-auto mt-48 mb-36 p-8">
+    <div v-if="!exists" class="text-center">Please await</div>
+    <div v-if="exists && route.query.step !== '3'">
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text">Asset</span>
+        </label>
+        <input
+          type="text"
+          v-model="asset"
+          class="input input-bordered"
+          readonly
+        />
       </div>
-      <div v-if="exists && route.query.step === '3'">Finish</div>
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text">Symbol</span>
+        </label>
+        <input
+          type="text"
+          v-model="symbol"
+          @input="() => (symbol = symbol.toUpperCase())"
+          class="input input-bordered"
+        />
+      </div>
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text">Decimals</span>
+        </label>
+        <input
+          type="number"
+          v-model="decimals"
+          min="0"
+          class="input input-bordered"
+        />
+      </div>
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text">Description</span>
+        </label>
+        <textarea v-model="description" class="textarea textarea-bordered" />
+      </div>
+      <div class="form-control mt-6">
+        <a
+          class="btn btn-primary"
+          :href="link"
+          :class="{ 'btn-disabled': !buttonEnabled }"
+          >Register symbol</a
+        >
+      </div>
+    </div>
+    <div v-if="exists && route.query.step === '3'" class="text-center">
+      Finish
     </div>
   </div>
 </template>

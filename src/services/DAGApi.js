@@ -54,6 +54,12 @@ export async function getJoint(unit) {
 const cacheForAssetMetadata = {};
 
 export async function getAssetMetadata(asset) {
+  if (asset === "base") {
+    return {
+      name: "GBYTE",
+      decimals: 9,
+    };
+  }
   if (cacheForAssetMetadata[asset]) {
     return cacheForAssetMetadata[asset];
   }
@@ -69,7 +75,6 @@ export async function getAssetMetadata(asset) {
     cacheForAssetMetadata[asset] = metadata.payload;
     return metadata.payload;
   } catch (e) {
-    console.error(e);
     return null;
   }
 }
