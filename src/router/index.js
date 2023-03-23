@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from "vue-router";
-import BuyView from "../views/BuyView.vue";
 import MarketView from "../views/MarketView.vue";
 
 const router = createRouter({
@@ -9,16 +8,6 @@ const router = createRouter({
       path: "/",
       name: "market",
       component: MarketView,
-    },
-    {
-      path: "/buy/:aa(.*)?",
-      name: "buy",
-      component: BuyView,
-    },
-    {
-      path: "/sell/:aa(.*)?",
-      name: "sell",
-      component: () => import("../views/SellView.vue"),
     },
     {
       path: "/stake/:aa(.*)?",

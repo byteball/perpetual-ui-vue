@@ -1,7 +1,6 @@
 <script setup>
 import { RouterView, useRoute } from "vue-router";
 const route = useRoute();
-console.log(route);
 </script>
 
 <template>
