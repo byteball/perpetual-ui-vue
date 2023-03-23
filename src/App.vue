@@ -8,7 +8,7 @@ console.log(route);
   <header>
     <nav class="menu">
       <RouterLink
-        to="/market"
+        to="/"
         class="btn btn-outline btn-sm"
         :class="{ 'btn-active': route.name === 'market' }"
         >Market</RouterLink
