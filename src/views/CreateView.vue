@@ -1,10 +1,12 @@
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import { generateLink } from "@/utils/generateLink";
 import { clearObject } from "@/utils/clearObject";
 import { parseDataForFactoryRequest } from "@/utils/parseDataForFactoryRequest";
 import { getJoint } from "@/services/DAGApi";
+
+import AutoComplete from "@tarekraafat/autocomplete.js";
 import emitter from "@/services/emitter";
 
 import Client from "@/services/Obyte";
@@ -21,6 +23,68 @@ const presalePeriod = ref({ value: "", error: "" });
 const auctionPriceHalvingPeriod = ref({ value: "", error: "" });
 const tokenShareThreshhold = ref({ value: "", error: "" });
 const minS0Share = ref({ value: "", error: "" });
+
+const SI = ref();
+const autoComplete = ref();
+const assetNames = ref(["ASD", "APT", "AND"]);
+
+function keyDown(e) {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    const matches = autoComplete.value.feedback.matches;
+
+    if (matches[autoComplete.value.cursor]) {
+      reserveAsset.value.value = matches[autoComplete.value.cursor].value;
+    }
+  }
+}
+
+onMounted(() => {
+  SI.value.addEventListener("keydown", keyDown);
+  autoComplete.value = new AutoComplete({
+    selector: "#assetInput",
+    submit: true,
+    placeHolder: "",
+    data: {
+      src: async () => {
+        return assetNames.value;
+      },
+      filter: (list) => {
+        const inputValue = autoComplete.value.input.value.toLowerCase();
+        const mostSimilar = [];
+        const similar = list.filter((el) => {
+          if (!el.value.toLowerCase().startsWith(inputValue)) {
+            return true;
+          }
+
+          mostSimilar.push(el);
+          return false;
+        });
+
+        return [...mostSimilar, ...similar];
+      },
+    },
+    resultsList: {
+      maxResults: 20,
+    },
+    resultItem: {
+      highlight: true,
+    },
+    events: {
+      input: {
+        selection: (e) => {
+          if (e.detail.event.type === "click") {
+            reserveAsset.value.value = e.detail.selection.value;
+          }
+        },
+      },
+    },
+  });
+});
+
+onBeforeUnmount(() => {
+  SI.value.removeEventListener("keydown", keyDown);
+});
 
 function setAwaiting(value) {
   awaiting.value = value;
@@ -214,7 +278,27 @@ watch(
   }
 );
 </script>
+<style>
+.autoComplete_wrapper > ul > li mark {
+  color: #641ae6 !important;
+}
 
+.autoComplete_wrapper > ul {
+  position: absolute;
+  top: 90% !important;
+  background-color: #2a303c;
+}
+
+.autoComplete_wrapper > ul > li {
+  background-color: #2a303c;
+  border-radius: 0;
+  color: #a6adba !important;
+}
+
+.autoComplete_wrapper > input::placeholder {
+  color: #a6adba !important;
+}
+</style>
 <template>
   <div class="container w-[512px] m-auto mt-40 mb-36 p-8">
     <div v-if="awaiting">
@@ -226,16 +310,17 @@ watch(
       </div>
     </div>
     <div v-show="!awaiting">
-      <div class="form-control">
+      <div class="!form-control">
         <label class="label">
           <span class="label-text">Reserve asset</span>
         </label>
         <input
           type="text"
-          placeholder="Reserve asset"
+          id="assetInput"
+          ref="SI"
           v-model="reserveAsset.value"
-          class="input input-bordered w-full"
-          :class="{ 'input-error': reserveAsset.error }"
+          class="!input !input-bordered !w-full"
+          :class="{ '!input-error': reserveAsset.error }"
         />
         <span
           v-if="reserveAsset.error"
