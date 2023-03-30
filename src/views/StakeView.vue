@@ -209,7 +209,7 @@ watch(
       </div>
       <div class="form-control">
         <label class="label">
-          <span class="label-text">Term</span>
+          <span class="label-text">Term (in days)</span>
         </label>
         <input type="text" v-model="term.value" class="input input-bordered" />
         <span
@@ -219,38 +219,38 @@ watch(
           {{ term.error }}
         </span>
       </div>
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Voted group key</span>
-        </label>
-        <input
-          type="text"
-          v-model="votedGroupKey.value"
-          class="input input-bordered"
-        />
-        <span
-          v-if="votedGroupKey.error"
-          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"
-        >
-          {{ votedGroupKey.error }}
-        </span>
-      </div>
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Percentages</span>
-        </label>
-        <input
-          type="text"
-          v-model="percentages.value"
-          class="input input-bordered"
-        />
-        <span
-          v-if="percentages.error"
-          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"
-        >
-          {{ percentages.error }}
-        </span>
-      </div>
+      <!--      <div class="form-control">-->
+      <!--        <label class="label">-->
+      <!--          <span class="label-text">Voted group key</span>-->
+      <!--        </label>-->
+      <!--        <input-->
+      <!--          type="text"-->
+      <!--          v-model="votedGroupKey.value"-->
+      <!--          class="input input-bordered"-->
+      <!--        />-->
+      <!--        <span-->
+      <!--          v-if="votedGroupKey.error"-->
+      <!--          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"-->
+      <!--        >-->
+      <!--          {{ votedGroupKey.error }}-->
+      <!--        </span>-->
+      <!--      </div>-->
+      <!--      <div class="form-control">-->
+      <!--        <label class="label">-->
+      <!--          <span class="label-text">Percentages</span>-->
+      <!--        </label>-->
+      <!--        <input-->
+      <!--          type="text"-->
+      <!--          v-model="percentages.value"-->
+      <!--          class="input input-bordered"-->
+      <!--        />-->
+      <!--        <span-->
+      <!--          v-if="percentages.error"-->
+      <!--          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"-->
+      <!--        >-->
+      <!--          {{ percentages.error }}-->
+      <!--        </span>-->
+      <!--      </div>-->
       <div class="form-control mt-6">
         <a
           class="btn btn-primary"
