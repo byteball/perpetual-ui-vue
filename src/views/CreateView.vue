@@ -4,7 +4,7 @@ import { useRouter } from "vue-router";
 import { generateLink } from "@/utils/generateLink";
 import { clearObject } from "@/utils/clearObject";
 import { parseDataForFactoryRequest } from "@/utils/parseDataForFactoryRequest";
-import { getJoint } from "@/services/DAGApi";
+import { getAssetMetadata } from "@/services/DAGApi";
 
 import AutoComplete from "@tarekraafat/autocomplete.js";
 import emitter from "@/services/emitter";
@@ -15,7 +15,8 @@ const router = useRouter();
 
 const awaiting = ref(false);
 const link = ref("");
-const reserveAsset = ref({ value: "base", error: "" });
+const reserveAssetInput = ref("");
+const reserveAsset = ref("");
 const swapFee = ref({ value: "0.003", error: "" });
 const arbProfitTax = ref({ value: "0.9", error: "" });
 const adjustmentPeriod = ref({ value: "", error: "" });
@@ -26,28 +27,77 @@ const minS0Share = ref({ value: "", error: "" });
 
 const SI = ref();
 const autoComplete = ref();
-const assetNames = ref(["ASD", "APT", "AND"]);
+const assocAssetBySymbol = ref({});
+const oswapAssets = ref({});
 
 function keyDown(e) {
   if (e.key === "Enter") {
     e.preventDefault();
-    const matches = autoComplete.value.feedback.matches;
+    const matches = autoComplete.value.feedback
+      ? autoComplete.value.feedback.matches
+      : [];
+
+    if (!matches.length) return;
+
+    if (autoComplete.value.cursor === -1) {
+      reserveAssetInput.value = matches[0].value;
+      autoComplete.value.close();
+      return;
+    }
 
     if (matches[autoComplete.value.cursor]) {
-      reserveAsset.value.value = matches[autoComplete.value.cursor].value;
+      reserveAssetInput.value = matches[autoComplete.value.cursor].value;
     }
   }
 }
 
-onMounted(() => {
+async function getOswapPoolsAndSymbols() {
+  const assetsBySymbol = {};
+
+  const vars = await Client.api.getAaStateVars({
+    address: import.meta.env.VITE_OSWAP_FACTORY,
+  });
+
+  for (let k in vars) {
+    if (k.startsWith("pool_")) {
+      const asset = vars[k].pool_asset;
+      const assetMeta = await getAssetMetadata(asset);
+      if (assetMeta) {
+        assetsBySymbol[assetMeta.name] = asset;
+      }
+    }
+  }
+
+  return assetsBySymbol;
+}
+
+onMounted(async () => {
+  const registry = Client.api.getOfficialTokenRegistryAddress();
+  oswapAssets.value = await getOswapPoolsAndSymbols();
   SI.value.addEventListener("keydown", keyDown);
+
   autoComplete.value = new AutoComplete({
+    name: "autoComplete",
     selector: "#assetInput",
     submit: true,
     placeHolder: "",
     data: {
-      src: async () => {
-        return assetNames.value;
+      src: async (query) => {
+        let assets = [];
+        assets = [...Object.keys(oswapAssets.value)];
+
+        const asset = await Client.api.getAssetBySymbol(registry, query);
+        if (asset) {
+          assets = [...assets, query];
+          assocAssetBySymbol.value = {
+            ...oswapAssets.value,
+            ...{ [query]: asset },
+          };
+        } else {
+          assocAssetBySymbol.value = { ...oswapAssets.value };
+        }
+
+        return assets;
       },
       filter: (list) => {
         const inputValue = autoComplete.value.input.value.toLowerCase();
@@ -74,7 +124,7 @@ onMounted(() => {
       input: {
         selection: (e) => {
           if (e.detail.event.type === "click") {
-            reserveAsset.value.value = e.detail.selection.value;
+            reserveAssetInput.value = e.detail.selection.value;
           }
         },
       },
@@ -95,7 +145,7 @@ emitter.on(`aa_request_${import.meta.env.VITE_FACTORY_AA}`, async (data) => {
 
   const _d = parseDataForFactoryRequest(data);
   const obj = clearObject({
-    reserve_asset: reserveAsset.value.value,
+    reserve_asset: reserveAsset.value,
     swap_fee: swapFee.value.value,
     arb_profit_tax: arbProfitTax.value.value,
     adjustment_period: adjustmentPeriod.value.value,
@@ -141,7 +191,7 @@ watch(
     link.value = generateLink(
       10000,
       clearObject({
-        reserve_asset: reserveAsset.value.value,
+        reserve_asset: reserveAsset.value,
         swap_fee: swapFee.value.value,
         arb_profit_tax: arbProfitTax.value.value,
         adjustment_period: adjustmentPeriod.value.value,
@@ -162,33 +212,31 @@ watch(
   }
 );
 
-watch(
-  () => reserveAsset.value.value,
-  async () => {
-    reserveAsset.value.error = "";
-
-    const reserverAssetValue = reserveAsset.value.value;
-    if (!reserverAssetValue) {
-      return;
-    }
-
-    if (reserverAssetValue === "base") {
-      return;
-    }
-
-    const joint = await getJoint(reserverAssetValue);
-
-    if (
-      !joint ||
-      !joint.joint.unit.messages.find((m) => m.app === "definition")
-    ) {
-      reserveAsset.value.error = "Asset not found";
-    }
-  },
-  {
-    immediate: true,
-  }
-);
+// async function checkAsset() {
+//   reserveAsset.value.error = "";
+//
+//   const reserverAssetValue = reserveAsset.value.value;
+//   if (!reserverAssetValue) {
+//     return;
+//   }
+//
+//   if (
+//     reserverAssetValue === "base" ||
+//     reserverAssetValue.toUpperCase() === "GBYTE" ||
+//     reserverAssetValue.toUpperCase() === "GB"
+//   ) {
+//     return;
+//   }
+//
+//   const joint = await getJoint(reserverAssetValue);
+//
+//   if (
+//     !joint ||
+//     !joint.joint.unit.messages.find((m) => m.app === "definition")
+//   ) {
+//     reserveAsset.value.error = "Asset not found";
+//   }
+// }
 
 watch(
   () => tokenShareThreshhold.value.value,
@@ -277,28 +325,26 @@ watch(
     immediate: true,
   }
 );
+
+watch(reserveAssetInput, async () => {
+  if (oswapAssets.value[reserveAssetInput.value]) {
+    reserveAsset.value = oswapAssets.value[reserveAssetInput.value];
+    return;
+  }
+
+  const registry = Client.api.getOfficialTokenRegistryAddress();
+  const asset = await Client.api.getAssetBySymbol(
+    registry,
+    reserveAssetInput.value
+  );
+  if (asset) {
+    reserveAsset.value = asset;
+    return;
+  }
+
+  reserveAsset.value = "";
+});
 </script>
-<style>
-.autoComplete_wrapper > ul > li mark {
-  color: #641ae6 !important;
-}
-
-.autoComplete_wrapper > ul {
-  position: absolute;
-  top: 90% !important;
-  background-color: #2a303c;
-}
-
-.autoComplete_wrapper > ul > li {
-  background-color: #2a303c;
-  border-radius: 0;
-  color: #a6adba !important;
-}
-
-.autoComplete_wrapper > input::placeholder {
-  color: #a6adba !important;
-}
-</style>
 <template>
   <div class="container w-[512px] m-auto mt-40 mb-36 p-8">
     <div v-if="awaiting">
@@ -318,16 +364,9 @@ watch(
           type="text"
           id="assetInput"
           ref="SI"
-          v-model="reserveAsset.value"
+          v-model="reserveAssetInput"
           class="!input !input-bordered !w-full"
-          :class="{ '!input-error': reserveAsset.error }"
         />
-        <span
-          v-if="reserveAsset.error"
-          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"
-        >
-          {{ reserveAsset.error }}
-        </span>
       </div>
       <!--      <div class="form-control">-->
       <!--        <label class="label">-->
@@ -458,7 +497,7 @@ watch(
         <a
           class="btn btn-primary"
           :href="link"
-          :class="{ 'btn-disabled': reserveAsset.value === '' }"
+          :class="{ 'btn-disabled': reserveAsset === '' }"
           @click="setAwaiting(true)"
           >Create</a
         >
@@ -466,3 +505,25 @@ watch(
     </div>
   </div>
 </template>
+
+<style>
+.autoComplete_wrapper > ul > li mark {
+  color: #641ae6 !important;
+}
+
+.autoComplete_wrapper > ul {
+  position: absolute;
+  background-color: #2a303c;
+  border: 1px solid #424955;
+}
+
+.autoComplete_wrapper > ul > li {
+  background-color: #2a303c;
+  border-radius: 0;
+  color: #a6adba !important;
+}
+
+.autoComplete_wrapper > input::placeholder {
+  color: #a6adba !important;
+}
+</style>
