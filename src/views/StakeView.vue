@@ -209,23 +209,24 @@ watch(
         <option v-for="aa in pools" :key="aa" :value="aa">{{ aa }}</option>
       </select>
     </div>
-    <div class="tabs tabs-boxed mt-8 mb-4">
-      <a
-        class="tab tab-lifted"
-        :class="{ 'tab-active': activeTab === 'stake' }"
-        @click="setTab('stake')"
-      >
-        Stake
-      </a>
-      <a
-        class="tab tab-lifted"
-        :class="{ 'tab-active': activeTab === 'withdraw' }"
-        @click="setTab('withdraw')"
-      >
-        Withdraw
-      </a>
-    </div>
     <div v-if="metaByAA && poolSymbolAndDecimalByAA[metaByAA.aa]">
+      <div class="tabs tabs-boxed mt-8 mb-4">
+        <a
+          class="tab tab-lifted"
+          :class="{ 'tab-active': activeTab === 'stake' }"
+          @click="setTab('stake')"
+        >
+          Stake
+        </a>
+        <a
+          class="tab tab-lifted"
+          :class="{ 'tab-active': activeTab === 'withdraw' }"
+          @click="setTab('withdraw')"
+        >
+          Withdraw
+        </a>
+      </div>
+
       <div v-if="activeTab === 'stake'">
         <div class="form-control">
           <label class="label">
