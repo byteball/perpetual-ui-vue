@@ -199,7 +199,18 @@ watch(
 }
 </style>
 <template>
-  <div class="container w-[512px] m-auto mt-40 mb-36 p-8">
+  <div
+    v-if="!pools.length"
+    class="container w-[320px] sm:w-[512px] m-auto mt-40 mb-36 p-8 text-center"
+  >
+    <button
+      class="btn btn-outline btn-circle btn-lg loading border-none"
+    ></button>
+  </div>
+  <div
+    v-if="pools.length"
+    class="container w-[320px] sm:w-[512px] m-auto mt-40 mb-36 p-8"
+  >
     <div class="form-control">
       <label class="label">
         <span class="label-text">Pool</span>

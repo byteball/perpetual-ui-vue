@@ -136,7 +136,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="container w-[512px] m-auto mt-48 mb-36 p-8">
+  <div class="container w-[320px] sm:w-[512px] m-auto mt-48 mb-36 p-8">
     <div v-if="!exists" class="text-center">Please await</div>
     <div v-if="exists && route.query.step !== '3'">
       <div class="form-control">
@@ -188,7 +188,15 @@ onMounted(() => {
       </div>
     </div>
     <div v-if="exists && route.query.step === '3'" class="text-center">
-      Finish
+      <div>
+        Done. After confirming the registration of the aa symbol, it will be
+        available in the market
+      </div>
+      <div class="mt-8">
+        <a class="btn btn-primary" @click="() => router.push('/')"
+          >Back to market</a
+        >
+      </div>
     </div>
   </div>
 </template>

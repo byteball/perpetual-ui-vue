@@ -180,8 +180,12 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
 </script>
 
 <template>
-  <div class="container w-[512px] m-auto mt-48 mb-36 p-8">
-    <div v-if="!assets.assetList.length" class="text-center">Loading...</div>
+  <div class="container w-[320px] sm:w-[512px] m-auto mt-48 mb-36 p-8">
+    <div v-if="!assets.assetList.length" class="text-center">
+      <button
+        class="btn btn-outline btn-circle btn-lg loading border-none"
+      ></button>
+    </div>
     <div class="form-control" v-if="assets.assetList.length">
       <div class="input-group">
         <input

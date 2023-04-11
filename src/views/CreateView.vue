@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
+import debounce from "lodash.debounce";
 import { generateLink } from "@/utils/generateLink";
 import { clearObject } from "@/utils/clearObject";
 import { parseDataForFactoryRequest } from "@/utils/parseDataForFactoryRequest";
@@ -84,7 +85,7 @@ onMounted(async () => {
     data: {
       src: async (query) => {
         let assets = [];
-        assets = [...Object.keys(oswapAssets.value)];
+        assets = [...Object.keys(oswapAssets.value), "GBYTE"];
 
         const asset = await Client.api.getAssetBySymbol(registry, query);
         if (asset) {
@@ -326,27 +327,35 @@ watch(
   }
 );
 
-watch(reserveAssetInput, async () => {
-  if (oswapAssets.value[reserveAssetInput.value]) {
-    reserveAsset.value = oswapAssets.value[reserveAssetInput.value];
-    return;
-  }
+watch(
+  reserveAssetInput,
+  debounce(async () => {
+    if (oswapAssets.value[reserveAssetInput.value]) {
+      reserveAsset.value = oswapAssets.value[reserveAssetInput.value];
+      return;
+    }
 
-  const registry = Client.api.getOfficialTokenRegistryAddress();
-  const asset = await Client.api.getAssetBySymbol(
-    registry,
-    reserveAssetInput.value
-  );
-  if (asset) {
-    reserveAsset.value = asset;
-    return;
-  }
+    if (["GBYTE", "base"].includes(reserveAssetInput.value)) {
+      reserveAsset.value = "base";
+      return;
+    }
 
-  reserveAsset.value = "";
-});
+    const registry = Client.api.getOfficialTokenRegistryAddress();
+    const asset = await Client.api.getAssetBySymbol(
+      registry,
+      reserveAssetInput.value
+    );
+    if (asset) {
+      reserveAsset.value = asset;
+      return;
+    }
+
+    reserveAsset.value = "";
+  }, 500)
+);
 </script>
 <template>
-  <div class="container w-[512px] m-auto mt-40 mb-36 p-8">
+  <div class="container w-[320px] sm:w-[512px] m-auto mt-40 mb-36 p-8">
     <div v-if="awaiting">
       <div>Awaiting...</div>
       <div>
