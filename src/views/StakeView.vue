@@ -129,7 +129,8 @@ watch(
     const data = getData();
 
     link.value = generateLink(
-      amount.value.value,
+      Number(amount.value.value) *
+        10 ** poolSymbolAndDecimalByAA.value[metaByAA.value.aa].decimals,
       data,
       null,
       metaByAA.value.staking_aa,
