@@ -18,8 +18,18 @@ const route = useRoute();
         :class="{ 'btn-active': route.name === 'stake' }"
         >Stake</RouterLink
       >
-      <!--      <RouterLink to="/vote">Vote</RouterLink>-->
-      <!--      <RouterLink to="/presale">Presale</RouterLink>-->
+      <RouterLink
+        to="/vote"
+        class="btn btn-outline btn-sm ml-4"
+        :class="{ 'btn-active': route.name === 'vote' }"
+        >Vote</RouterLink
+      >
+      <RouterLink
+        to="/presale"
+        class="btn btn-outline btn-sm ml-4"
+        :class="{ 'btn-active': route.name === 'presale' }"
+        >Presale</RouterLink
+      >
       <RouterLink
         to="/create"
         class="btn btn-outline btn-sm ml-4"

@@ -41,6 +41,7 @@ watch(
 );
 
 watch(selectedAA, () => {
+  if (!selectedAA.value) return;
   router.push(`/vote/${selectedAA.value}`);
 });
 
@@ -70,41 +71,46 @@ watch(
 </script>
 
 <template>
-  <div class="form">
-    <div>
-      <select class="select select-bordered mb-4" v-model="selectedAA">
-        <option value="" disabled>Please select aa</option>
-        <option v-for="aa in aas" :key="aa" :value="aa">{{ aa }}</option>
-      </select>
-    </div>
-    <div v-show="!metaByAA">Waiting...</div>
-    <div v-show="metaByAA">
-      <div class="pt-2">
-        <input
-          type="text"
-          placeholder="Name"
-          v-model="name"
-          class="input input-bordered input-sm w-full max-w-xs"
-        />
+  <div
+    v-if="aas.length"
+    class="container w-[320px] sm:w-[512px] m-auto mt-40 mb-36 p-8"
+  >
+    <div class="form">
+      <div>
+        <select class="select select-bordered mb-4 w-full" v-model="selectedAA">
+          <option value="" disabled>Please select aa</option>
+          <option v-for="aa in aas" :key="aa" :value="aa">{{ aa }}</option>
+        </select>
       </div>
-      <div class="pt-2">
-        <input
-          type="text"
-          placeholder="Price aa"
-          v-model="price_aa"
-          class="input input-bordered input-sm w-full max-w-xs"
-        />
-      </div>
-      <div class="pt-2">
-        <input
-          type="text"
-          placeholder="Value"
-          v-model="value"
-          class="input input-bordered input-sm w-full max-w-xs"
-        />
-      </div>
-      <div class="mt-2">
-        <a class="btn btn-sm" :href="link">Vote</a>
+      <div v-show="!metaByAA">Waiting...</div>
+      <div v-show="metaByAA">
+        <div class="pt-2">
+          <input
+            type="text"
+            placeholder="Name"
+            v-model="name"
+            class="input input-bordered w-full"
+          />
+        </div>
+        <div class="pt-2">
+          <input
+            type="text"
+            placeholder="Price aa"
+            v-model="price_aa"
+            class="input input-bordered w-full"
+          />
+        </div>
+        <div class="pt-2">
+          <input
+            type="text"
+            placeholder="Value"
+            v-model="value"
+            class="input input-bordered w-full"
+          />
+        </div>
+        <div class="mt-2">
+          <a class="btn btn-sm" :href="link">Vote</a>
+        </div>
       </div>
     </div>
   </div>
