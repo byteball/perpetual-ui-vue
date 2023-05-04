@@ -1,7 +1,6 @@
 <script setup>
-import { ref, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
-import { useRoute, useRouter } from "vue-router";
 
 import { generateLink } from "@/utils/generateLink";
 import { useAaInfoStore } from "@/stores/aaInfo";
@@ -9,80 +8,74 @@ import { getPresaleAssetsFromMeta } from "@/utils/getAssetsFromMeta";
 import { getAssetMetadata } from "@/services/DAGApi";
 import { getPlaceholderForAmount } from "@/utils/placeholder";
 
-const router = useRouter();
-const route = useRoute();
-
 const store = useAaInfoStore();
 const { aas, meta } = storeToRefs(store);
 
-const selectedAA = ref("");
-const selectedAsset = ref("");
+const selectedReserveAsset = ref("");
+const selectedPresaleAsset = ref("");
 const amount = ref("");
 const link = ref("");
-const metaByAA = ref(null);
-const assets = ref([]);
 const activeTab = ref("buy");
 const assetsMetadata = ref({});
+const reserveAssets = ref({});
+const aAsPairs = ref({});
 
-const prepareAssetsMetadata = async () => {
-  for (let asset of assets.value) {
-    const data = await getAssetMetadata(asset);
-
-    if (!data) continue;
-
-    assetsMetadata.value[asset] = data;
-  }
-};
 const setTab = (tabName) => {
   activeTab.value = tabName;
 };
 
-watch(
-  () => {
-    const aa = route.params.aa;
-    const ml = Object.keys(meta.value).length;
+const prepareReserveAssetList = async () => {
+  for (const aa of aas.value) {
+    const reserveAsset = meta.value[aa].reserve_asset;
 
-    return `${aa}_${ml > 0}`;
-  },
-  async () => {
-    const aa = route.params.aa;
-    if (aa && meta.value[aa]) {
-      selectedAA.value = aa;
-      metaByAA.value = meta.value[aa];
-      assets.value = getPresaleAssetsFromMeta(meta.value[aa]);
-      if (assets.value.length) {
-        selectedAsset.value = assets.value[0];
+    const reserveAssetData = await getAssetMetadata(reserveAsset);
 
-        await prepareAssetsMetadata();
-      }
-      return;
+    if (!reserveAssetData) continue;
+
+    if (!assetsMetadata.value[reserveAsset]) {
+      assetsMetadata.value[reserveAsset] = reserveAssetData;
     }
 
-    selectedAA.value = "";
-    metaByAA.value = null;
-    assets.value = [];
-  },
-  { immediate: true }
-);
+    const presaleAssets = getPresaleAssetsFromMeta(meta.value[aa]);
 
-watch(selectedAA, () => {
-  if (!selectedAA.value) return;
+    const presaleAssetsWithMetadata = [];
+    for (const asset of presaleAssets) {
+      const presaleAssetData = await getAssetMetadata(asset);
 
-  router.push(`/presale/${selectedAA.value}`);
+      if (!presaleAssetData) continue;
+
+      if (!assetsMetadata.value[asset]) {
+        assetsMetadata.value[asset] = presaleAssetData;
+      }
+
+      presaleAssetsWithMetadata.push(asset);
+
+      aAsPairs.value[`${reserveAsset}_${asset}`] = aa;
+    }
+
+    reserveAssets.value[reserveAsset] = reserveAssets.value[reserveAsset]
+      ? [...reserveAssets.value[reserveAsset], ...presaleAssetsWithMetadata]
+      : presaleAssetsWithMetadata;
+  }
+};
+
+onMounted(async () => {
+  await prepareReserveAssetList();
 });
 
-watch([selectedAA, selectedAsset, amount, activeTab], () => {
-  if (!metaByAA.value) return;
+watch(aas, prepareReserveAssetList);
+watch(meta, prepareReserveAssetList);
 
+watch([selectedReserveAsset, selectedPresaleAsset, amount, activeTab], () => {
   const assetAmount =
-    metaByAA.value.reserve_asset === "base"
+    selectedReserveAsset.value === "base"
       ? Number(amount.value) + 1000
       : amount.value;
 
   const amountValue = activeTab.value === "buy" ? assetAmount : 10000;
 
   const data = {
-    asset: selectedAsset.value,
+    asset: selectedPresaleAsset.value,
   };
 
   if (activeTab.value === "buy") {
@@ -93,12 +86,17 @@ watch([selectedAA, selectedAsset, amount, activeTab], () => {
     data.claim = assetAmount;
   }
 
+  const aa =
+    aAsPairs.value[
+      `${selectedReserveAsset.value}_${selectedPresaleAsset.value}`
+    ];
+
   link.value = generateLink(
     amountValue,
     data,
     null,
-    route.params.aa,
-    metaByAA.value.reserve_asset,
+    aa,
+    selectedReserveAsset.value,
     true
   );
 });
@@ -130,29 +128,55 @@ watch([selectedAA, selectedAsset, amount, activeTab], () => {
       </a>
     </div>
     <div>
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Autonomous Agent</span>
-        </label>
-        <select class="select select-bordered" v-model="selectedAA">
-          <option value="" disabled>Please select aa</option>
-          <option v-for="aa in aas" :key="aa" :value="aa">{{ aa }}</option>
-        </select>
+      <div v-if="!Object.keys(reserveAssets).length">
+        Reserve assets not found
       </div>
-      <div v-show="!metaByAA">Waiting...</div>
-      <div v-show="metaByAA && !assets.length">Presale assets not found</div>
-      <div v-show="metaByAA && assets.length">
+      <div v-if="Object.keys(reserveAssets).length">
         <div class="form-control mt-3">
           <label class="label">
-            <span class="label-text">Asset</span>
+            <span class="label-text">Reserve Asset</span>
           </label>
-          <select class="select select-bordered" v-model="selectedAsset">
-            <option v-for="asset in assets" :key="asset" :value="asset">
-              {{ asset }}
+          <select class="select select-bordered" v-model="selectedReserveAsset">
+            <template
+              :key="reserveAsset"
+              v-for="reserveAsset in Object.keys(reserveAssets)"
+            >
+              <option
+                :value="reserveAsset"
+                v-if="reserveAssets[reserveAsset].length"
+              >
+                {{ reserveAsset }}
+              </option>
+            </template>
+          </select>
+        </div>
+        <div
+          v-if="
+            selectedReserveAsset && !reserveAssets[selectedReserveAsset].length
+          "
+        >
+          Presale assets not found
+        </div>
+        <div
+          v-if="
+            selectedReserveAsset && reserveAssets[selectedReserveAsset].length
+          "
+          class="form-control mt-3"
+        >
+          <label class="label">
+            <span class="label-text">Presale Asset</span>
+          </label>
+          <select class="select select-bordered" v-model="selectedPresaleAsset">
+            <option
+              v-for="presaleAsset in reserveAssets[selectedReserveAsset]"
+              :key="presaleAsset"
+              :value="presaleAsset"
+            >
+              {{ presaleAsset }}
             </option>
           </select>
         </div>
-        <div class="mt-3" v-if="assetsMetadata[selectedAsset]">
+        <div class="mt-3">
           <label class="label">
             <span class="label-text">Amount</span>
           </label>
@@ -161,20 +185,22 @@ watch([selectedAA, selectedAsset, amount, activeTab], () => {
               type="text"
               v-model="amount"
               :placeholder="
-                getPlaceholderForAmount(assetsMetadata[selectedAsset].decimals)
+                getPlaceholderForAmount(
+                  assetsMetadata[selectedPresaleAsset].decimals
+                )
               "
               class="input input-bordered w-full"
             />
-            <span>{{ assetsMetadata[selectedAsset].name }}</span>
+            <span>{{ assetsMetadata[selectedPresaleAsset].name }}</span>
           </div>
         </div>
-        <div v-if="!assetsMetadata[selectedAsset]">
-          No metadata for this asset available...
-        </div>
         <div class="form-control mt-6">
-          <a class="btn btn-primary" :href="link">{{
-            activeTab === "buy" ? "buy" : "сlaim"
-          }}</a>
+          <a
+            class="btn btn-primary"
+            :class="{ 'btn-disabled': !amount }"
+            :href="link"
+            >{{ activeTab === "buy" ? "buy" : "сlaim" }}</a
+          >
         </div>
       </div>
     </div>
