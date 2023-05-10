@@ -25,6 +25,10 @@ const setTab = (tabName) => {
 };
 
 const prepareReserveAssetList = async () => {
+  if (!Object.keys(meta.value).length) {
+    return;
+  }
+
   for (const aa of aas.value) {
     const reserveAsset = meta.value[aa].reserve_asset;
 
@@ -63,7 +67,6 @@ onMounted(async () => {
   await prepareReserveAssetList();
 });
 
-watch(aas, prepareReserveAssetList);
 watch(meta, prepareReserveAssetList);
 
 watch([selectedReserveAsset, selectedPresaleAsset, amount, activeTab], () => {
@@ -142,6 +145,13 @@ watch([selectedReserveAsset, selectedPresaleAsset, amount, activeTab], () => {
               v-for="reserveAsset in Object.keys(reserveAssets)"
             >
               <option
+                v-if="!reserveAssets[reserveAsset].length"
+                value=""
+                disabled
+              >
+                No reserved assets found
+              </option>
+              <option
                 :value="reserveAsset"
                 v-if="reserveAssets[reserveAsset].length"
               >
@@ -176,31 +186,33 @@ watch([selectedReserveAsset, selectedPresaleAsset, amount, activeTab], () => {
             </option>
           </select>
         </div>
-        <div class="mt-3">
-          <label class="label">
-            <span class="label-text">Amount</span>
-          </label>
-          <div class="input-group">
-            <input
-              type="text"
-              v-model="amount"
-              :placeholder="
-                getPlaceholderForAmount(
-                  assetsMetadata[selectedPresaleAsset].decimals
-                )
-              "
-              class="input input-bordered w-full"
-            />
-            <span>{{ assetsMetadata[selectedPresaleAsset].name }}</span>
+        <div v-if="selectedPresaleAsset">
+          <div class="mt-3">
+            <label class="label">
+              <span class="label-text">Amount</span>
+            </label>
+            <div class="input-group">
+              <input
+                type="text"
+                v-model="amount"
+                :placeholder="
+                  getPlaceholderForAmount(
+                    assetsMetadata[selectedPresaleAsset].decimals
+                  )
+                "
+                class="input input-bordered w-full"
+              />
+              <span>{{ assetsMetadata[selectedPresaleAsset].name }}</span>
+            </div>
           </div>
-        </div>
-        <div class="form-control mt-6">
-          <a
-            class="btn btn-primary"
-            :class="{ 'btn-disabled': !amount }"
-            :href="link"
-            >{{ activeTab === "buy" ? "buy" : "сlaim" }}</a
-          >
+          <div class="form-control mt-6">
+            <a
+              class="btn btn-primary"
+              :class="{ 'btn-disabled': !amount }"
+              :href="link"
+              >{{ activeTab === "buy" ? "buy" : "сlaim" }}</a
+            >
+          </div>
         </div>
       </div>
     </div>
