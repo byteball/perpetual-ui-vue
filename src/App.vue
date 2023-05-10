@@ -19,10 +19,10 @@ const route = useRoute();
         >Stake</RouterLink
       >
       <RouterLink
-        to="/vote"
+        to="/governance"
         class="btn btn-outline btn-sm ml-4"
-        :class="{ 'btn-active': route.name === 'vote' }"
-        >Vote</RouterLink
+        :class="{ 'btn-active': route.name === 'governance' }"
+        >Governance</RouterLink
       >
       <RouterLink
         to="/presale"

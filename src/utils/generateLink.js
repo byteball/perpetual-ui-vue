@@ -10,3 +10,11 @@ export const generateLink = (amount, data, address, AA, asset, is_single) => {
     is_single ? "1" : ""
   }&asset=${encodeURIComponent(asset || "base")}`;
 };
+
+export const generateDefinitionLink = (definition) => {
+  return `obyte${
+    import.meta.env.VITE_NETWORK === "testnet" ? "-tn" : ""
+  }:data?app=definition&definition=${encodeURIComponent(
+    JSON.stringify(definition, null, 4)
+  )}`;
+};
