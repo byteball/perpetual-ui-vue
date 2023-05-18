@@ -29,8 +29,11 @@ export async function getMetaForPerpAAs(aas) {
       m = { ...m, ...vars };
 
       const stakingDefinition = await client.api.getDefinition(m.staking_aa);
-
       m.stakingParams = stakingDefinition[1].params;
+
+      m.stakingVars = await client.api.getAaStateVars({
+        address: m.staking_aa,
+      });
 
       meta[aa] = m;
     } catch (e) {
