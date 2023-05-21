@@ -137,7 +137,32 @@ onMounted(() => {
 
 <template>
   <div class="container w-[320px] sm:w-[512px] m-auto mt-48 mb-36 p-8">
-    <div v-if="!exists" class="text-center">Please await</div>
+    <div v-if="!exists" class="text-center">
+      <div class="alert shadow-lg">
+        <div>
+          <svg
+            class="animate-spin h-5 w-5 ml-2 mr-3"
+            viewBox="0 0 24 24"
+            fill="none"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+          <span>Waiting for transaction confirmation</span>
+        </div>
+      </div>
+    </div>
     <div v-if="exists && route.query.step !== '3'">
       <div class="form-control">
         <label class="label">

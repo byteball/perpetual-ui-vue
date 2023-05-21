@@ -4,6 +4,7 @@ import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import { getAssetMetadata } from "@/services/DAGApi";
+import Client from "@/services/Obyte";
 
 const router = useRouter();
 
@@ -11,6 +12,7 @@ const store = useAaInfoStore();
 const { aas, meta } = storeToRefs(store);
 
 const aasWithMeta = ref({});
+const priceAAsDefinition = ref({});
 
 function getMajorityThreshold(aaState, stakingVars) {
   return (
@@ -67,14 +69,20 @@ async function init() {
 
   const m = {};
   for (let aa in meta.value) {
+    const priceAAsMeta = getPriceAAsMetaFromVars(
+      meta.value[aa].state,
+      meta.value[aa].stakingParams,
+      meta.value[aa].stakingVars
+    );
     m[aa] = {
       symbolAndDecimals: await getAssetMetadata(meta.value[aa].state.asset0),
-      priceAAsMeta: getPriceAAsMetaFromVars(
-        meta.value[aa].state,
-        meta.value[aa].stakingParams,
-        meta.value[aa].stakingVars
-      ),
+      priceAAsMeta,
     };
+
+    for (const priceAA in priceAAsMeta) {
+      const priceAADefinition = await Client.api.getDefinition(priceAA);
+      priceAAsDefinition.value[priceAA] = priceAADefinition[1].params;
+    }
   }
 
   aasWithMeta.value = m;
@@ -90,30 +98,167 @@ watch(meta, init, { deep: true });
 <template>
   <div
     v-if="Object.keys(aasWithMeta).length"
-    class="container w-[320px] sm:w-[512px] m-auto mt-40 mb-36 p-8"
+    class="container w-[320px] sm:w-[768px] m-auto mt-40 mb-36 p-8"
   >
     <div v-for="(meta, aa) in aasWithMeta" :key="aa">
-      <div
-        v-if="meta.symbolAndDecimals"
-        class="border border-gray-300 rounded-md p-2.5"
-      >
-        <div class="text-sm">{{ meta.symbolAndDecimals.name }}</div>
-        <div class="mt-4">
-          <div
-            v-for="(priceAAsMeta, aa2) in meta.priceAAsMeta"
-            :key="aa2"
-            class="mb-2"
-          >
-            <div>{{ aa2 }}</div>
-            <div>
-              Status: ({{
-                priceAAsMeta.finished ? "finished" : "not finished"
-              }})
+      <div v-if="meta.symbolAndDecimals">
+        <div class="card bg-base-200 shadow-xl">
+          <div class="card-body">
+            <div class="flex justify-between mb-2">
+              <div class="text-lg font-bold">
+                {{ meta.symbolAndDecimals.name }}
+              </div>
+              <div>
+                <button class="btn btn-sm btn-primary" @click="goToAddPerp(aa)">
+                  Add a perp for voting
+                </button>
+              </div>
+            </div>
+            <div
+              v-for="(priceAAsMeta, aa2) in meta.priceAAsMeta"
+              :key="aa2"
+              class="mb-2"
+            >
+              <div class="card bg-base-300 shadow-xl">
+                <div class="card-body gap-0">
+                  <div v-if="!priceAAsMeta.finished">
+                    <div class="text-sm font-medium inline-block mb-2">
+                      Price AA:
+                      <div class="text-sm font-light inline-block">
+                        {{ aa2 }}
+                      </div>
+                    </div>
+                    <div class="flex justify-between">
+                      <div class="font-medium text-sm inline-block mb-2">
+                        Oracle:
+                        <div class="font-light text-sm inline-block">
+                          {{ priceAAsDefinition[aa2].oracle }}
+                        </div>
+                      </div>
+                      <div class="font-medium text-sm inline-block mb-2">
+                        Multiplier:
+                        <div class="font-light text-sm inline-block">
+                          {{ priceAAsDefinition[aa2].multiplier || 1 }}
+                        </div>
+                      </div>
+                    </div>
+                    <div class="font-medium text-sm inline-block mb-2">
+                      Feed name:
+                      <div class="font-light text-sm inline-block">
+                        {{ priceAAsDefinition[aa2].feed_name }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex justify-between">
+                    <div class="text-sm font-medium inline-block">
+                      Status:
+                      <div class="text-sm font-light inline-block">
+                        <p v-if="priceAAsMeta.finished">finished</p>
+                        <p
+                          v-if="
+                            !priceAAsMeta.finished &&
+                            priceAAsMeta.vpAddPriceBCommit
+                          "
+                        >
+                          waiting commit
+                        </p>
+                        <p
+                          v-if="
+                            !priceAAsMeta.finished &&
+                            !priceAAsMeta.vpAddPriceBCommit
+                          "
+                        >
+                          not finished
+                        </p>
+                      </div>
+                    </div>
+                    <div
+                      v-if="!priceAAsMeta.finished"
+                      class="font-medium text-sm inline-block"
+                    >
+                      {{
+                        !priceAAsMeta.finished && priceAAsMeta.vpAddPriceBCommit
+                          ? "Result: "
+                          : "Leader: "
+                      }}
+                      <div class="font-light text-sm inline-block">
+                        {{ priceAAsMeta.leaderAddPriceAA.value }}
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    v-if="!priceAAsMeta.finished"
+                    class="card-actions justify-start mt-4"
+                  >
+                    <div
+                      v-if="
+                        !priceAAsMeta.finished &&
+                        !priceAAsMeta.vpAddPriceBCommit
+                      "
+                    >
+                      <button class="btn btn-sm gap-2">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke-width="1.5"
+                          stroke="currentColor"
+                          class="w-4 h-4"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+                          />
+                        </svg>
+                        Vote for yes
+                      </button>
+                      <button class="btn btn-sm gap-2">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke-width="1.5"
+                          stroke="currentColor"
+                          class="w-4 h-4"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+                          />
+                        </svg>
+                        Vote for no
+                      </button>
+                    </div>
+                    <div
+                      v-if="
+                        !priceAAsMeta.finished && priceAAsMeta.vpAddPriceBCommit
+                      "
+                    >
+                      <button class="btn btn-sm gap-2">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke-width="1.5"
+                          stroke="currentColor"
+                          class="w-4 h-4"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+                          />
+                        </svg>
+                        Commit result
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="mt-4">
-          <a class="link" @click="goToAddPerp(aa)">Add a perp for voting</a>
         </div>
       </div>
     </div>
