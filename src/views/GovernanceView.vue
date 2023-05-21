@@ -5,6 +5,7 @@ import { useRouter } from "vue-router";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import { getAssetMetadata } from "@/services/DAGApi";
 import Client from "@/services/Obyte";
+import { generateLink } from "@/utils/generateLink";
 
 const router = useRouter();
 
@@ -92,6 +93,26 @@ function goToAddPerp(aa) {
   router.push({ name: "addPerp", params: { aa } });
 }
 
+function generateAndFollowLink(priceAA, vote, perpetualAA) {
+  const link = generateLink(
+    10000,
+    {
+      vote_value: 1,
+      name: "add_price_aa",
+      price_aa: priceAA,
+      value: vote,
+    },
+    null,
+    perpetualAA,
+    "base",
+    true
+  );
+
+  const a = document.createElement("a");
+  a.href = link;
+  a.click();
+}
+
 onMounted(init);
 watch(meta, init, { deep: true });
 </script>
@@ -100,23 +121,29 @@ watch(meta, init, { deep: true });
     v-if="Object.keys(aasWithMeta).length"
     class="container w-[320px] sm:w-[768px] m-auto mt-40 mb-36 p-8"
   >
-    <div v-for="(meta, aa) in aasWithMeta" :key="aa">
-      <div v-if="meta.symbolAndDecimals">
+    <div
+      v-for="(perpetualAAMeta, perpetualAA) in aasWithMeta"
+      :key="perpetualAA"
+    >
+      <div v-if="perpetualAAMeta.symbolAndDecimals">
         <div class="card bg-base-200 shadow-xl">
           <div class="card-body">
             <div class="flex justify-between mb-2">
               <div class="text-lg font-bold">
-                {{ meta.symbolAndDecimals.name }}
+                {{ perpetualAAMeta.symbolAndDecimals.name }}
               </div>
               <div>
-                <button class="btn btn-sm btn-primary" @click="goToAddPerp(aa)">
-                  Add a perp for voting
+                <button
+                  class="btn btn-sm btn-primary"
+                  @click="goToAddPerp(perpetualAA)"
+                >
+                  Add perpetual for voting
                 </button>
               </div>
             </div>
             <div
-              v-for="(priceAAsMeta, aa2) in meta.priceAAsMeta"
-              :key="aa2"
+              v-for="(priceAAsMeta, priceAA) in perpetualAAMeta.priceAAsMeta"
+              :key="priceAA"
               class="mb-2"
             >
               <div class="card bg-base-300 shadow-xl">
@@ -125,27 +152,27 @@ watch(meta, init, { deep: true });
                     <div class="text-sm font-medium inline-block mb-2">
                       Price AA:
                       <div class="text-sm font-light inline-block">
-                        {{ aa2 }}
+                        {{ priceAA }}
                       </div>
                     </div>
                     <div class="flex justify-between">
                       <div class="font-medium text-sm inline-block mb-2">
                         Oracle:
                         <div class="font-light text-sm inline-block">
-                          {{ priceAAsDefinition[aa2].oracle }}
+                          {{ priceAAsDefinition[priceAA].oracle }}
                         </div>
                       </div>
                       <div class="font-medium text-sm inline-block mb-2">
                         Multiplier:
                         <div class="font-light text-sm inline-block">
-                          {{ priceAAsDefinition[aa2].multiplier || 1 }}
+                          {{ priceAAsDefinition[priceAA].multiplier || 1 }}
                         </div>
                       </div>
                     </div>
                     <div class="font-medium text-sm inline-block mb-2">
                       Feed name:
                       <div class="font-light text-sm inline-block">
-                        {{ priceAAsDefinition[aa2].feed_name }}
+                        {{ priceAAsDefinition[priceAA].feed_name }}
                       </div>
                     </div>
                   </div>
@@ -196,7 +223,16 @@ watch(meta, init, { deep: true });
                         !priceAAsMeta.vpAddPriceBCommit
                       "
                     >
-                      <button class="btn btn-sm gap-2">
+                      <button
+                        class="btn btn-sm gap-2"
+                        @click="
+                          generateAndFollowLink(
+                            priceAA,
+                            priceAAsMeta.leaderAddPriceAA.value,
+                            perpetualAA
+                          )
+                        "
+                      >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           fill="none"
@@ -213,7 +249,12 @@ watch(meta, init, { deep: true });
                         </svg>
                         Vote for yes
                       </button>
-                      <button class="btn btn-sm gap-2">
+                      <button
+                        class="btn btn-sm gap-2"
+                        @click="
+                          generateAndFollowLink(priceAA, 'no', perpetualAA)
+                        "
+                      >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           fill="none"
@@ -236,7 +277,12 @@ watch(meta, init, { deep: true });
                         !priceAAsMeta.finished && priceAAsMeta.vpAddPriceBCommit
                       "
                     >
-                      <button class="btn btn-sm gap-2">
+                      <button
+                        class="btn btn-sm gap-2"
+                        @click="
+                          generateAndFollowLink(priceAA, 'yes', perpetualAA)
+                        "
+                      >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           fill="none"
@@ -254,6 +300,34 @@ watch(meta, init, { deep: true });
                         Commit result
                       </button>
                     </div>
+                  </div>
+                  <div
+                    v-if="priceAAsMeta.finished"
+                    class="card-actions justify-start"
+                  >
+                    <button
+                      v-if="priceAAsMeta.result === 'no'"
+                      class="btn btn-sm gap-2 mt-4"
+                      @click="
+                        generateAndFollowLink(priceAA, 'yes', perpetualAA)
+                      "
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        class="w-4 h-4"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+                        />
+                      </svg>
+                      Vote for add
+                    </button>
                   </div>
                 </div>
               </div>
