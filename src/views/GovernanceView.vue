@@ -126,9 +126,9 @@ watch(meta, init, { deep: true });
       :key="perpetualAA"
     >
       <div v-if="perpetualAAMeta.symbolAndDecimals">
-        <div class="card bg-base-200 shadow-xl">
+        <div class="card bg-base-200 shadow-xl mb-4">
           <div class="card-body">
-            <div class="flex justify-between mb-2">
+            <div class="flex justify-between">
               <div class="text-lg font-bold">
                 {{ perpetualAAMeta.symbolAndDecimals.name }}
               </div>
@@ -144,9 +144,8 @@ watch(meta, init, { deep: true });
             <div
               v-for="(priceAAsMeta, priceAA) in perpetualAAMeta.priceAAsMeta"
               :key="priceAA"
-              class="mb-2"
             >
-              <div class="card bg-base-300 shadow-xl">
+              <div class="card bg-base-300 shadow-xl mt-2">
                 <div class="card-body gap-0">
                   <div v-if="!priceAAsMeta.finished">
                     <div class="text-sm font-medium inline-block mb-2">
