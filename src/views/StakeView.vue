@@ -198,6 +198,10 @@ watch(
   --tab-bg: transparent;
   --tab-border-color: transparent;
 }
+
+.no-pointer {
+  pointer-events: none;
+}
 </style>
 <template>
   <div
@@ -255,7 +259,9 @@ watch(
               "
               class="input input-bordered w-full"
             />
-            <span>{{ poolSymbolAndDecimalByAA[metaByAA.aa].name }}</span>
+            <label class="btn no-pointer">{{
+              poolSymbolAndDecimalByAA[metaByAA.aa].name
+            }}</label>
           </div>
           <span
             v-if="amount.error"
@@ -264,7 +270,7 @@ watch(
             {{ amount.error }}
           </span>
         </div>
-        <div class="form-control">
+        <div class="form-control mt-2">
           <label class="label">
             <span class="label-text">Term (in days)</span>
           </label>
@@ -329,7 +335,9 @@ watch(
               "
               class="input input-bordered w-full"
             />
-            <span>{{ poolSymbolAndDecimalByAA[metaByAA.aa].name }}</span>
+            <label class="btn no-pointer">{{
+              poolSymbolAndDecimalByAA[metaByAA.aa].name
+            }}</label>
           </div>
           <span
             v-if="amount.error"

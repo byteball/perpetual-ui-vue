@@ -124,7 +124,7 @@ onUnmounted(() => {
 });
 </script>
 <template>
-  <div class="container w-[320px] sm:w-[512px] m-auto mt-40 mb-36 p-8">
+  <div class="container w-[320px] sm:w-[640px] m-auto mt-40 mb-36 p-8">
     <div v-if="step === 1">
       <div class="!form-control">
         <div class="pt-2">
@@ -158,50 +158,117 @@ onUnmounted(() => {
           />
         </div>
       </div>
-      <div class="mt-8 text-center">
-        <a class="btn btn-primary" @click="checkExistsPriceAA">Add perp</a>
+      <div class="mt-8 text-center !form-control">
+        <a class="btn btn-primary" @click="checkExistsPriceAA">Add perpetual</a>
       </div>
     </div>
     <div v-else-if="step === 2">
-      <div class="text-center">Good, now you need publish price aa</div>
-      <div class="mt-8 text-center">
-        <a class="btn btn-primary" :href="linkForPriceAA" @click="goToStep3()"
-          >Publish price aa</a
-        >
+      <div class="alert shadow-lg">
+        <div class="ml-2">
+          <span>Good, now you need publish price AA</span>
+        </div>
+        <div class="flex-none">
+          <a
+            class="btn btn-sm btn-primary"
+            :href="linkForPriceAA"
+            @click="goToStep3()"
+          >
+            Publish price aa
+          </a>
+        </div>
       </div>
     </div>
     <div v-else-if="step === 3">
       <div v-if="needCheckPriceAA">
-        <div>
-          To continue, you need to wait until price aa is published, if you have
-          not done so, click back
-        </div>
-        <div class="mt-8 text-center">
-          <a class="btn btn-primary" @click="back()">Back</a>
+        <div class="alert shadow-lg">
+          <svg
+            class="animate-spin h-8 w-8 ml-2 mr-2"
+            viewBox="0 0 24 24"
+            fill="none"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+          <div>
+            To continue, you need to wait until price aa is published, if you
+            have not done so, click back
+          </div>
+          <div>
+            <a class="btn btn-sm btn-primary" @click="back()">Back</a>
+          </div>
         </div>
       </div>
     </div>
     <div v-else-if="step === 4">
-      <div>
-        <div>Perp AA: {{ route.params.aa }}</div>
-        <div class="mt-2">
-          <div class="mt-1">Oracle: {{ oracle }}</div>
-          <div class="mt-1">Feed name: {{ feedName }}</div>
-          <div class="mt-1">Multiplier: {{ multiplier }}</div>
-        </div>
-        <div class="mt-8 text-center">
-          <a
-            class="btn btn-primary"
-            :href="linkForPublishPerp"
-            @click="step = 5"
-            >Publish perpetual</a
-          >
+      <div class="card bg-base-200 shadow-xl mt-2">
+        <div class="card-body gap-0">
+          <div class="text-sm font-medium inline-block mb-2">
+            Perp AA:
+            <div class="text-sm font-light inline-block">
+              {{ route.params.aa }}
+            </div>
+          </div>
+          <div class="text-sm font-medium inline-block mb-2">
+            Oracle:
+            <div class="text-sm font-light inline-block">
+              {{ oracle }}
+            </div>
+          </div>
+          <div class="text-sm font-medium inline-block mb-2">
+            Feed name:
+            <div class="text-sm font-light inline-block">
+              {{ feedName }}
+            </div>
+          </div>
+          <div class="text-sm font-medium inline-block mb-2">
+            Multiplier:
+            <div class="text-sm font-light inline-block">
+              {{ multiplier }}
+            </div>
+          </div>
+          <div class="card-actions justify-start mt-4">
+            <a
+              class="btn btn-sm gap-2 btn-primary"
+              :href="linkForPublishPerp"
+              @click="step = 5"
+            >
+              Publish perpetual
+            </a>
+          </div>
         </div>
       </div>
     </div>
     <div v-else>
-      <div class="text-center">
-        Great, soon perp will be available for voting
+      <div class="alert shadow-lg">
+        <div>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            class="stroke-info h-6 w-6 ml-2 mr-2"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              stroke="currentColor"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            ></path>
+          </svg>
+          <span>Great, soon perpetual will be available for voting</span>
+        </div>
       </div>
     </div>
   </div>
