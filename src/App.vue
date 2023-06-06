@@ -5,7 +5,7 @@ const route = useRoute();
 
 <template>
   <header>
-    <div class="navbar bg-base-100">
+    <div tabindex="0" class="navbar bg-base-100">
       <div class="navbar-start">
         <div class="dropdown">
           <label tabindex="0" class="btn btn-ghost lg:hidden">
@@ -121,7 +121,9 @@ const route = useRoute();
     <nav class="menu"></nav>
   </header>
 
-  <RouterView />
+  <div tabindex="0">
+    <RouterView />
+  </div>
 </template>
 
 <style scoped>
