@@ -1,4 +1,5 @@
 import { getAssetMetadata } from "@/services/DAGApi";
+import { fullExplorerUrlForAsset, fullExplorerUrlForUnit } from "@/config";
 
 function getNotDefaultAssetsFromMeta(meta, onlyNotPresale) {
   const keys = Object.keys(meta);
@@ -120,4 +121,12 @@ export async function getAssetsOnlyWithSymbolsAndDecimals(assets) {
     assetsByAA,
     nameAndDecimalsByAsset,
   };
+}
+
+export function getUrlForReserveAsset(asset) {
+  if (asset === "base") {
+    return fullExplorerUrlForAsset + "GBYTE";
+  }
+
+  return fullExplorerUrlForUnit + asset;
 }

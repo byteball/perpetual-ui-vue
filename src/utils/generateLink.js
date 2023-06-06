@@ -18,3 +18,27 @@ export const generateDefinitionLink = (definition) => {
     JSON.stringify(definition, null, 4)
   )}`;
 };
+
+export function generateAndFollowLinkForVoteAddPriceAA(
+  priceAA,
+  vote,
+  perpetualAA
+) {
+  const link = generateLink(
+    10000,
+    {
+      vote_value: 1,
+      name: "add_price_aa",
+      price_aa: priceAA,
+      value: vote,
+    },
+    null,
+    perpetualAA,
+    "base",
+    true
+  );
+
+  const a = document.createElement("a");
+  a.href = link;
+  a.click();
+}

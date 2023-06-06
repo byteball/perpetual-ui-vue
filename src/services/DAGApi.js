@@ -65,6 +65,7 @@ export async function getAssetMetadata(asset) {
     return {
       name: "GBYTE",
       decimals: 9,
+      asset,
     };
   }
   if (cacheForAssetMetadata[asset]) {
@@ -80,7 +81,7 @@ export async function getAssetMetadata(asset) {
     );
 
     cacheForAssetMetadata[asset] = metadata.payload;
-    return metadata.payload;
+    return { ...metadata.payload, asset };
   } catch (e) {
     return null;
   }

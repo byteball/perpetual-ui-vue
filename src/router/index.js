@@ -20,6 +20,11 @@ const router = createRouter({
       component: () => import("../views/GovernanceView.vue"),
     },
     {
+      path: "/governance/management/:aa",
+      name: "governanceManagement",
+      component: () => import("../views/GovernanceManagementView.vue"),
+    },
+    {
       path: "/addPerp/:aa",
       name: "addPerp",
       component: () => import("../views/AddPerpView.vue"),
