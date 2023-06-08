@@ -124,42 +124,48 @@ onUnmounted(() => {
 });
 </script>
 <template>
-  <div class="container w-[320px] sm:w-[640px] m-auto mt-40 mb-36 p-8">
+  <div class="container w-[320px] sm:w-[640px] m-auto mt-8 mb-36 p-8">
     <div v-if="step === 1">
-      <div class="!form-control">
-        <div class="pt-2">
-          <label class="label">
-            <span class="label-text">Oracle</span>
-          </label>
-          <input
-            type="text"
-            v-model="oracle"
-            class="input input-bordered w-full"
-          />
+      <div class="card bg-base-200 shadow-xl">
+        <div class="card-body">
+          <div class="!form-control">
+            <div class="pt-2">
+              <label class="label">
+                <span class="label-text">Oracle</span>
+              </label>
+              <input
+                type="text"
+                v-model="oracle"
+                class="input input-bordered w-full"
+              />
+            </div>
+            <div class="pt-4">
+              <label class="label">
+                <span class="label-text">Feed name</span>
+              </label>
+              <input
+                type="text"
+                v-model="feedName"
+                class="input input-bordered w-full"
+              />
+            </div>
+            <div class="pt-4">
+              <label class="label">
+                <span class="label-text">Multiplier</span>
+              </label>
+              <input
+                type="text"
+                v-model="multiplier"
+                class="input input-bordered w-full"
+              />
+            </div>
+          </div>
+          <div class="mt-8 text-center !form-control">
+            <a class="btn btn-primary" @click="checkExistsPriceAA"
+              >Add perpetual</a
+            >
+          </div>
         </div>
-        <div class="pt-4">
-          <label class="label">
-            <span class="label-text">Feed name</span>
-          </label>
-          <input
-            type="text"
-            v-model="feedName"
-            class="input input-bordered w-full"
-          />
-        </div>
-        <div class="pt-4">
-          <label class="label">
-            <span class="label-text">Multiplier</span>
-          </label>
-          <input
-            type="text"
-            v-model="multiplier"
-            class="input input-bordered w-full"
-          />
-        </div>
-      </div>
-      <div class="mt-8 text-center !form-control">
-        <a class="btn btn-primary" @click="checkExistsPriceAA">Add perpetual</a>
       </div>
     </div>
     <div v-else-if="step === 2">

@@ -178,61 +178,81 @@ watch(asset1, asset1Handler);
 watch(asset2, asset2Handler);
 watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
 </script>
-
+<style>
+.disabled-card-input {
+  background-color: hsl(var(--b1) / var(--tw-bg-opacity)) !important;
+}
+</style>
 <template>
-  <div class="container w-[320px] sm:w-[512px] m-auto mt-48 mb-36 p-8">
-    <div v-if="!assets.assetList.length" class="text-center">
-      <button
-        class="btn btn-outline btn-circle btn-lg loading border-none"
-      ></button>
+  <div class="container w-[320px] sm:w-[512px] m-auto mt-8 mb-36 p-8">
+    <div class="p-2 mb-6">
+      <div class="text-lg font-semibold leading-7">Market</div>
+      <p class="mt-2 leading-6">
+        This information will be displayed publicly so be careful what you
+        share.
+      </p>
     </div>
-    <div class="form-control" v-if="assets.assetList.length">
-      <div class="input-group">
-        <input
-          type="text"
-          :placeholder="
-            getPlaceholderForAmount(
-              assets.nameAndDecimalsByAsset[asset1]?.decimals
-            )
-          "
-          class="input input-bordered w-full"
-          v-model.number="asset1Amount"
-          :disabled="!asset1"
-        />
-        <label for="asset1Modal" class="btn">{{
-          asset1 ? assets.nameAndDecimalsByAsset[asset1].name : "Select asset"
-        }}</label>
-      </div>
-      <div class="input-group mt-4">
-        <input
-          type="text"
-          placeholder="0"
-          class="input input-bordered w-full"
-          :disabled="!asset2"
-          v-model.number="asset2Amount"
-          readonly
-        />
-        <label
-          for="asset2Modal"
-          class="btn"
-          :class="{ 'btn-disabled': !asset1 }"
-          >{{
-            asset2 ? assets.nameAndDecimalsByAsset[asset2].name : "Select asset"
-          }}</label
-        >
-      </div>
-      <div v-if="asset2Amount" class="mt-4">
-        <div>Fee: {{ Number(percent.toFixed(4)) }}%</div>
-        <div>New price: {{ newPrice }}</div>
-        <div></div>
-      </div>
-      <div class="mt-8 text-center">
-        <a
-          class="btn btn-primary"
-          :href="link"
-          :class="{ 'btn-disabled': !link || !(Number(asset2Amount) > 0) }"
-          >Exchange</a
-        >
+
+    <div class="card bg-base-200 shadow-xl">
+      <div class="card-body">
+        <div v-if="!assets.assetList.length" class="text-center">
+          <button
+            class="btn btn-outline btn-circle btn-lg loading border-none"
+          ></button>
+        </div>
+        <div class="form-control" v-if="assets.assetList.length">
+          <div class="input-group">
+            <input
+              type="text"
+              :placeholder="
+                getPlaceholderForAmount(
+                  assets.nameAndDecimalsByAsset[asset1]?.decimals
+                )
+              "
+              class="input input-bordered w-full disabled-card-input"
+              v-model.number="asset1Amount"
+              :disabled="!asset1"
+            />
+            <label for="asset1Modal" class="btn">{{
+              asset1
+                ? assets.nameAndDecimalsByAsset[asset1].name
+                : "Select asset"
+            }}</label>
+          </div>
+          <div class="input-group mt-4">
+            <input
+              type="text"
+              placeholder="0"
+              class="input input-bordered w-full disabled-card-input"
+              :disabled="!asset2"
+              v-model.number="asset2Amount"
+              readonly
+            />
+            <label
+              for="asset2Modal"
+              class="btn"
+              :class="{ 'btn-disabled': !asset1 }"
+              >{{
+                asset2
+                  ? assets.nameAndDecimalsByAsset[asset2].name
+                  : "Select asset"
+              }}</label
+            >
+          </div>
+          <div v-if="asset2Amount" class="mt-4">
+            <div>Fee: {{ Number(percent.toFixed(4)) }}%</div>
+            <div>New price: {{ newPrice }}</div>
+            <div></div>
+          </div>
+          <div class="form-control mt-8 text-center">
+            <a
+              class="btn btn-primary"
+              :href="link"
+              :class="{ 'btn-disabled': !link || !(Number(asset2Amount) > 0) }"
+              >Exchange</a
+            >
+          </div>
+        </div>
       </div>
     </div>
   </div>

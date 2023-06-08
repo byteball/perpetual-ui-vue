@@ -136,7 +136,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="container w-[320px] sm:w-[512px] m-auto mt-48 mb-36 p-8">
+  <div class="container w-[320px] sm:w-[512px] m-auto mt-8 mb-36 p-8">
     <div v-if="!exists" class="text-center">
       <div class="alert shadow-lg">
         <div>
@@ -164,63 +164,92 @@ onMounted(() => {
       </div>
     </div>
     <div v-if="exists && route.query.step !== '3'">
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Asset</span>
-        </label>
-        <input
-          type="text"
-          v-model="asset"
-          class="input input-bordered"
-          readonly
-        />
-      </div>
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Symbol</span>
-        </label>
-        <input
-          type="text"
-          v-model="symbol"
-          @input="() => (symbol = symbol.toUpperCase())"
-          class="input input-bordered"
-        />
-      </div>
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Decimals</span>
-        </label>
-        <input
-          type="number"
-          v-model="decimals"
-          min="0"
-          class="input input-bordered"
-        />
-      </div>
-      <div class="form-control">
-        <label class="label">
-          <span class="label-text">Description</span>
-        </label>
-        <textarea v-model="description" class="textarea textarea-bordered" />
-      </div>
-      <div class="form-control mt-6">
-        <a
-          class="btn btn-primary"
-          :href="link"
-          :class="{ 'btn-disabled': !buttonEnabled }"
-          >Register symbol</a
-        >
+      <div class="card bg-base-200 shadow-xl">
+        <div class="card-body">
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Asset</span>
+            </label>
+            <input
+              type="text"
+              v-model="asset"
+              class="input input-bordered"
+              readonly
+            />
+          </div>
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Symbol</span>
+            </label>
+            <input
+              type="text"
+              v-model="symbol"
+              @input="() => (symbol = symbol.toUpperCase())"
+              class="input input-bordered"
+            />
+          </div>
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Decimals</span>
+            </label>
+            <input
+              type="number"
+              v-model="decimals"
+              min="0"
+              class="input input-bordered"
+            />
+          </div>
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Description</span>
+            </label>
+            <textarea
+              v-model="description"
+              class="textarea textarea-bordered"
+            />
+          </div>
+          <div class="form-control mt-6">
+            <a
+              class="btn btn-primary"
+              :href="link"
+              :class="{ 'btn-disabled': !buttonEnabled }"
+              >Register symbol</a
+            >
+          </div>
+        </div>
       </div>
     </div>
     <div v-if="exists && route.query.step === '3'" class="text-center">
-      <div>
-        Done. After confirming the registration of the aa symbol, it will be
-        available in the market
-      </div>
-      <div class="mt-8">
-        <a class="btn btn-primary" @click="() => router.push('/')"
-          >Back to market</a
-        >
+      <div class="alert shadow-lg">
+        <div>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            class="stroke-info h-6 w-6 ml-2 mr-2"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              stroke="currentColor"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            ></path>
+          </svg>
+          <span>
+            Done. After confirming the registration of the aa symbol, it will be
+            available in the market
+          </span>
+          <div class="flex-none">
+            <button
+              class="btn btn-sm btn-primary"
+              @click="() => router.push('/')"
+            >
+              Back to market
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
