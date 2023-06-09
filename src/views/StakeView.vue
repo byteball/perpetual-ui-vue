@@ -241,7 +241,7 @@ watch(
               <span class="label-text">Pool</span>
             </label>
             <select class="select select-bordered" v-model="selectedAA">
-              <option value="" disabled>Please select aa</option>
+              <option value="" disabled>Please select pool</option>
               <option v-for="aa in pools" :key="aa" :value="aa">
                 {{
                   `${poolReserveNameByAA[aa]}/${poolSymbolAndDecimalByAA[aa].name}`
