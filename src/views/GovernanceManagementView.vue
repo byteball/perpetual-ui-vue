@@ -2,25 +2,19 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useRoute } from "vue-router";
-import { fullExplorerUrlForAddress } from "@/config";
 import { useAaInfoStore } from "@/stores/aaInfo";
+import { getAllVotes, getPreparedMeta } from "@/utils/governanceUtils";
 import {
-  getAllVotes,
-  getParam,
-  getPreparedMeta,
-} from "@/utils/governanceUtils";
-import { generateAndFollowLinkForVoteAddPriceAA } from "@/utils/generateLink";
+  generateAndFollowLinkForVoteAddPriceAA,
+  generateAndFollowLinkForVoteInGovernance,
+} from "@/utils/generateLink";
 import Client from "@/services/Obyte";
 import GovernanceAsset from "@/components/governance/GovernanceAsset.vue";
 import PriceAANotFinished from "@/components/governance/PriceAANotFinished.vue";
 import LinkIcon from "@/components/icons/LinkIcon.vue";
-import VotingTable from "@/components/governance/VotingTable.vue";
-import {
-  Dialog,
-  DialogPanel,
-  DialogTitle,
-  DialogDescription,
-} from "@headlessui/vue";
+import { Dialog } from "@headlessui/vue";
+import VoteBlock from "@/components/governance/VoteBlock.vue";
+import VoteModal from "@/components/governance/VoteModal.vue";
 
 const store = useAaInfoStore();
 const { aas, meta } = storeToRefs(store);
@@ -31,6 +25,7 @@ const ready = ref(false);
 const notFound = ref(false);
 const perpetualAA = computed(() => route.params.aa);
 const votes = ref({});
+const modalParams = ref({});
 
 const preparedMeta = ref({});
 const priceAAsDefinition = ref({});
@@ -49,7 +44,6 @@ async function init() {
   notFound.value = false;
 
   preparedMeta.value = await getPreparedMeta(metaByAA);
-  console.log(preparedMeta.value);
   for (const priceAA in preparedMeta.value.priceAAsMeta) {
     const priceAADefinition = await Client.api.getDefinition(priceAA);
     priceAAsDefinition.value[priceAA] = priceAADefinition[1].params;
@@ -57,6 +51,70 @@ async function init() {
 
   votes.value = getAllVotes(metaByAA.stakingVars);
   ready.value = true;
+}
+
+function reqVote(name, type, suffix, value) {
+  let title;
+  if (value) {
+    title = `Vote for ${getTitleByName(name)} value`;
+  } else {
+    title = `Set new value for ${getTitleByName(name)}`;
+  }
+  showModal(title, name, type, suffix, value);
+}
+
+function showModal(title, name, type, suffix, value) {
+  modalParams.value = {
+    title,
+    name,
+    type,
+    suffix,
+    value,
+  };
+  modalIsOpen.value = true;
+}
+
+function vote(name, value) {
+  generateAndFollowLinkForVoteInGovernance(
+    name,
+    value,
+    preparedMeta.value.rawMeta.staking_aa
+  );
+}
+
+function getTitleByName(name, toUpper) {
+  let title;
+  switch (name) {
+    case "swap_fee":
+      title = "swap fee";
+      break;
+    case "arb_profit_tax":
+      title = "arb profit tax";
+      break;
+    case "adjustment_period":
+      title = "adjustment period";
+      break;
+    case "presale_period":
+      title = "presale period";
+      break;
+    case "auction_price_halving_period":
+      title = "auction price halving period";
+      break;
+    case "token_share_threshold":
+      title = "token share threshold";
+      break;
+    case "min_s0_share":
+      title = "min s0 share";
+      break;
+    default:
+      title = name;
+  }
+
+  if (toUpper) {
+    title = title.charAt(0).toUpperCase() + title.substring(1);
+  }
+
+  return title;
 }
 
 onMounted(init);
@@ -73,41 +131,69 @@ watch(meta, init, { deep: true });
       <div class="card-body">
         <div>
           <div class="text-lg font-bold">
-            <a
-              class="link text-sky-500 link-hover"
-              target="_blank"
-              :href="fullExplorerUrlForAddress + perpetualAA"
-              >{{ perpetualAA }}</a
-            >
+            {{ preparedMeta.reserveAsset.name }}/{{
+              preparedMeta.symbolAndDecimals.name
+            }}
           </div>
           <GovernanceAsset :perpetual-aa-meta="preparedMeta" />
         </div>
         <div>
-          <div class="flex justify-between mt-8 font-bold text-lg">
-            <div>Swap fee</div>
-            <div>
-              Current value:
-              {{ getParam("swap_fee", preparedMeta.rawMeta) * 100 }}%
-            </div>
-          </div>
-          <div class="card bg-base-300 shadow-xl mt-2.5">
-            <div class="card-body gap-0">
-              <div class="text-center">
-                <div v-if="votes['swap_fee'].length" class="mb-4">
-                  <VotingTable
-                    :votes="votes['swap_fee']"
-                    type="percent"
-                    suffix="%"
-                  />
-                </div>
-                <a
-                  class="link text-sky-500 link-hover"
-                  @click="modalIsOpen = true"
-                  >suggest another value</a
-                >
-              </div>
-            </div>
-          </div>
+          <VoteBlock
+            title="Swap fee"
+            name="swap_fee"
+            :votes-by-name="votes['swap_fee']"
+            :prepared-meta="preparedMeta"
+            type="percent"
+            @reqVote="reqVote"
+          />
+          <VoteBlock
+            title="Arb profit tax"
+            name="arb_profit_tax"
+            :votes-by-name="votes['arb_profit_tax']"
+            :prepared-meta="preparedMeta"
+            type="percent"
+            @reqVote="reqVote"
+          />
+          <VoteBlock
+            title="Adjustment period"
+            name="adjustment_period"
+            :votes-by-name="votes['adjustment_period']"
+            :prepared-meta="preparedMeta"
+            type="date"
+            @reqVote="reqVote"
+          />
+          <VoteBlock
+            title="Presale period"
+            name="presale_period"
+            :votes-by-name="votes['presale_period']"
+            :prepared-meta="preparedMeta"
+            type="date"
+            @reqVote="reqVote"
+          />
+          <VoteBlock
+            title="Auction price halving period"
+            name="auction_price_halving_period"
+            :votes-by-name="votes['auction_price_halving_period']"
+            :prepared-meta="preparedMeta"
+            type="date"
+            @reqVote="reqVote"
+          />
+          <VoteBlock
+            title="Token share threshold"
+            name="token_share_threshold"
+            :votes-by-name="votes['token_share_threshold']"
+            :prepared-meta="preparedMeta"
+            type="percent"
+            @reqVote="reqVote"
+          />
+          <VoteBlock
+            title="Min s0 share"
+            name="min_s0_share"
+            :votes-by-name="votes['min_s0_share']"
+            :prepared-meta="preparedMeta"
+            type="percent"
+            @reqVote="reqVote"
+          />
         </div>
 
         <div>
@@ -179,15 +265,7 @@ watch(meta, init, { deep: true });
   >
     <div class="fixed inset-0 bg-black/50" aria-hidden="true" />
     <div class="fixed inset-0 flex items-center justify-center">
-      <DialogPanel class="w-full max-w-lg rounded bg-base-200 p-8">
-        <div class="text-center text-2xl font-bold">Change swap fee</div>
-        <div class="mt-8 mb-8">
-          <input class="input input-bordered w-full" placeholder="0.3" />
-        </div>
-        <div class="text-center">
-          <button class="btn btn-primary">Vote for change</button>
-        </div>
-      </DialogPanel>
+      <VoteModal :params="modalParams" @vote="vote" />
     </div>
   </Dialog>
 </template>

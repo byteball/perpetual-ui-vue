@@ -22,7 +22,7 @@ export const generateDefinitionLink = (definition) => {
 export function generateAndFollowLinkForVoteAddPriceAA(
   priceAA,
   vote,
-  perpetualAA
+  stakingAA
 ) {
   const link = generateLink(
     10000,
@@ -33,7 +33,29 @@ export function generateAndFollowLinkForVoteAddPriceAA(
       value: vote,
     },
     null,
-    perpetualAA,
+    stakingAA,
+    "base",
+    true
+  );
+
+  const a = document.createElement("a");
+  a.href = link;
+  a.click();
+}
+export function generateAndFollowLinkForVoteInGovernance(
+  name,
+  value,
+  stakingAA
+) {
+  const link = generateLink(
+    10000,
+    {
+      vote_value: 1,
+      name: name,
+      value: value,
+    },
+    null,
+    stakingAA,
     "base",
     true
   );

@@ -4,7 +4,6 @@ import { storeToRefs } from "pinia";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import Client from "@/services/Obyte";
 import { getPreparedMeta } from "@/utils/governanceUtils";
-import { fullExplorerUrlForAddress } from "@/config";
 import GovernanceAsset from "@/components/governance/GovernanceAsset.vue";
 
 const store = useAaInfoStore();
@@ -54,12 +53,9 @@ watch(meta, init, { deep: true });
           <div class="card-body">
             <div>
               <div class="text-lg font-bold">
-                <a
-                  class="link text-sky-500 link-hover"
-                  target="_blank"
-                  :href="fullExplorerUrlForAddress + perpetualAA"
-                  >{{ perpetualAA }}</a
-                >
+                {{ perpetualAAMeta.reserveAsset.name }}/{{
+                  perpetualAAMeta.symbolAndDecimals.name
+                }}
               </div>
               <GovernanceAsset
                 :perpetual-aa-meta="perpetualAAMeta"

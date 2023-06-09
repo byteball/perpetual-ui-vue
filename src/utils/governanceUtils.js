@@ -94,7 +94,7 @@ export function getAllVotes(vars) {
 
       if (Object.keys(perpDefaults).includes(key)) {
         if (!votes[key]) votes[key] = [];
-        votes[key].push({ name: Number(value), amount: vars[k] });
+        votes[key].push({ value: Number(value), amount: vars[k] });
       } else {
         let length = 0;
         if (key.startsWith("add_price_aa")) {
@@ -109,7 +109,7 @@ export function getAllVotes(vars) {
 
         let a = key.substring(length);
         if (!votes.add_price_aa[a]) votes.add_price_aa[a] = [];
-        votes.add_price_aa[a].push({ name: value, amount: vars[k] });
+        votes.add_price_aa[a].push({ value: value, amount: vars[k] });
       }
     }
   });
