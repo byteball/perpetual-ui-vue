@@ -68,7 +68,9 @@ const route = useRoute();
             </li>
           </ul>
         </div>
-        <a class="btn btn-ghost normal-case text-xl">Perpetual</a>
+        <RouterLink class="btn btn-ghost normal-case text-xl" to="/"
+          >Perpetual</RouterLink
+        >
       </div>
       <div class="navbar-center hidden lg:flex">
         <ul class="menu menu-horizontal px-1">

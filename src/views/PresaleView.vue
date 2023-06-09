@@ -19,6 +19,7 @@ const activeTab = ref("buy");
 const assetsMetadata = ref({});
 const reserveAssets = ref({});
 const aAsPairs = ref({});
+const isLoaded = ref(false);
 
 const setTab = (tabName) => {
   activeTab.value = tabName;
@@ -86,6 +87,8 @@ const prepareReserveAssetList = async () => {
   if (Object.keys(reserveAssets.value).length) {
     filterReserveAssetsWithoutPresale();
   }
+
+  isLoaded.value = true;
 };
 
 onMounted(async () => {
@@ -149,105 +152,112 @@ watch([selectedReserveAsset, selectedPresaleAsset, amount, activeTab], () => {
 
     <div class="card bg-base-200 shadow-xl">
       <div class="card-body">
-        <div class="tabs tabs-boxed mb-4">
-          <a
-            class="tab tab-lifted"
-            :class="{ 'tab-active': activeTab === 'buy' }"
-            @click="setTab('buy')"
-          >
-            Buy
-          </a>
-          <a
-            class="tab tab-lifted"
-            :class="{ 'tab-active': activeTab === 'claim' }"
-            @click="setTab('claim')"
-          >
-            Claim
-          </a>
+        <div v-if="!isLoaded" class="text-center">
+          <button
+            class="btn btn-outline btn-circle btn-lg loading border-none"
+          ></button>
         </div>
-        <div>
-          <div v-if="!Object.keys(reserveAssets).length">
-            Reserve assets not found
+        <div v-else>
+          <div class="tabs tabs-boxed mb-4">
+            <a
+              class="tab tab-lifted"
+              :class="{ 'tab-active': activeTab === 'buy' }"
+              @click="setTab('buy')"
+            >
+              Buy
+            </a>
+            <a
+              class="tab tab-lifted"
+              :class="{ 'tab-active': activeTab === 'claim' }"
+              @click="setTab('claim')"
+            >
+              Claim
+            </a>
           </div>
-          <div v-if="Object.keys(reserveAssets).length">
-            <div class="form-control mt-3">
-              <label class="label">
-                <span class="label-text">Reserve Asset</span>
-              </label>
-              <select
-                class="select select-bordered"
-                v-model="selectedReserveAsset"
+          <div>
+            <div v-if="!Object.keys(reserveAssets).length">
+              Reserve assets not found
+            </div>
+            <div v-if="Object.keys(reserveAssets).length">
+              <div class="form-control mt-3">
+                <label class="label">
+                  <span class="label-text">Reserve Asset</span>
+                </label>
+                <select
+                  class="select select-bordered"
+                  v-model="selectedReserveAsset"
+                >
+                  <template
+                    :key="reserveAsset"
+                    v-for="reserveAsset in Object.keys(reserveAssets)"
+                  >
+                    <option
+                      :value="reserveAsset"
+                      v-if="reserveAssets[reserveAsset].length"
+                    >
+                      {{ reserveAsset }}
+                    </option>
+                  </template>
+                </select>
+              </div>
+              <div
+                v-if="
+                  selectedReserveAsset &&
+                  !reserveAssets[selectedReserveAsset].length
+                "
               >
-                <template
-                  :key="reserveAsset"
-                  v-for="reserveAsset in Object.keys(reserveAssets)"
+                Presale assets not found
+              </div>
+              <div
+                v-if="
+                  selectedReserveAsset &&
+                  reserveAssets[selectedReserveAsset].length
+                "
+                class="form-control mt-3"
+              >
+                <label class="label">
+                  <span class="label-text">Presale Asset</span>
+                </label>
+                <select
+                  class="select select-bordered"
+                  v-model="selectedPresaleAsset"
                 >
                   <option
-                    :value="reserveAsset"
-                    v-if="reserveAssets[reserveAsset].length"
+                    v-for="presaleAsset in reserveAssets[selectedReserveAsset]"
+                    :key="presaleAsset"
+                    :value="presaleAsset"
                   >
-                    {{ reserveAsset }}
+                    {{ presaleAsset }}
                   </option>
-                </template>
-              </select>
-            </div>
-            <div
-              v-if="
-                selectedReserveAsset &&
-                !reserveAssets[selectedReserveAsset].length
-              "
-            >
-              Presale assets not found
-            </div>
-            <div
-              v-if="
-                selectedReserveAsset &&
-                reserveAssets[selectedReserveAsset].length
-              "
-              class="form-control mt-3"
-            >
-              <label class="label">
-                <span class="label-text">Presale Asset</span>
-              </label>
-              <select
-                class="select select-bordered"
-                v-model="selectedPresaleAsset"
-              >
-                <option
-                  v-for="presaleAsset in reserveAssets[selectedReserveAsset]"
-                  :key="presaleAsset"
-                  :value="presaleAsset"
-                >
-                  {{ presaleAsset }}
-                </option>
-              </select>
-            </div>
-            <div v-if="selectedPresaleAsset">
-              <div class="mt-3">
-                <label class="label">
-                  <span class="label-text">Amount</span>
-                </label>
-                <div class="input-group">
-                  <input
-                    type="text"
-                    v-model="amount"
-                    :placeholder="
-                      getPlaceholderForAmount(
-                        assetsMetadata[selectedPresaleAsset].decimals
-                      )
-                    "
-                    class="input input-bordered w-full"
-                  />
-                  <span>{{ assetsMetadata[selectedPresaleAsset].name }}</span>
-                </div>
+                </select>
               </div>
-              <div class="form-control mt-6">
-                <a
-                  class="btn btn-primary"
-                  :class="{ 'btn-disabled': !amount }"
-                  :href="link"
-                  >{{ activeTab === "buy" ? "buy" : "сlaim" }}</a
-                >
+              <div v-if="selectedPresaleAsset">
+                <div class="mt-3">
+                  <label class="label">
+                    <span class="label-text">Amount</span>
+                  </label>
+                  <div class="input-group">
+                    <input
+                      type="text"
+                      v-model="amount"
+                      :placeholder="
+                        getPlaceholderForAmount(
+                          assetsMetadata[selectedPresaleAsset].decimals
+                        )
+                      "
+                      class="input input-bordered w-full"
+                    />
+                    <span>{{ assetsMetadata[selectedPresaleAsset].name }}</span>
+                  </div>
+                </div>
+                <div class="form-control mt-6">
+                  <a
+                    class="btn btn-primary"
+                    :class="{ 'btn-disabled': !amount }"
+                    :href="link"
+                    >{{ activeTab === "buy" ? "buy" : "сlaim" }}</a
+                  >
+                </div>
               </div>
             </div>
           </div>
