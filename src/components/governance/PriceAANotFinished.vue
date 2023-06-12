@@ -50,6 +50,15 @@ defineProps(["priceAa", "stakingAa", "definition", "priceAasMeta"]);
   <div class="card-actions justify-start mt-4">
     <div v-if="!priceAasMeta.vpAddPriceBCommit">
       <button
+        class="btn btn-sm gap-2 mr-4"
+        @click="
+          generateAndFollowLinkForVoteAddPriceAA(priceAa, 'no', stakingAa)
+        "
+      >
+        <LinkIcon />
+        Vote for no
+      </button>
+      <button
         class="btn btn-sm gap-2"
         @click="
           generateAndFollowLinkForVoteAddPriceAA(
@@ -62,8 +71,10 @@ defineProps(["priceAa", "stakingAa", "definition", "priceAasMeta"]);
         <LinkIcon />
         Vote for yes
       </button>
+    </div>
+    <div v-if="priceAasMeta.vpAddPriceBCommit">
       <button
-        class="btn btn-sm gap-2"
+        class="btn btn-sm gap-2 mr-4"
         @click="
           generateAndFollowLinkForVoteAddPriceAA(priceAa, 'no', stakingAa)
         "
@@ -71,8 +82,6 @@ defineProps(["priceAa", "stakingAa", "definition", "priceAasMeta"]);
         <LinkIcon />
         Vote for no
       </button>
-    </div>
-    <div v-if="priceAasMeta.vpAddPriceBCommit">
       <button
         class="btn btn-sm gap-2"
         @click="

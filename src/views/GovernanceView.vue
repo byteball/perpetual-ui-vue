@@ -52,23 +52,25 @@ watch(meta, init, { deep: true });
         <div class="card bg-base-200 shadow-xl mb-4">
           <div class="card-body">
             <div>
-              <div class="text-lg font-bold">
-                {{ perpetualAAMeta.reserveAsset.name }}/{{
-                  perpetualAAMeta.symbolAndDecimals.name
-                }}
+              <div class="flex justify-between items-center">
+                <div class="text-lg font-bold">
+                  {{ perpetualAAMeta.reserveAsset.name }}/{{
+                    perpetualAAMeta.symbolAndDecimals.name
+                  }}
+                </div>
+                <div>
+                  <RouterLink
+                    class="btn btn-sm btn-primary"
+                    :to="`/governance/management/${perpetualAA}`"
+                  >
+                    Manage AA
+                  </RouterLink>
+                </div>
               </div>
               <GovernanceAsset
                 :perpetual-aa-meta="perpetualAAMeta"
                 :is-main-page="true"
               />
-              <div class="text-center mt-8">
-                <RouterLink
-                  class="btn btn-sm btn-primary"
-                  :to="`/governance/management/${perpetualAA}`"
-                >
-                  Manage AA
-                </RouterLink>
-              </div>
             </div>
           </div>
         </div>

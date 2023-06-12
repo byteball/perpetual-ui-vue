@@ -44,6 +44,7 @@ async function init() {
   notFound.value = false;
 
   preparedMeta.value = await getPreparedMeta(metaByAA);
+  console.log(preparedMeta.value.priceAAsMeta);
   for (const priceAA in preparedMeta.value.priceAAsMeta) {
     const priceAADefinition = await Client.api.getDefinition(priceAA);
     priceAAsDefinition.value[priceAA] = priceAADefinition[1].params;
