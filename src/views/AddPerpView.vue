@@ -1,6 +1,6 @@
 <script setup>
 import { onUnmounted, ref, watch } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import Client from "@/services/Obyte";
 import { generateDefinitionLink, generateLink } from "@/utils/generateLink";
 import { storeToRefs } from "pinia";
@@ -12,6 +12,7 @@ const step = ref(1);
 const route = useRoute();
 const store = useAaInfoStore();
 const { meta } = storeToRefs(store);
+const router = useRouter();
 
 const oracle = ref("F4KHJUCLJKY4JV7M5F754LAJX4EB7M4N");
 const feedName = ref("GBYTE_USD");
@@ -119,12 +120,38 @@ watch(step, () => {
   }
 });
 
+async function goBack() {
+  await router.push(`/governance/management/${route.params.aa}`);
+}
+
 onUnmounted(() => {
   clearPriceInterval();
 });
 </script>
 <template>
   <div class="container w-[320px] sm:w-[640px] m-auto mt-8 mb-36 p-8">
+    <div @click="goBack()" class="p-2 mb-6 cursor-pointer">
+      <div class="flex items-center">
+        <div class="inline-block mr-2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="w-5 h-5"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M15.75 19.5L8.25 12l7.5-7.5"
+            />
+          </svg>
+        </div>
+        <div class="text-sm font-semibold leading-7 inline-block">Back</div>
+      </div>
+    </div>
+
     <div class="p-2 mb-6">
       <div class="text-lg font-semibold leading-7">Add new perpetual</div>
       <p class="mt-2 leading-6">

@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import { getAllVotes, getPreparedMeta } from "@/utils/governanceUtils";
 import {
@@ -20,6 +20,7 @@ const store = useAaInfoStore();
 const { aas, meta } = storeToRefs(store);
 
 const route = useRoute();
+const router = useRouter();
 
 const ready = ref(false);
 const notFound = ref(false);
@@ -118,6 +119,10 @@ function getTitleByName(name, toUpper) {
   return title;
 }
 
+async function goBack() {
+  await router.push(`/governance`);
+}
+
 onMounted(init);
 watch(meta, init, { deep: true });
 </script>
@@ -127,7 +132,7 @@ watch(meta, init, { deep: true });
     class="container w-[320px] sm:w-[768px] m-auto mt-8 mb-36 p-8"
     v-if="ready"
   >
-    <div @click="$router.go(-1)" class="p-2 mb-6 cursor-pointer">
+    <div @click="goBack()" class="p-2 mb-6 cursor-pointer">
       <div class="flex items-center">
         <div class="inline-block mr-2">
           <svg
