@@ -15,8 +15,11 @@ defineEmits(["voteFromTable"]);
       </tr>
     </thead>
     <tbody>
-      <tr v-for="v in votes" :key="v.value">
-        <td>{{ rawToFormatVotingValue(type, v.value) }}{{ suffix || "" }}</td>
+      <tr v-for="(v, index) in votes" :key="v.value">
+        <td>
+          {{ rawToFormatVotingValue(type, v.value) }}{{ suffix || "" }}
+          {{ index === 0 ? "(leader)" : "" }}
+        </td>
         <td>{{ Number((v.amount / 10 ** decimals).toFixed(decimals)) }}</td>
         <td>
           <a

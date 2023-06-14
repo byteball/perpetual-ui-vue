@@ -539,7 +539,7 @@ watch(
             <a
               class="btn btn-primary"
               :href="link"
-              :class="{ 'btn-disabled': reserveAsset === '' }"
+              :class="{ '!btn-disabled': reserveAsset === '' }"
               @click="setAwaiting(true)"
               >Create</a
             >

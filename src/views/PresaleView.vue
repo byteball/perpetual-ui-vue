@@ -153,12 +153,13 @@ watch([selectedReserveAsset, selectedPresaleAsset, amount, activeTab], () => {
     <div class="card bg-base-200 shadow-xl">
       <div class="card-body">
         <div v-if="!isLoaded" class="text-center">
-          <button
-            class="btn btn-outline btn-circle btn-lg loading border-none"
-          ></button>
+          <span class="loading loading-spinner loading-md"></span>
         </div>
         <div v-else>
-          <div class="tabs tabs-boxed mb-4">
+          <div
+            v-if="Object.keys(reserveAssets).length"
+            class="tabs tabs-boxed mb-4"
+          >
             <a
               class="tab tab-lifted"
               :class="{ 'tab-active': activeTab === 'buy' }"
@@ -253,7 +254,7 @@ watch([selectedReserveAsset, selectedPresaleAsset, amount, activeTab], () => {
                 <div class="form-control mt-6">
                   <a
                     class="btn btn-primary"
-                    :class="{ 'btn-disabled': !amount }"
+                    :class="{ '!btn-disabled': !amount }"
                     :href="link"
                     >{{ activeTab === "buy" ? "buy" : "сlaim" }}</a
                   >

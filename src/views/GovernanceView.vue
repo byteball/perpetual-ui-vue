@@ -81,8 +81,6 @@ watch(meta, init, { deep: true });
     v-else
     class="container w-[320px] sm:w-[512px] m-auto mt-40 mb-36 p-8 text-center"
   >
-    <button
-      class="btn btn-outline btn-circle btn-lg loading border-none"
-    ></button>
+    <span class="loading loading-spinner loading-md"></span>
   </div>
 </template>

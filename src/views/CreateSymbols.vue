@@ -212,7 +212,7 @@ onMounted(() => {
             <a
               class="btn btn-primary"
               :href="link"
-              :class="{ 'btn-disabled': !buttonEnabled }"
+              :class="{ '!btn-disabled': !buttonEnabled }"
               >Register symbol</a
             >
           </div>

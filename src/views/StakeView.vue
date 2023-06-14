@@ -231,9 +231,7 @@ watch(
     <div class="card bg-base-200 shadow-xl">
       <div class="card-body">
         <div v-if="!pools.length" class="text-center">
-          <button
-            class="btn btn-outline btn-circle btn-lg loading border-none"
-          ></button>
+          <span class="loading loading-spinner loading-md"></span>
         </div>
         <div v-if="pools.length">
           <div class="form-control">
@@ -374,7 +372,7 @@ watch(
             <div class="form-control mt-6">
               <a
                 class="btn btn-primary"
-                :class="{ 'btn-disabled': buttonDisabled }"
+                :class="{ '!btn-disabled': buttonDisabled }"
                 :href="link"
                 >{{ activeTab === "stake" ? "stake" : "withdraw" }}</a
               >

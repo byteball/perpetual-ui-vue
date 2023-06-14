@@ -124,9 +124,40 @@ watch(meta, init, { deep: true });
 
 <template>
   <div
-    class="container w-[320px] sm:w-[768px] m-auto mt-40 mb-36 p-8"
+    class="container w-[320px] sm:w-[768px] m-auto mt-8 mb-36 p-8"
     v-if="ready"
   >
+    <div @click="$router.go(-1)" class="p-2 mb-6 cursor-pointer">
+      <div class="flex items-center">
+        <div class="inline-block mr-2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="w-5 h-5"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M15.75 19.5L8.25 12l7.5-7.5"
+            />
+          </svg>
+        </div>
+        <div class="text-sm font-semibold leading-7 inline-block">Back</div>
+      </div>
+    </div>
+
+    <div class="p-2 mb-6">
+      <div class="text-lg font-semibold leading-7 inline-block">
+        Manage Autonomous Agent
+      </div>
+      <p class="mt-2 leading-6">
+        This information will be displayed publicly so be careful what you
+        share.
+      </p>
+    </div>
     <div v-if="notFound" class="text-center">AA not found</div>
     <div v-else class="card bg-base-200 shadow-xl mb-4">
       <div class="card-body">
@@ -255,9 +286,7 @@ watch(meta, init, { deep: true });
     v-else
     class="container w-[320px] sm:w-[512px] m-auto mt-40 mb-36 p-8 text-center"
   >
-    <button
-      class="btn btn-outline btn-circle btn-lg loading border-none"
-    ></button>
+    <span class="loading loading-spinner loading-md"></span>
   </div>
   <Dialog
     :open="modalIsOpen"

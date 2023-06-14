@@ -196,9 +196,7 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
     <div class="card bg-base-200 shadow-xl">
       <div class="card-body">
         <div v-if="!assets.assetList.length" class="text-center">
-          <button
-            class="btn btn-outline btn-circle btn-lg loading border-none"
-          ></button>
+          <span class="loading loading-spinner loading-md"></span>
         </div>
         <div class="form-control" v-if="assets.assetList.length">
           <div class="input-group">
@@ -248,7 +246,7 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
             <a
               class="btn btn-primary"
               :href="link"
-              :class="{ 'btn-disabled': !link || !(Number(asset2Amount) > 0) }"
+              :class="{ '!btn-disabled': !link || !(Number(asset2Amount) > 0) }"
               >Exchange</a
             >
           </div>

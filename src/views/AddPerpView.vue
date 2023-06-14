@@ -125,6 +125,14 @@ onUnmounted(() => {
 </script>
 <template>
   <div class="container w-[320px] sm:w-[640px] m-auto mt-8 mb-36 p-8">
+    <div class="p-2 mb-6">
+      <div class="text-lg font-semibold leading-7">Add new perpetual</div>
+      <p class="mt-2 leading-6">
+        This information will be displayed publicly so be careful what you
+        share.
+      </p>
+    </div>
+
     <div v-if="step === 1">
       <div class="card bg-base-200 shadow-xl">
         <div class="card-body">
