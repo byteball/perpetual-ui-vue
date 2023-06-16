@@ -1,7 +1,7 @@
 import { getAssetMetadata } from "@/services/DAGApi";
 import { fullExplorerUrlForAsset, fullExplorerUrlForUnit } from "@/config";
 
-function getNotDefaultAssetsFromMeta(meta, onlyNotPresale) {
+export function getNotDefaultAssetsFromMeta(meta, onlyNotPresale) {
   const keys = Object.keys(meta);
   const assets = [];
 

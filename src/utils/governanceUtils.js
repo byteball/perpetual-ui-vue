@@ -13,7 +13,11 @@ function getChallengingPeriod(stakingParams) {
 }
 
 function getPriceAAsMetaFromVars(aaState, stakingParams, stakingVars) {
-  const priceAAsMeta = {};
+  const priceAAsMeta = {
+    finished: {},
+    notFinished: {},
+    allPriceAAs: [],
+  };
 
   Object.keys(stakingVars).forEach((key) => {
     if (key.startsWith("leader_add_price_aa")) {
@@ -35,31 +39,40 @@ function getPriceAAsMetaFromVars(aaState, stakingParams, stakingVars) {
             leaderAddPriceAA.flip_ts + getChallengingPeriod(stakingParams)
         : null;
 
-      priceAAsMeta[priceAA] = {
-        finished,
+      priceAAsMeta[finished ? "finished" : "notFinished"][priceAA] = {
         result,
         leaderAddPriceAA,
         vpAddPrice,
         vpAddPriceBCommit,
       };
+      priceAAsMeta.allPriceAAs.push(priceAA);
     }
   });
 
   return priceAAsMeta;
 }
 
+const cacheForPreparedMetaByAsset0AndReserve = {};
 export async function getPreparedMeta(metaByAA) {
+  const key = `${metaByAA.state.asset0}_${metaByAA.reserve_asset}`;
+  if (cacheForPreparedMetaByAsset0AndReserve[key]) {
+    return cacheForPreparedMetaByAsset0AndReserve[key];
+  }
+
   const priceAAsMeta = getPriceAAsMetaFromVars(
     metaByAA.state,
     metaByAA.stakingParams,
     metaByAA.stakingVars
   );
-  return {
+  const meta = {
     symbolAndDecimals: await getAssetMetadata(metaByAA.state.asset0),
     priceAAsMeta,
     reserveAsset: await getAssetMetadata(metaByAA.reserve_asset),
     rawMeta: metaByAA,
   };
+  cacheForPreparedMetaByAsset0AndReserve[key] = meta;
+
+  return meta;
 }
 
 export function getParam(name, meta) {

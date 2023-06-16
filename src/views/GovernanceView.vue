@@ -2,7 +2,6 @@
 import { onMounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useAaInfoStore } from "@/stores/aaInfo";
-import Client from "@/services/Obyte";
 import { getPreparedMeta } from "@/utils/governanceUtils";
 import GovernanceAsset from "@/components/governance/GovernanceAsset.vue";
 
@@ -10,7 +9,6 @@ const store = useAaInfoStore();
 const { aas, meta } = storeToRefs(store);
 
 const aasWithMeta = ref({});
-const priceAAsDefinition = ref({});
 
 async function init() {
   if (!aas.value.length) return;
@@ -18,11 +16,6 @@ async function init() {
   const m = {};
   for (let aa in meta.value) {
     m[aa] = await getPreparedMeta(meta.value[aa]);
-
-    for (const priceAA in m[aa].priceAAsMeta) {
-      const priceAADefinition = await Client.api.getDefinition(priceAA);
-      priceAAsDefinition.value[priceAA] = priceAADefinition[1].params;
-    }
   }
 
   aasWithMeta.value = m;

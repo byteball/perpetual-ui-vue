@@ -4,17 +4,17 @@ import { storeToRefs } from "pinia";
 import { useRoute, useRouter } from "vue-router";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import { getAllVotes, getPreparedMeta } from "@/utils/governanceUtils";
-import {
-  generateAndFollowLinkForVoteAddPriceAA,
-  generateAndFollowLinkForVoteInGovernance,
-} from "@/utils/generateLink";
+import { generateAndFollowLinkForVoteInGovernance } from "@/utils/generateLink";
+import { getNotDefaultAssetsFromMeta } from "@/utils/assetsUtils";
 import Client from "@/services/Obyte";
 import GovernanceAsset from "@/components/governance/GovernanceAsset.vue";
 import PriceAANotFinished from "@/components/governance/PriceAANotFinished.vue";
-import LinkIcon from "@/components/icons/LinkIcon.vue";
 import { Dialog } from "@headlessui/vue";
 import VoteBlock from "@/components/governance/VoteBlock.vue";
 import VoteModal from "@/components/governance/VoteModal.vue";
+import { getAssetMetadata } from "@/services/DAGApi";
+import PriceAAFinished from "@/components/governance/PriceAAFinished.vue";
+import RegisterSymbolModal from "@/components/RegisterSymbolModal.vue";
 
 const store = useAaInfoStore();
 const { aas, meta } = storeToRefs(store);
@@ -27,11 +27,14 @@ const notFound = ref(false);
 const perpetualAA = computed(() => route.params.aa);
 const votes = ref({});
 const modalParams = ref({});
+const registerSymbolAsset = ref("");
 
 const preparedMeta = ref({});
 const priceAAsDefinition = ref({});
+const metaForFinishedAssets = ref({});
 
-const modalIsOpen = ref(false);
+const modalForVoteIsOpen = ref(false);
+const modalForRegisterSymbolIsOpen = ref(false);
 
 async function init() {
   if (!aas.value.length) return;
@@ -45,13 +48,28 @@ async function init() {
   notFound.value = false;
 
   preparedMeta.value = await getPreparedMeta(metaByAA);
-  console.log(preparedMeta.value.priceAAsMeta);
-  for (const priceAA in preparedMeta.value.priceAAsMeta) {
+  console.log("meta", preparedMeta.value);
+  for (const priceAA of preparedMeta.value.priceAAsMeta.allPriceAAs) {
     const priceAADefinition = await Client.api.getDefinition(priceAA);
     priceAAsDefinition.value[priceAA] = priceAADefinition[1].params;
   }
 
   votes.value = getAllVotes(metaByAA.stakingVars);
+
+  const assets = getNotDefaultAssetsFromMeta(metaByAA);
+  const mForFinishedAssets = {};
+  for (let asset of assets) {
+    const m = metaByAA[`asset_${asset}`];
+    mForFinishedAssets[asset] = {
+      metaByPriceAA: preparedMeta.value.priceAAsMeta.finished[m.price_aa],
+      assetMetaData: await getAssetMetadata(asset),
+      ...m,
+    };
+  }
+
+  metaForFinishedAssets.value = mForFinishedAssets;
+  console.log("metaForFinishedAssets", mForFinishedAssets);
+
   ready.value = true;
 }
 
@@ -62,10 +80,10 @@ function reqVote(name, type, suffix, value) {
   } else {
     title = `Set new value for ${getTitleByName(name)}`;
   }
-  showModal(title, name, type, suffix, value);
+  showModalForVote(title, name, type, suffix, value);
 }
 
-function showModal(title, name, type, suffix, value) {
+function showModalForVote(title, name, type, suffix, value) {
   modalParams.value = {
     title,
     name,
@@ -73,7 +91,7 @@ function showModal(title, name, type, suffix, value) {
     suffix,
     value,
   };
-  modalIsOpen.value = true;
+  modalForVoteIsOpen.value = true;
 }
 
 function vote(name, value) {
@@ -82,6 +100,11 @@ function vote(name, value) {
     value,
     preparedMeta.value.rawMeta.staking_aa
   );
+}
+
+function reqRegister(asset) {
+  registerSymbolAsset.value = asset;
+  modalForRegisterSymbolIsOpen.value = true;
 }
 
 function getTitleByName(name, toUpper) {
@@ -235,42 +258,30 @@ watch(meta, init, { deep: true });
 
         <div>
           <div class="text-lg font-bold mt-8 mb-2.5">Price AAs</div>
+          <div v-for="(assetMeta, asset) in metaForFinishedAssets" :key="asset">
+            <PriceAAFinished
+              :asset-meta="assetMeta"
+              :asset="asset"
+              :staking-aa="preparedMeta.rawMeta.staking_aa"
+              :price-aa="assetMeta.price_aa"
+              :price-aa-definition="priceAAsDefinition[assetMeta.price_aa]"
+              @reqRegister="reqRegister"
+            />
+          </div>
           <div
-            v-for="(priceAAsMeta, priceAA) in preparedMeta.priceAAsMeta"
+            v-for="(priceAAsMeta, priceAA) in preparedMeta.priceAAsMeta
+              .notFinished"
             :key="priceAA"
           >
             <div class="card bg-base-300 shadow-xl mb-8">
               <div class="card-body gap-0">
-                <div v-if="!priceAAsMeta.finished">
+                <div>
                   <PriceAANotFinished
                     :price-aa="priceAA"
                     :staking-aa="preparedMeta.rawMeta.staking_aa"
                     :definition="priceAAsDefinition[priceAA]"
                     :price-aas-meta="priceAAsMeta"
                   />
-                </div>
-                <div
-                  v-if="priceAAsMeta.finished"
-                  class="card-actions justify-start"
-                >
-                  <div class="font-medium text-sm inline-block mb-2">
-                    Status:
-                    <div class="font-light text-sm inline-block">finished</div>
-                  </div>
-                  <button
-                    v-if="priceAAsMeta.result === 'no'"
-                    class="btn btn-sm gap-2 mt-4"
-                    @click="
-                      generateAndFollowLinkForVoteAddPriceAA(
-                        priceAA,
-                        'yes',
-                        preparedMeta.rawMeta.staking_aa
-                      )
-                    "
-                  >
-                    <LinkIcon />
-                    Vote for add
-                  </button>
                 </div>
               </div>
             </div>
@@ -294,13 +305,26 @@ watch(meta, init, { deep: true });
     <span class="loading loading-spinner loading-md"></span>
   </div>
   <Dialog
-    :open="modalIsOpen"
-    @close="modalIsOpen = false"
+    :open="modalForVoteIsOpen"
+    @close="modalForVoteIsOpen = false"
     class="relative z-50"
   >
     <div class="fixed inset-0 bg-black/50" aria-hidden="true" />
     <div class="fixed inset-0 flex items-center justify-center">
       <VoteModal :params="modalParams" @vote="vote" />
+    </div>
+  </Dialog>
+  <Dialog
+    :open="modalForRegisterSymbolIsOpen"
+    @close="modalForRegisterSymbolIsOpen = false"
+    class="relative z-50"
+  >
+    <div class="fixed inset-0 bg-black/50" aria-hidden="true" />
+    <div class="fixed inset-0 flex items-center justify-center">
+      <RegisterSymbolModal
+        :asset="registerSymbolAsset"
+        :perp-aa="perpetualAA"
+      />
     </div>
   </Dialog>
 </template>
