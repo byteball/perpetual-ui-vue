@@ -50,6 +50,9 @@ const router = createRouter({
       component: () => import("../views/CreateView.vue"),
     },
   ],
+  scrollBehavior() {
+    return { top: 0, behavior: "smooth" };
+  },
 });
 
 export default router;

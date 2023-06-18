@@ -50,11 +50,13 @@ function voteFromTable(value) {
               @vote-from-table="voteFromTable"
             />
           </div>
-          <a
-            class="link text-sky-500 link-hover"
-            @click="$emit('reqVote', name, type, suffix)"
-            >suggest another value</a
-          >
+          <div class="text-left">
+            <a
+              class="link text-sky-500 link-hover"
+              @click="$emit('reqVote', name, type, suffix)"
+              >suggest another value</a
+            >
+          </div>
         </div>
       </div>
     </div>

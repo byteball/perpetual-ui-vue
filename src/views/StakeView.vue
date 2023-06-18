@@ -17,6 +17,7 @@ const { aas, meta, status } = storeToRefs(store);
 const pools = ref([]);
 const poolSymbolAndDecimalByAA = ref({});
 const poolReserveNameByAA = ref({});
+const modalForPool = ref();
 
 const selectedAA = ref("");
 const link = ref("");
@@ -74,6 +75,11 @@ function getData() {
       perp_asset: metaByAA.value.state.asset0,
     };
   }
+}
+
+function setPool(pool) {
+  selectedAA.value = pool;
+  modalForPool.value.checked = false;
 }
 
 onMounted(() => {
@@ -235,17 +241,21 @@ watch(
         </div>
         <div v-if="pools.length">
           <div class="form-control">
-            <label class="label">
-              <span class="label-text">Pool</span>
+            <label for="poolModal" class="btn btn-neutral">
+              {{
+                selectedAA
+                  ? `${poolReserveNameByAA[selectedAA]}/${poolSymbolAndDecimalByAA[selectedAA].name}`
+                  : `Please select pool`
+              }}
             </label>
-            <select class="select select-bordered" v-model="selectedAA">
-              <option value="" disabled>Please select pool</option>
-              <option v-for="aa in pools" :key="aa" :value="aa">
-                {{
-                  `${poolReserveNameByAA[aa]}/${poolSymbolAndDecimalByAA[aa].name}`
-                }}
-              </option>
-            </select>
+            <!--            <select class="select select-bordered" v-model="selectedAA">-->
+            <!--              <option value="" disabled>Please select pool</option>-->
+            <!--              <option v-for="aa in pools" :key="aa" :value="aa">-->
+            <!--                {{-->
+            <!--                  `${poolReserveNameByAA[aa]}/${poolSymbolAndDecimalByAA[aa].name}`-->
+            <!--                }}-->
+            <!--              </option>-->
+            <!--            </select>-->
           </div>
           <div v-if="metaByAA && poolSymbolAndDecimalByAA[metaByAA.aa]">
             <div class="tabs tabs-boxed mt-8 mb-4">
@@ -382,4 +392,23 @@ watch(
       </div>
     </div>
   </div>
+
+  <input
+    ref="modalForPool"
+    type="checkbox"
+    id="poolModal"
+    class="modal-toggle"
+  />
+  <label for="poolModal" class="modal cursor-pointer">
+    <label class="modal-box relative" for="">
+      <div
+        v-for="aa in pools"
+        :key="aa"
+        class="my-2 mx-4 cursor-pointer hover:text-gray-600"
+        @click="setPool(aa)"
+      >
+        {{ `${poolReserveNameByAA[aa]}/${poolSymbolAndDecimalByAA[aa].name}` }}
+      </div>
+    </label>
+  </label>
 </template>
