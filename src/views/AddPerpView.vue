@@ -5,6 +5,8 @@ import Client from "@/services/Obyte";
 import { generateDefinitionLink, generateLink } from "@/utils/generateLink";
 import { storeToRefs } from "pinia";
 import { useAaInfoStore } from "@/stores/aaInfo";
+import { getDataFeed } from "@/services/DAGApi";
+import debounce from "lodash.debounce";
 
 let intervalId = 0;
 const step = ref(1);
@@ -98,6 +100,12 @@ function back() {
   needCheckPriceAA.value = false;
   step.value = 2;
 }
+
+watch([oracle, feedName], () => {
+  debounce(async () => {
+    const dataFeed = await getDataFeed(oracle.value, feedName.value);
+  }, 500);
+});
 
 watch(step, () => {
   if (step.value === 3 && needCheckPriceAA.value) {
@@ -250,9 +258,9 @@ onUnmounted(() => {
             </div>
           </div>
           <div class="mt-8 text-center !form-control">
-            <a class="btn btn-primary" @click="checkExistsPriceAA"
-              >Add perpetual</a
-            >
+            <a class="btn btn-primary" @click="checkExistsPriceAA">
+              Add perpetual
+            </a>
           </div>
         </div>
       </div>

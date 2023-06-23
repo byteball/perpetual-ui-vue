@@ -248,14 +248,6 @@ watch(
                   : `Please select pool`
               }}
             </label>
-            <!--            <select class="select select-bordered" v-model="selectedAA">-->
-            <!--              <option value="" disabled>Please select pool</option>-->
-            <!--              <option v-for="aa in pools" :key="aa" :value="aa">-->
-            <!--                {{-->
-            <!--                  `${poolReserveNameByAA[aa]}/${poolSymbolAndDecimalByAA[aa].name}`-->
-            <!--                }}-->
-            <!--              </option>-->
-            <!--            </select>-->
           </div>
           <div v-if="metaByAA && poolSymbolAndDecimalByAA[metaByAA.aa]">
             <div class="tabs tabs-boxed mt-8 mb-4">

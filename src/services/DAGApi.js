@@ -61,15 +61,11 @@ export async function getJoint(unit) {
 const cacheForAssetMetadata = {};
 
 export async function getDataFeed(oracle, feedName) {
+  console.log("123 321 567 765");
+
   const params = {
     oracles: [oracle],
     feed_name: feedName,
-    // feed_value: string | number | boolean;
-    // min_mci: number;
-    // ifseveral: 'abort' | 'last';
-    // what: 'unit' | 'value';
-    // type: 'string' | 'auto';
-    // ifnone: string | number | boolean;
   };
 
   try {

@@ -33,6 +33,8 @@ const link = ref("");
 const percent = ref(0);
 const newPrice = ref(0);
 
+const resultError = ref("");
+
 async function initSelectedAA() {
   if (status.value !== "initialized") return;
   const a = getAssetsFromMeta(meta.value, true);
@@ -149,6 +151,8 @@ function calcDataForSell() {
 function calcAndSetDataForMetaAndLink() {
   if (!asset1.value || !asset2.value) return;
 
+  resultError.value = "";
+
   let data;
   if (metaByActiveAA.value.reserve_asset === asset1.value) {
     data = calcDataForBuy();
@@ -165,6 +169,11 @@ function calcAndSetDataForMetaAndLink() {
   link.value = data.link;
   percent.value = data.result.fee_percent;
   newPrice.value = data.result.new_price;
+
+  if (data?.result?.error) {
+    resultError.value = data.result.error;
+  }
+
   console.log("result", data.result);
 }
 
@@ -263,6 +272,12 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
               }}</label
             >
           </div>
+          <span
+            v-if="resultError"
+            class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"
+          >
+            {{ resultError }}
+          </span>
           <div v-if="asset2Amount" class="mt-4">
             <div>Fee: {{ Number(percent.toFixed(4)) }}%</div>
             <div>New price: {{ newPrice }}</div>

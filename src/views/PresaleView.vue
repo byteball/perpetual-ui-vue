@@ -13,6 +13,8 @@ const { aas, meta } = storeToRefs(store);
 
 const selectedReserveAsset = ref("");
 const selectedPresaleAsset = ref("");
+const selectedAA = ref("");
+const selectedAsset0 = ref("");
 const amount = ref("");
 const link = ref("");
 const activeTab = ref("buy");
@@ -20,6 +22,9 @@ const assetsMetadata = ref({});
 const reserveAssets = ref({});
 const aAsPairs = ref({});
 const isLoaded = ref(false);
+const modalForPresale = ref();
+
+const presaleList = ref([]);
 
 const setTab = (tabName) => {
   activeTab.value = tabName;
@@ -46,17 +51,27 @@ const filterReserveAssetsWithoutPresale = () => {
   }
 };
 
-const prepareReserveAssetList = async () => {
+const preparePresaleList = async () => {
   if (!Object.keys(meta.value).length) {
     return;
   }
 
   for (const aa of aas.value) {
-    const reserveAsset = meta.value[aa].reserve_asset;
+    const presale = { aa };
+    presale.asset0 = meta.value[aa]?.state?.asset0;
 
+    const asset0Data = await getAssetMetadata(presale.asset0);
+
+    if (!assetsMetadata.value[presale.asset0]) {
+      assetsMetadata.value[presale.asset0] = asset0Data;
+    }
+
+    const reserveAsset = meta.value[aa].reserve_asset;
     const reserveAssetData = await getAssetMetadata(reserveAsset);
 
     if (!reserveAssetData) continue;
+
+    presale.reserveAsset = reserveAsset;
 
     if (!assetsMetadata.value[reserveAsset]) {
       assetsMetadata.value[reserveAsset] = reserveAssetData;
@@ -65,23 +80,23 @@ const prepareReserveAssetList = async () => {
     const presaleAssets = getPresaleAssetsFromMeta(meta.value[aa]);
 
     const presaleAssetsWithMetadata = [];
-    for (const asset of presaleAssets) {
-      const presaleAssetData = await getAssetMetadata(asset);
+    for (const presaleAsset of presaleAssets) {
+      const presaleAssetData = await getAssetMetadata(presaleAsset);
 
       if (!presaleAssetData) continue;
 
-      if (!assetsMetadata.value[asset]) {
-        assetsMetadata.value[asset] = presaleAssetData;
+      presale.presaleAsset = presaleAsset;
+
+      if (!assetsMetadata.value[presaleAsset]) {
+        assetsMetadata.value[presaleAsset] = presaleAssetData;
       }
 
-      presaleAssetsWithMetadata.push(asset);
+      presaleAssetsWithMetadata.push(presaleAsset);
 
-      aAsPairs.value[`${reserveAsset}_${asset}`] = aa;
+      presaleList.value.push(presale);
+
+      aAsPairs.value[`${reserveAsset}_${presaleAsset}`] = aa;
     }
-
-    reserveAssets.value[reserveAsset] = reserveAssets.value[reserveAsset]
-      ? [...reserveAssets.value[reserveAsset], ...presaleAssetsWithMetadata]
-      : presaleAssetsWithMetadata;
   }
 
   if (Object.keys(reserveAssets.value).length) {
@@ -91,11 +106,20 @@ const prepareReserveAssetList = async () => {
   isLoaded.value = true;
 };
 
+const choosePresale = (presale) => {
+  selectedPresaleAsset.value = presale.presaleAsset;
+  selectedReserveAsset.value = presale.reserveAsset;
+  selectedAA.value = presale.aa;
+  selectedAsset0.value = presale.asset0;
+
+  modalForPresale.value.checked = false;
+};
+
 onMounted(async () => {
-  await prepareReserveAssetList();
+  await preparePresaleList();
 });
 
-watch(meta, prepareReserveAssetList);
+watch(meta, preparePresaleList);
 
 watch([selectedReserveAsset, selectedPresaleAsset, amount, activeTab], () => {
   const assetAmount =
@@ -156,114 +180,89 @@ watch([selectedReserveAsset, selectedPresaleAsset, amount, activeTab], () => {
           <span class="loading loading-spinner loading-md"></span>
         </div>
         <div v-else>
-          <div
-            v-if="Object.keys(reserveAssets).length"
-            class="tabs tabs-boxed mb-4"
-          >
-            <a
-              class="tab tab-lifted"
-              :class="{ 'tab-active': activeTab === 'buy' }"
-              @click="setTab('buy')"
-            >
-              Buy
-            </a>
-            <a
-              class="tab tab-lifted"
-              :class="{ 'tab-active': activeTab === 'claim' }"
-              @click="setTab('claim')"
-            >
-              Claim
-            </a>
-          </div>
-          <div>
-            <div v-if="!Object.keys(reserveAssets).length">
-              Reserve assets not found
+          <div v-if="presaleList.length">
+            <div class="form-control">
+              <label
+                for="presaleModal"
+                class="btn btn-neutral !whitespace-pre-wrap leading-4"
+              >
+                {{
+                  selectedAA
+                    ? `${assetsMetadata[selectedPresaleAsset].name} in pool \n ${assetsMetadata[selectedAsset0].name} / ${assetsMetadata[selectedReserveAsset].name}`
+                    : `Please select presale`
+                }}
+              </label>
             </div>
-            <div v-if="Object.keys(reserveAssets).length">
-              <div class="form-control mt-3">
-                <label class="label">
-                  <span class="label-text">Reserve Asset</span>
-                </label>
-                <select
-                  class="select select-bordered"
-                  v-model="selectedReserveAsset"
-                >
-                  <template
-                    :key="reserveAsset"
-                    v-for="reserveAsset in Object.keys(reserveAssets)"
-                  >
-                    <option
-                      :value="reserveAsset"
-                      v-if="reserveAssets[reserveAsset].length"
-                    >
-                      {{ reserveAsset }}
-                    </option>
-                  </template>
-                </select>
-              </div>
-              <div
-                v-if="
-                  selectedReserveAsset &&
-                  !reserveAssets[selectedReserveAsset].length
-                "
+          </div>
+          <div v-if="selectedAA">
+            <div class="tabs tabs-boxed mt-8">
+              <a
+                class="tab tab-lifted"
+                :class="{ 'tab-active': activeTab === 'buy' }"
+                @click="setTab('buy')"
               >
-                Presale assets not found
-              </div>
-              <div
-                v-if="
-                  selectedReserveAsset &&
-                  reserveAssets[selectedReserveAsset].length
-                "
-                class="form-control mt-3"
+                Buy
+              </a>
+              <a
+                class="tab tab-lifted"
+                :class="{ 'tab-active': activeTab === 'claim' }"
+                @click="setTab('claim')"
               >
-                <label class="label">
-                  <span class="label-text">Presale Asset</span>
-                </label>
-                <select
-                  class="select select-bordered"
-                  v-model="selectedPresaleAsset"
-                >
-                  <option
-                    v-for="presaleAsset in reserveAssets[selectedReserveAsset]"
-                    :key="presaleAsset"
-                    :value="presaleAsset"
-                  >
-                    {{ presaleAsset }}
-                  </option>
-                </select>
+                Claim
+              </a>
+            </div>
+            <div class="mt-4">
+              <label class="label">
+                <span class="label-text">Amount</span>
+              </label>
+              <div class="input-group">
+                <input
+                  type="text"
+                  v-model="amount"
+                  :placeholder="
+                    getPlaceholderForAmount(
+                      assetsMetadata[selectedPresaleAsset].decimals
+                    )
+                  "
+                  class="input input-bordered w-full"
+                />
+                <span>{{ assetsMetadata[selectedPresaleAsset].name }}</span>
               </div>
-              <div v-if="selectedPresaleAsset">
-                <div class="mt-3">
-                  <label class="label">
-                    <span class="label-text">Amount</span>
-                  </label>
-                  <div class="input-group">
-                    <input
-                      type="text"
-                      v-model="amount"
-                      :placeholder="
-                        getPlaceholderForAmount(
-                          assetsMetadata[selectedPresaleAsset].decimals
-                        )
-                      "
-                      class="input input-bordered w-full"
-                    />
-                    <span>{{ assetsMetadata[selectedPresaleAsset].name }}</span>
-                  </div>
-                </div>
-                <div class="form-control mt-6">
-                  <a
-                    class="btn btn-primary"
-                    :class="{ '!btn-disabled': !amount }"
-                    :href="link"
-                    >{{ activeTab === "buy" ? "buy" : "сlaim" }}</a
-                  >
-                </div>
-              </div>
+            </div>
+            <div class="form-control mt-6">
+              <a
+                class="btn btn-primary"
+                :class="{ '!btn-disabled': !amount }"
+                :href="link"
+                >{{ activeTab === "buy" ? "buy" : "сlaim" }}</a
+              >
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
+
+  <input
+    ref="modalForPresale"
+    type="checkbox"
+    id="presaleModal"
+    class="modal-toggle"
+  />
+  <label for="presaleModal" class="modal cursor-pointer">
+    <label class="modal-box relative" for="">
+      <div
+        v-for="presale in presaleList"
+        :key="`${presale.presaleAsset}_${presale.reserveAsset}_${presale.asset0}`"
+        class="my-2 mx-4 cursor-pointer hover:text-gray-600"
+        @click="choosePresale(presale)"
+      >
+        {{
+          `${assetsMetadata[presale.presaleAsset].name} in pool ${
+            assetsMetadata[presale.asset0].name
+          } / ${assetsMetadata[presale.reserveAsset].name}`
+        }}
+      </div>
+    </label>
+  </label>
 </template>
