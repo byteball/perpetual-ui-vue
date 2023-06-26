@@ -26,6 +26,9 @@ const needCheckPriceAA = ref(false);
 const linkForPriceAA = ref("");
 const linkForPublishPerp = ref("");
 
+const currentRate = ref(null);
+const buttonDisabled = ref(true);
+
 function setLinkForPriceAA() {
   linkForPriceAA.value = generateDefinitionLink([
     "autonomous agent",
@@ -101,11 +104,25 @@ function back() {
   step.value = 2;
 }
 
-watch([oracle, feedName], () => {
+watch(
+  [oracle, feedName],
   debounce(async () => {
-    const dataFeed = await getDataFeed(oracle.value, feedName.value);
-  }, 500);
-});
+    currentRate.value = await getDataFeed(oracle.value, feedName.value);
+  }, 500),
+  { immediate: true }
+);
+
+watch(
+  [currentRate, multiplier],
+  () => {
+    buttonDisabled.value = true;
+
+    if (currentRate.value !== null && multiplier.value) {
+      buttonDisabled.value = false;
+    }
+  },
+  { immediate: true }
+);
 
 watch(step, () => {
   if (step.value === 3 && needCheckPriceAA.value) {
@@ -255,10 +272,26 @@ onUnmounted(() => {
                 v-model="multiplier"
                 class="input input-bordered w-full"
               />
+
+              <div class="mt-4 text-sm">
+                <div v-if="currentRate">
+                  <span class="font-medium"> Current rate: </span>
+                  {{ `${currentRate}` }}
+                </div>
+                <div v-else class="tracking-wide text-red-500">
+                  {{
+                    "Data not found, please check oracle address and feed name"
+                  }}
+                </div>
+              </div>
             </div>
           </div>
           <div class="mt-8 text-center !form-control">
-            <a class="btn btn-primary" @click="checkExistsPriceAA">
+            <a
+              class="btn btn-primary"
+              @click="checkExistsPriceAA"
+              :class="{ '!btn-disabled': buttonDisabled }"
+            >
               Add perpetual
             </a>
           </div>

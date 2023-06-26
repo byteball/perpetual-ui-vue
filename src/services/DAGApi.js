@@ -61,15 +61,13 @@ export async function getJoint(unit) {
 const cacheForAssetMetadata = {};
 
 export async function getDataFeed(oracle, feedName) {
-  console.log("123 321 567 765");
-
   const params = {
     oracles: [oracle],
     feed_name: feedName,
   };
 
   try {
-    return client.api.getDataFeed(params);
+    return await client.api.getDataFeed(params);
   } catch (e) {
     return null;
   }

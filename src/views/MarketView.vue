@@ -274,7 +274,7 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
           </div>
           <span
             v-if="resultError"
-            class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"
+            class="flex tracking-wide text-red-500 text-sm mt-2 ml-2"
           >
             {{ resultError }}
           </span>
