@@ -6,7 +6,6 @@ import {
   rawToFormatVotingValue,
 } from "@/utils/convertValue";
 import { isValidNumber } from "@/utils/validates";
-import { getParam } from "@/utils/governanceUtils";
 import GovernanceAssetField from "@/components/governance/GovernanceAssetField.vue";
 
 const props = defineProps(["params"]);
@@ -34,10 +33,13 @@ function sendVotingEmit() {
     <div class="text-center text-2xl font-bold">{{ params.title }}</div>
     <div class="mt-8 mb-8">
       <div>
-        <p class="leading-6 font-medium">You're going to vote for:</p>
+        <p class="leading-6 font-medium">
+          You're going to vote for:
+          <span v-if="!isNewValue">{{ inputValue }}{{ params.suffix }}</span>
+        </p>
       </div>
       <div class="mt-2 form-control">
-        <label class="input-group">
+        <label v-if="isNewValue" class="input-group">
           <input
             class="input input-bordered join-item w-full"
             placeholder="value"

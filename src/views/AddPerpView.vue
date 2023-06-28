@@ -26,7 +26,7 @@ const needCheckPriceAA = ref(false);
 const linkForPriceAA = ref("");
 const linkForPublishPerp = ref("");
 
-const currentRate = ref(null);
+const currentRate = ref(undefined);
 const buttonDisabled = ref(true);
 
 function setLinkForPriceAA() {
@@ -117,7 +117,11 @@ watch(
   () => {
     buttonDisabled.value = true;
 
-    if (currentRate.value !== null && multiplier.value) {
+    if (
+      currentRate.value !== null &&
+      currentRate.value !== undefined &&
+      multiplier.value
+    ) {
       buttonDisabled.value = false;
     }
   },
@@ -273,7 +277,7 @@ onUnmounted(() => {
                 class="input input-bordered w-full"
               />
 
-              <div class="mt-4 text-sm">
+              <div v-if="currentRate !== undefined" class="mt-4 text-sm">
                 <div v-if="currentRate">
                   <span class="font-medium"> Current rate: </span>
                   {{ `${currentRate}` }}
