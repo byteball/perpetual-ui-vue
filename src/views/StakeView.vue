@@ -4,9 +4,10 @@ import { storeToRefs } from "pinia";
 import { useRoute, useRouter } from "vue-router";
 
 import { generateLink } from "@/utils/generateLink";
-import { getPlaceholderForAmount } from "@/utils/placeholder";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import { getAssetMetadata } from "@/services/DAGApi";
+import NumberInput from "@/components/inputs/NumberInput.vue";
+import IntegerInput from "@/components/inputs/IntegerInput.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -273,15 +274,10 @@ watch(
                   <span class="label-text">Amount</span>
                 </label>
                 <div class="input-group">
-                  <input
-                    type="text"
+                  <NumberInput
                     v-model="amount.value"
-                    :placeholder="
-                      getPlaceholderForAmount(
-                        poolSymbolAndDecimalByAA[metaByAA.aa].decimals
-                      )
-                    "
                     class="input input-bordered w-full"
+                    :decimals="poolSymbolAndDecimalByAA[metaByAA.aa].decimals"
                   />
                   <label class="btn no-pointer">{{
                     poolSymbolAndDecimalByAA[metaByAA.aa].name
@@ -298,8 +294,7 @@ watch(
                 <label class="label">
                   <span class="label-text">Term (in days)</span>
                 </label>
-                <input
-                  type="text"
+                <IntegerInput
                   v-model="term.value"
                   class="input input-bordered"
                 />
@@ -349,15 +344,10 @@ watch(
                   <span class="label-text">Amount</span>
                 </label>
                 <div class="input-group">
-                  <input
-                    type="text"
+                  <NumberInput
                     v-model="amount.value"
-                    :placeholder="
-                      getPlaceholderForAmount(
-                        poolSymbolAndDecimalByAA[metaByAA.aa].decimals
-                      )
-                    "
                     class="input input-bordered w-full"
+                    :decimals="poolSymbolAndDecimalByAA[metaByAA.aa].decimals"
                   />
                   <label class="btn no-pointer">{{
                     poolSymbolAndDecimalByAA[metaByAA.aa].name

@@ -7,6 +7,7 @@ import {
 } from "@/utils/convertValue";
 import { isValidNumber } from "@/utils/validates";
 import GovernanceAssetField from "@/components/governance/GovernanceAssetField.vue";
+import VoteInput from "@/components/inputs/VoteInput.vue";
 
 const props = defineProps(["params"]);
 const emit = defineEmits(["vote"]);
@@ -40,12 +41,10 @@ function sendVotingEmit() {
       </div>
       <div class="mt-2 form-control">
         <label v-if="isNewValue" class="input-group">
-          <input
+          <VoteInput
             class="input input-bordered join-item w-full"
-            placeholder="value"
             v-model="inputValue"
-            :disabled="!isNewValue"
-            :class="{ 'disabled-card-input': !isNewValue }"
+            :type="props.params.type"
           />
           <span class="join-item">{{ params.suffix }}</span>
         </label>
@@ -59,7 +58,7 @@ function sendVotingEmit() {
       <button
         class="btn btn-primary"
         @click="sendVotingEmit"
-        :disabled="!inputValue || !isValidValue"
+        :disabled="!inputValue || !isValidValue || inputValue === '0'"
       >
         Vote for {{ isNewValue ? "new value" : "value" }}
       </button>
