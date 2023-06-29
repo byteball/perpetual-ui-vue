@@ -14,6 +14,7 @@
     "@tailwindcss/typography": "^0.5.9",
     "@tarekraafat/autocomplete.js": "^10.2.7",
     "lodash.debounce": "^4.0.8",
+    "maska": "^2.1.9",
     "mitt": "^3.0.0",
     "obyte": "^0.1.23",
     "pinia": "^2.1.3",

@@ -7,6 +7,7 @@ import { storeToRefs } from "pinia";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import { getDataFeed } from "@/services/DAGApi";
 import debounce from "lodash.debounce";
+import IntegerInput from "@/components/inputs/IntegerInput.vue";
 
 let intervalId = 0;
 const step = ref(1);
@@ -120,7 +121,8 @@ watch(
     if (
       currentRate.value !== null &&
       currentRate.value !== undefined &&
-      multiplier.value
+      multiplier.value &&
+      multiplier.value !== "0"
     ) {
       buttonDisabled.value = false;
     }
@@ -271,8 +273,7 @@ onUnmounted(() => {
                   </svg>
                 </div>
               </div>
-              <input
-                type="text"
+              <IntegerInput
                 v-model="multiplier"
                 class="input input-bordered w-full"
               />

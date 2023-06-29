@@ -10,7 +10,7 @@ import {
 } from "@/utils/assetsUtils";
 import { generateLink } from "@/utils/generateLink";
 import { getExchangeResultByState } from "@/utils/getExchangeResultByState";
-import { getPlaceholderForAmount } from "@/utils/placeholder";
+import NumberInput from "@/components/inputs/NumberInput.vue";
 
 const store = useAaInfoStore();
 const { aas, meta, status } = storeToRefs(store);
@@ -217,15 +217,10 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
         </div>
         <div class="form-control" v-if="assets.assetList.length">
           <div class="input-group">
-            <input
-              type="text"
-              :placeholder="
-                getPlaceholderForAmount(
-                  assets.nameAndDecimalsByAsset[asset1]?.decimals
-                )
-              "
+            <NumberInput
+              v-model="asset1Amount"
               class="input input-bordered w-full disabled-card-input"
-              v-model.number="asset1Amount"
+              :decimals="assets.nameAndDecimalsByAsset[asset1]?.decimals"
               :disabled="!asset1"
             />
             <label for="asset1Modal" class="btn">{{

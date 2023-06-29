@@ -6,7 +6,7 @@ import { generateLink } from "@/utils/generateLink";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import { getPresaleAssetsFromMeta } from "@/utils/getAssetsFromMeta";
 import { getAssetMetadata } from "@/services/DAGApi";
-import { getPlaceholderForAmount } from "@/utils/placeholder";
+import NumberInput from "@/components/inputs/NumberInput.vue";
 
 const store = useAaInfoStore();
 const { aas, meta } = storeToRefs(store);
@@ -216,14 +216,9 @@ watch([selectedReserveAsset, selectedPresaleAsset, amount, activeTab], () => {
                 <span class="label-text">Amount</span>
               </label>
               <div class="input-group">
-                <input
-                  type="text"
+                <NumberInput
                   v-model="amount"
-                  :placeholder="
-                    getPlaceholderForAmount(
-                      assetsMetadata[selectedPresaleAsset].decimals
-                    )
-                  "
+                  :decimals="assetsMetadata[selectedPresaleAsset].decimals"
                   class="input input-bordered w-full"
                 />
                 <span>{{ assetsMetadata[selectedPresaleAsset].name }}</span>
