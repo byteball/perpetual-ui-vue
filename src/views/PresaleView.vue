@@ -1,12 +1,16 @@
 <script setup>
 import { onMounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
+import { useRoute, useRouter } from "vue-router";
 
 import { generateLink } from "@/utils/generateLink";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import { getPresaleAssetsFromMeta } from "@/utils/getAssetsFromMeta";
 import { getAssetMetadata } from "@/services/DAGApi";
 import NumberInput from "@/components/inputs/NumberInput.vue";
+
+const route = useRoute();
+const router = useRouter();
 
 const store = useAaInfoStore();
 const { aas, meta } = storeToRefs(store);
@@ -23,6 +27,7 @@ const reserveAssets = ref({});
 const aAsPairs = ref({});
 const isLoaded = ref(false);
 const modalForPresale = ref();
+const toastMessage = ref("");
 
 const presaleList = ref([]);
 
@@ -51,27 +56,34 @@ const filterReserveAssetsWithoutPresale = () => {
   }
 };
 
+const showToastMessage = (message) => {
+  toastMessage.value = message;
+
+  setTimeout(() => {
+    toastMessage.value = "";
+  }, 3000);
+};
+
 const preparePresaleList = async () => {
+  presaleList.value = [];
+
   if (!Object.keys(meta.value).length) {
     return;
   }
 
   for (const aa of aas.value) {
-    const presale = { aa };
-    presale.asset0 = meta.value[aa]?.state?.asset0;
+    const asset0 = meta.value[aa]?.state?.asset0;
 
-    const asset0Data = await getAssetMetadata(presale.asset0);
+    const asset0Data = await getAssetMetadata(asset0);
 
-    if (!assetsMetadata.value[presale.asset0]) {
-      assetsMetadata.value[presale.asset0] = asset0Data;
+    if (!assetsMetadata.value[asset0]) {
+      assetsMetadata.value[asset0] = asset0Data;
     }
 
     const reserveAsset = meta.value[aa].reserve_asset;
     const reserveAssetData = await getAssetMetadata(reserveAsset);
 
     if (!reserveAssetData) continue;
-
-    presale.reserveAsset = reserveAsset;
 
     if (!assetsMetadata.value[reserveAsset]) {
       assetsMetadata.value[reserveAsset] = reserveAssetData;
@@ -85,15 +97,13 @@ const preparePresaleList = async () => {
 
       if (!presaleAssetData) continue;
 
-      presale.presaleAsset = presaleAsset;
-
       if (!assetsMetadata.value[presaleAsset]) {
         assetsMetadata.value[presaleAsset] = presaleAssetData;
       }
 
       presaleAssetsWithMetadata.push(presaleAsset);
 
-      presaleList.value.push(presale);
+      presaleList.value.push({ aa, asset0, reserveAsset, presaleAsset });
 
       aAsPairs.value[`${reserveAsset}_${presaleAsset}`] = aa;
     }
@@ -104,6 +114,23 @@ const preparePresaleList = async () => {
   }
 
   isLoaded.value = true;
+
+  if (route.params.presale) {
+    if (!presaleList.value.length) {
+      return;
+    }
+
+    const routePresale = presaleList.value.find(
+      (presale) => presale.presaleAsset === route.params.presale
+    );
+
+    if (!routePresale) {
+      showToastMessage("Presale not found, please choose an existing one");
+      return;
+    }
+
+    choosePresale(routePresale);
+  }
 };
 
 const choosePresale = (presale) => {
@@ -121,11 +148,18 @@ onMounted(async () => {
 
 watch(meta, preparePresaleList);
 
+watch(selectedPresaleAsset, () => {
+  if (!selectedPresaleAsset.value) return;
+
+  router.push(`/presale/${selectedPresaleAsset.value}`);
+});
+
 watch([selectedReserveAsset, selectedPresaleAsset, amount, activeTab], () => {
   const assetAmount =
     selectedReserveAsset.value === "base"
-      ? Number(amount.value) + 1000
-      : amount.value;
+      ? Number(amount.value) * 10 ** 9 + 1000
+      : amount.value /
+        10 ** assetsMetadata.value[selectedReserveAsset.value].decimals;
 
   const amountValue = activeTab.value === "buy" ? assetAmount : 10000;
 
@@ -166,6 +200,12 @@ watch([selectedReserveAsset, selectedPresaleAsset, amount, activeTab], () => {
 </style>
 <template>
   <div class="container w-[320px] sm:w-[512px] m-auto mt-8 mb-36 p-8">
+    <div v-if="toastMessage" class="toast toast-top toast-end">
+      <div class="alert alert-error">
+        <span>{{ toastMessage }}</span>
+      </div>
+    </div>
+
     <div class="p-2 mb-6">
       <div class="text-lg font-semibold leading-7">Presale</div>
       <p class="mt-2 leading-6">
