@@ -35,7 +35,7 @@ const router = createRouter({
       component: () => import("../views/VoteView.vue"),
     },
     {
-      path: "/presale/:aa(.*)?",
+      path: "/presale/:presale(.*)?",
       name: "presale",
       component: () => import("../views/PresaleView.vue"),
     },
