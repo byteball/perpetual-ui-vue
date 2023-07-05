@@ -5,19 +5,24 @@ import { useRoute, useRouter } from "vue-router";
 
 import { generateLink } from "@/utils/generateLink";
 import { useAaInfoStore } from "@/stores/aaInfo";
+import { useAddressStore } from "@/stores/addressStore";
 import { getAssetMetadata } from "@/services/DAGApi";
 import NumberInput from "@/components/inputs/NumberInput.vue";
 import IntegerInput from "@/components/inputs/IntegerInput.vue";
+import AddressController from "@/components/AddressController.vue";
 
 const router = useRouter();
 const route = useRoute();
 
 const store = useAaInfoStore();
+const addressStore = useAddressStore();
 const { aas, meta, status } = storeToRefs(store);
+const { address } = storeToRefs(addressStore);
 
 const pools = ref([]);
 const poolSymbolAndDecimalByAA = ref({});
 const poolReserveNameByAA = ref({});
+const stakeBalanceByPool = ref({});
 const modalForPool = ref();
 
 const selectedAA = ref("");
@@ -32,11 +37,14 @@ const activeTab = ref("stake");
 
 async function initPools() {
   if (status.value !== "initialized") return;
+  if (!address.value) return;
 
   const p = [];
   for (let aa of aas.value) {
     const poolAssetData = await getAssetMetadata(meta.value[aa].state.asset0);
     if (!poolAssetData) continue;
+    stakeBalanceByPool.value[aa] =
+      meta.value[aa]?.stakingVars[`user_${address.value}_a0`]?.balance || 0;
 
     p.push(aa);
     poolSymbolAndDecimalByAA.value[aa] = poolAssetData;
@@ -86,8 +94,8 @@ function setPool(pool) {
 onMounted(() => {
   initPools();
 });
-watch(aas, initPools);
-watch(status, initPools);
+watch([aas, status], initPools);
+watch(() => address.value, initPools);
 
 watch(
   () => {
@@ -227,7 +235,14 @@ watch(
 }
 </style>
 <template>
-  <div class="container w-[320px] sm:w-[512px] m-auto mt-8 mb-36 p-8">
+  <div
+    v-if="!address"
+    class="container w-[320px] sm:w-[512px] m-auto mt-8 mb-36 p-8"
+  >
+    <AddressController />
+  </div>
+  <div v-else class="container w-[320px] sm:w-[512px] m-auto mt-8 mb-36 p-8">
+    <AddressController />
     <div class="p-2 mb-6">
       <div class="text-lg font-semibold leading-7">Stake</div>
       <p class="mt-2 leading-6">
@@ -304,6 +319,10 @@ watch(
                 >
                   {{ term.error }}
                 </span>
+              </div>
+              <div class="mt-2">
+                <div>Your VP: {{ VpByPool[metaByAA.aa] }}</div>
+                <div>New VP: {{ 1 }}</div>
               </div>
               <!--      <div class="form-control">-->
               <!--        <label class="label">-->

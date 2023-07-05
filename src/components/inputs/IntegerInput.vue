@@ -7,7 +7,7 @@ const props = defineProps(["modelValue"]);
 const value = ref("");
 
 watch(
-  props.modelValue,
+  () => props.modelValue,
   () => {
     value.value = props.modelValue;
   },
