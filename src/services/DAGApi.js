@@ -99,3 +99,17 @@ export async function getAssetMetadata(asset) {
     return null;
   }
 }
+
+export async function executeAAGetter(aa, getter) {
+  const params = {
+    address: aa,
+    getter,
+    args: [],
+  };
+
+  try {
+    return (await client.api.executeGetter(params))?.result;
+  } catch (e) {
+    return null;
+  }
+}

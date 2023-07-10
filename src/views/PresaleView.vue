@@ -2,23 +2,41 @@
 import { onMounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useRoute, useRouter } from "vue-router";
+import * as dayjs from "dayjs";
+import * as duration from "dayjs/plugin/duration";
 
 import { generateLink } from "@/utils/generateLink";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import { getPresaleAssetsFromMeta } from "@/utils/getAssetsFromMeta";
-import { getAssetMetadata } from "@/services/DAGApi";
+import { executeAAGetter, getAssetMetadata } from "@/services/DAGApi";
 import NumberInput from "@/components/inputs/NumberInput.vue";
+import { getParam } from "@/utils/governanceUtils";
+import AddressController from "@/components/AddressController.vue";
+import { useAddressStore } from "@/stores/addressStore";
+
+dayjs.extend(duration);
 
 const route = useRoute();
 const router = useRouter();
 
 const store = useAaInfoStore();
+const addressStore = useAddressStore();
 const { aas, meta } = storeToRefs(store);
+const { address } = storeToRefs(addressStore);
 
 const selectedReserveAsset = ref("");
 const selectedPresaleAsset = ref("");
 const selectedAA = ref("");
 const selectedAsset0 = ref("");
+const selectedPresaleIsFinished = ref("");
+const selectedPresaleFinishDate = ref("");
+const selectedPresaleTargetAmount = ref("");
+const selectedPresaleCurrentAmount = ref("");
+const selectedPresaleAddressAmount = ref(0);
+
+const targetPrice = ref("");
+const receiveAmount = ref("");
+
 const amount = ref("");
 const link = ref("");
 const activeTab = ref("buy");
@@ -73,6 +91,12 @@ const preparePresaleList = async () => {
 
   for (const aa of aas.value) {
     const asset0 = meta.value[aa]?.state?.asset0;
+    const presalePeriod = getParam("presale_period", meta.value[aa]);
+    const tokenShareThreshold = getParam(
+      "token_share_threshold",
+      meta.value[aa]
+    );
+    const reserve = meta.value[aa].state.reserve;
 
     const asset0Data = await getAssetMetadata(asset0);
 
@@ -103,7 +127,33 @@ const preparePresaleList = async () => {
 
       presaleAssetsWithMetadata.push(presaleAsset);
 
-      presaleList.value.push({ aa, asset0, reserveAsset, presaleAsset });
+      const presaleAssetIssue =
+        meta.value[aa][`asset_${presaleAsset}`].creation_ts;
+      const currentPresaleAmount =
+        meta.value[aa][`asset_${presaleAsset}`].presale_amount;
+
+      const finishDate = dayjs((presaleAssetIssue + presalePeriod) * 1000);
+
+      const targetPresaleAmount = tokenShareThreshold * reserve;
+
+      const isPresaleFinished =
+        targetPresaleAmount <= currentPresaleAmount ||
+        finishDate.diff(dayjs()) < 0;
+
+      const priceAA = meta.value[aa][`asset_${presaleAsset}`].price_aa;
+      const targetPrice = await executeAAGetter(priceAA, "get_target_price");
+
+      presaleList.value.push({
+        aa,
+        asset0,
+        reserveAsset,
+        presaleAsset,
+        isPresaleFinished,
+        targetPresaleAmount,
+        currentPresaleAmount,
+        targetPrice,
+        finishDate: finishDate.format("MMMM D, YYYY HH:mm"),
+      });
 
       aAsPairs.value[`${reserveAsset}_${presaleAsset}`] = aa;
     }
@@ -129,15 +179,55 @@ const preparePresaleList = async () => {
       return;
     }
 
-    choosePresale(routePresale);
+    fillPresaleData(routePresale);
   }
 };
 
-const choosePresale = (presale) => {
+const updateAddressPresaleAmount = () => {
+  selectedPresaleAddressAmount.value = 0;
+
+  if (
+    selectedAA.value &&
+    meta.value[selectedAA.value][
+      `contribution_${address.value}_${selectedPresaleAsset.value}`
+    ]
+  ) {
+    selectedPresaleAddressAmount.value =
+      meta.value[selectedAA.value][
+        `contribution_${address.value}_${selectedPresaleAsset.value}`
+      ] /
+      10 ** assetsMetadata.value[selectedReserveAsset.value].decimals;
+  }
+};
+
+const fillPresaleData = (presale) => {
   selectedPresaleAsset.value = presale.presaleAsset;
   selectedReserveAsset.value = presale.reserveAsset;
   selectedAA.value = presale.aa;
   selectedAsset0.value = presale.asset0;
+  selectedPresaleIsFinished.value = presale.isPresaleFinished;
+  selectedPresaleFinishDate.value = presale.finishDate;
+  selectedPresaleTargetAmount.value = presale.targetPresaleAmount
+    ? presale.targetPresaleAmount /
+      10 ** assetsMetadata.value[selectedReserveAsset.value].decimals
+    : 0;
+  selectedPresaleCurrentAmount.value = presale.currentPresaleAmount
+    ? presale.currentPresaleAmount /
+      10 ** assetsMetadata.value[selectedReserveAsset.value].decimals
+    : 0;
+  targetPrice.value = presale.targetPrice;
+
+  if (selectedPresaleIsFinished.value) {
+    activeTab.value = "claim";
+  }
+
+  if (address.value && selectedAA.value) {
+    updateAddressPresaleAmount();
+  }
+};
+
+const choosePresale = (presale) => {
+  fillPresaleData(presale);
 
   modalForPresale.value.checked = false;
 };
@@ -148,13 +238,23 @@ onMounted(async () => {
 
 watch(meta, preparePresaleList);
 
+const calculateReceiveAmount = () => {
+  receiveAmount.value =
+    (targetPrice.value * amount.value) /
+    assetsMetadata.value[selectedPresaleAsset.value].decimals;
+};
+
+watch([amount, selectedPresaleAsset], calculateReceiveAmount);
+
 watch(selectedPresaleAsset, () => {
   if (!selectedPresaleAsset.value) return;
 
   router.push(`/presale/${selectedPresaleAsset.value}`);
 });
 
-watch([selectedReserveAsset, selectedPresaleAsset, amount, activeTab], () => {
+watch(() => address.value, updateAddressPresaleAmount);
+
+watch([selectedPresaleAsset, amount, activeTab], () => {
   const assetAmount =
     selectedReserveAsset.value === "base"
       ? Number(amount.value) * 10 ** 9 + 1000
@@ -172,7 +272,7 @@ watch([selectedReserveAsset, selectedPresaleAsset, amount, activeTab], () => {
   }
 
   if (activeTab.value === "claim") {
-    data.claim = assetAmount;
+    data.claim = 1;
   }
 
   const aa =
@@ -206,6 +306,8 @@ watch([selectedReserveAsset, selectedPresaleAsset, amount, activeTab], () => {
       </div>
     </div>
 
+    <AddressController />
+
     <div class="p-2 mb-6">
       <div class="text-lg font-semibold leading-7">Presale</div>
       <p class="mt-2 leading-6">
@@ -235,42 +337,78 @@ watch([selectedReserveAsset, selectedPresaleAsset, amount, activeTab], () => {
             </div>
           </div>
           <div v-if="selectedAA">
-            <div class="tabs tabs-boxed mt-8">
-              <a
-                class="tab tab-lifted"
-                :class="{ 'tab-active': activeTab === 'buy' }"
-                @click="setTab('buy')"
-              >
-                Buy
-              </a>
-              <a
-                class="tab tab-lifted"
-                :class="{ 'tab-active': activeTab === 'claim' }"
-                @click="setTab('claim')"
-              >
-                Claim
-              </a>
-            </div>
-            <div class="mt-4">
-              <label class="label">
-                <span class="label-text">Amount</span>
-              </label>
-              <div class="input-group">
-                <NumberInput
-                  v-model="amount"
-                  :decimals="assetsMetadata[selectedPresaleAsset].decimals"
-                  class="input input-bordered w-full"
-                />
-                <span>{{ assetsMetadata[selectedPresaleAsset].name }}</span>
+            <div v-if="selectedPresaleIsFinished">
+              <div class="text-lg font-bold mt-6">Presale finished</div>
+
+              <div v-if="address">
+                <div v-if="selectedPresaleAddressAmount">
+                  <div class="mt-2">
+                    <div class="text-sm">
+                      You can claim
+                      {{ selectedPresaleAddressAmount }}
+                      {{ assetsMetadata[selectedReserveAsset].name }}
+                    </div>
+                  </div>
+
+                  <div class="form-control mt-6">
+                    <a class="btn btn-primary" :href="link">Claim</a>
+                  </div>
+                </div>
               </div>
             </div>
-            <div class="form-control mt-6">
-              <a
-                class="btn btn-primary"
-                :class="{ '!btn-disabled': !amount }"
-                :href="link"
-                >{{ activeTab === "buy" ? "buy" : "сlaim" }}</a
-              >
+            <div v-else>
+              <div class="mt-4">
+                <div>Finish date: {{ selectedPresaleFinishDate }}</div>
+                <div class="mt-2">
+                  Sold:
+                  {{
+                    `${selectedPresaleCurrentAmount} / ${selectedPresaleTargetAmount}`
+                  }}
+                </div>
+              </div>
+              <div class="tabs tabs-boxed mt-8">
+                <a
+                  class="tab tab-lifted"
+                  :class="{ 'tab-active': activeTab === 'buy' }"
+                  @click="setTab('buy')"
+                >
+                  Buy
+                </a>
+                <!--                <a-->
+                <!--                  class="tab tab-lifted"-->
+                <!--                  :class="{ 'tab-active': activeTab === 'withdraw' }"-->
+                <!--                  @click="setTab('withdraw')"-->
+                <!--                >-->
+                <!--                  Withdraw-->
+                <!--                </a>-->
+              </div>
+              <div class="mt-4">
+                <label class="label">
+                  <span class="label-text">Amount</span>
+                </label>
+                <div class="input-group">
+                  <NumberInput
+                    v-model="amount"
+                    :decimals="assetsMetadata[selectedReserveAsset].decimals"
+                    class="input input-bordered w-full"
+                  />
+                  <span>{{ assetsMetadata[selectedReserveAsset].name }}</span>
+                </div>
+              </div>
+              <div v-if="amount" class="mt-4">
+                <div>
+                  you will receive {{ receiveAmount }}
+                  {{ assetsMetadata[selectedPresaleAsset].name }}
+                </div>
+              </div>
+              <div class="form-control mt-6">
+                <a
+                  class="btn btn-primary"
+                  :class="{ '!btn-disabled': !amount }"
+                  :href="link"
+                  >{{ "buy" }}</a
+                >
+              </div>
             </div>
           </div>
         </div>
