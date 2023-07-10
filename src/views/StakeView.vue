@@ -320,10 +320,10 @@ watch(
                   {{ term.error }}
                 </span>
               </div>
-              <div class="mt-2">
-                <div>Your VP: {{ VpByPool[metaByAA.aa] }}</div>
-                <div>New VP: {{ 1 }}</div>
-              </div>
+              <!--              <div class="mt-2">-->
+              <!--                <div>Your VP: {{ VpByPool[metaByAA.aa] }}</div>-->
+              <!--                <div>New VP: {{ 1 }}</div>-->
+              <!--              </div>-->
               <!--      <div class="form-control">-->
               <!--        <label class="label">-->
               <!--          <span class="label-text">Voted group key</span>-->
