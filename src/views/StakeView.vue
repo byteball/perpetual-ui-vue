@@ -1,9 +1,10 @@
 <script setup>
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useRoute, useRouter } from "vue-router";
 
 import { generateLink } from "@/utils/generateLink";
+import { getVP } from "@/utils/getVP";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import { useAddressStore } from "@/stores/addressStore";
 import { getAssetMetadata } from "@/services/DAGApi";
@@ -35,9 +36,46 @@ const percentages = ref({ value: "100", error: "" });
 const buttonDisabled = ref(true);
 const activeTab = ref("stake");
 
+const timestamp = ref(0);
+
+const currentBalance = computed(() => {
+  const balance =
+    metaByAA.value?.stakingVars[`user_${address.value}_a0`]?.balance;
+  return Number(balance) || 0;
+});
+
+const currentVP = computed(() => {
+  const decimals = poolSymbolAndDecimalByAA.value[metaByAA.value.aa].decimals;
+  return (
+    getVP(
+      currentBalance.value,
+      metaByAA.value["decay_factor"],
+      metaByAA.value["max_term"],
+      Number(term.value.value),
+      timestamp.value
+    ) /
+    10 ** decimals
+  );
+});
+
+const newVP = computed(() => {
+  const decimals = poolSymbolAndDecimalByAA.value[metaByAA.value.aa].decimals;
+  return (
+    getVP(
+      currentBalance.value + Number(amount.value.value) * 10 ** decimals,
+      metaByAA.value["decay_factor"],
+      metaByAA.value["max_term"],
+      Number(term.value.value),
+      timestamp.value
+    ) /
+    10 ** decimals
+  );
+});
+
 async function initPools() {
   if (status.value !== "initialized") return;
   if (!address.value) return;
+  timestamp.value = Math.floor(Date.now() / 1000);
 
   const p = [];
   for (let aa of aas.value) {
@@ -320,10 +358,10 @@ watch(
                   {{ term.error }}
                 </span>
               </div>
-              <!--              <div class="mt-2">-->
-              <!--                <div>Your VP: {{ VpByPool[metaByAA.aa] }}</div>-->
-              <!--                <div>New VP: {{ 1 }}</div>-->
-              <!--              </div>-->
+              <div class="mt-2">
+                <div>Your VP: {{ currentVP }}</div>
+                <div>New VP: {{ newVP }}</div>
+              </div>
               <!--      <div class="form-control">-->
               <!--        <label class="label">-->
               <!--          <span class="label-text">Voted group key</span>-->

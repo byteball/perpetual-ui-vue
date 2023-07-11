@@ -3,9 +3,11 @@ import { computed, onMounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useRoute, useRouter } from "vue-router";
 import { useAaInfoStore } from "@/stores/aaInfo";
+import { useAddressStore } from "@/stores/addressStore";
 import { getAllVotes, getPreparedMeta } from "@/utils/governanceUtils";
 import { generateAndFollowLinkForVoteInGovernance } from "@/utils/generateLink";
 import { getNotDefaultAssetsFromMeta } from "@/utils/assetsUtils";
+import { getVP } from "@/utils/getVP";
 import Client from "@/services/Obyte";
 import GovernanceAsset from "@/components/governance/GovernanceAsset.vue";
 import PriceAANotFinished from "@/components/governance/PriceAANotFinished.vue";
@@ -36,6 +38,33 @@ const metaForFinishedAssets = ref({});
 const modalForVoteIsOpen = ref(false);
 const modalForRegisterSymbolIsOpen = ref(false);
 
+const addressStore = useAddressStore();
+const { address } = storeToRefs(addressStore);
+
+const timestamp = ref(0);
+
+const currentBalance = computed(() => {
+  const metaByAA = meta.value[perpetualAA.value];
+  console.log(metaByAA.stakingVars[`user_${address.value}_a0`].balance);
+  const balance = metaByAA.stakingVars[`user_${address.value}_a0`]?.balance;
+  return Number(balance) || 0;
+});
+
+const currentVP = computed(() => {
+  const metaByAA = meta.value[perpetualAA.value];
+  const decimals = preparedMeta.value.symbolAndDecimals.decimals;
+  return (
+    getVP(
+      currentBalance.value,
+      metaByAA["decay_factor"],
+      metaByAA["max_term"],
+      360,
+      timestamp.value
+    ) /
+    10 ** decimals
+  );
+});
+
 async function init() {
   if (!aas.value.length) return;
 
@@ -46,6 +75,7 @@ async function init() {
     return false;
   }
   notFound.value = false;
+  timestamp.value = Math.floor(Date.now() / 1000);
 
   preparedMeta.value = await getPreparedMeta(metaByAA);
   console.log("meta", preparedMeta.value);
@@ -195,7 +225,7 @@ watch(meta, init, { deep: true });
               preparedMeta.symbolAndDecimals.name
             }}
           </div>
-          <GovernanceAsset :perpetual-aa-meta="preparedMeta" />
+          <div>Your VP: {{ currentVP }}</div>
         </div>
         <div>
           <VoteBlock
