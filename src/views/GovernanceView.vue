@@ -2,11 +2,15 @@
 import { onMounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useAaInfoStore } from "@/stores/aaInfo";
+import { useAddressStore } from "@/stores/addressStore";
 import { getPreparedMeta } from "@/utils/governanceUtils";
 import GovernanceAsset from "@/components/governance/GovernanceAsset.vue";
+import AddressController from "@/components/AddressController.vue";
 
 const store = useAaInfoStore();
+const addressStore = useAddressStore();
 const { aas, meta } = storeToRefs(store);
+const { address } = storeToRefs(addressStore);
 
 const aasWithMeta = ref({});
 
@@ -26,9 +30,16 @@ watch(meta, init, { deep: true });
 </script>
 <template>
   <div
-    v-if="Object.keys(aasWithMeta).length"
+    v-if="!address"
+    class="container w-[320px] sm:w-[512px] m-auto mt-8 mb-36 p-8"
+  >
+    <AddressController />
+  </div>
+  <div
+    v-else-if="Object.keys(aasWithMeta).length"
     class="container w-[320px] sm:w-[768px] m-auto mt-8 mb-36 p-8"
   >
+    <AddressController />
     <div class="p-2 mb-6">
       <div class="text-lg font-semibold leading-7">Governance</div>
       <p class="mt-1 leading-6">

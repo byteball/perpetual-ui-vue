@@ -14,7 +14,7 @@ const mask = computed(() => {
 const value = ref("");
 
 watch(
-  props.modelValue,
+  () => props.modelValue,
   () => {
     value.value = props.modelValue;
   },
