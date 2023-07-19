@@ -13,6 +13,7 @@ import NumberInput from "@/components/inputs/NumberInput.vue";
 import { getParam } from "@/utils/governanceUtils";
 import AddressController from "@/components/AddressController.vue";
 import { useAddressStore } from "@/stores/addressStore";
+import ClaimCard from "@/components/presale/ClaimCard.vue";
 
 dayjs.extend(duration);
 
@@ -140,6 +141,8 @@ const preparePresaleList = async () => {
         targetPresaleAmount <= currentPresaleAmount ||
         finishDate.diff(dayjs()) < 0;
 
+      if (isPresaleFinished) continue;
+
       const priceAA = meta.value[aa][`asset_${presaleAsset}`].price_aa;
       const targetPrice = await executeAAGetter(priceAA, "get_target_price");
 
@@ -239,9 +242,13 @@ onMounted(async () => {
 watch(meta, preparePresaleList);
 
 const calculateReceiveAmount = () => {
+  const reserveDecimals =
+    10 ** assetsMetadata.value[selectedReserveAsset.value].decimals;
+
   receiveAmount.value =
-    (targetPrice.value * amount.value) /
-    assetsMetadata.value[selectedPresaleAsset.value].decimals;
+    (Number(amount.value) * reserveDecimals) /
+    targetPrice.value /
+    10 ** assetsMetadata.value[selectedPresaleAsset.value].decimals;
 };
 
 watch([amount, selectedPresaleAsset], calculateReceiveAmount);
@@ -261,8 +268,6 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
       : amount.value /
         10 ** assetsMetadata.value[selectedReserveAsset.value].decimals;
 
-  const amountValue = activeTab.value === "buy" ? assetAmount : 10000;
-
   const data = {
     asset: selectedPresaleAsset.value,
   };
@@ -271,17 +276,13 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
     data.presale = 1;
   }
 
-  if (activeTab.value === "claim") {
-    data.claim = 1;
-  }
-
   const aa =
     aAsPairs.value[
       `${selectedReserveAsset.value}_${selectedPresaleAsset.value}`
     ];
 
   link.value = generateLink(
-    amountValue,
+    assetAmount,
     data,
     null,
     aa,
@@ -307,6 +308,8 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
     </div>
 
     <AddressController />
+
+    <ClaimCard />
 
     <div class="p-2 mb-6">
       <div class="text-lg font-semibold leading-7">Presale</div>
@@ -336,27 +339,11 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
               </label>
             </div>
           </div>
+          <div v-else>
+            <p class="mt-2 leading-6">There is no presale in progress now</p>
+          </div>
           <div v-if="selectedAA">
-            <div v-if="selectedPresaleIsFinished">
-              <div class="text-lg font-bold mt-6">Presale finished</div>
-
-              <div v-if="address">
-                <div v-if="selectedPresaleAddressAmount">
-                  <div class="mt-2">
-                    <div class="text-sm">
-                      You can claim
-                      {{ selectedPresaleAddressAmount }}
-                      {{ assetsMetadata[selectedReserveAsset].name }}
-                    </div>
-                  </div>
-
-                  <div class="form-control mt-6">
-                    <a class="btn btn-primary" :href="link">Claim</a>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div v-else>
+            <div>
               <div class="mt-4">
                 <div>Finish date: {{ selectedPresaleFinishDate }}</div>
                 <div class="mt-2">
@@ -397,7 +384,12 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
               </div>
               <div v-if="amount" class="mt-4">
                 <div>
-                  you will receive {{ receiveAmount }}
+                  you will receive
+                  {{
+                    receiveAmount.toFixed(
+                      assetsMetadata[selectedPresaleAsset].decimals
+                    )
+                  }}
                   {{ assetsMetadata[selectedPresaleAsset].name }}
                 </div>
               </div>
