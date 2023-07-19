@@ -53,7 +53,7 @@ function getPriceAAsMetaFromVars(aaState, stakingParams, stakingVars) {
 }
 
 const cacheForPreparedMetaByAsset0AndReserve = {};
-export async function getPreparedMeta(metaByAA) {
+export async function getPreparedMeta(metaByAA, userAddress) {
   const key = `${metaByAA.state.asset0}_${metaByAA.reserve_asset}`;
   if (cacheForPreparedMetaByAsset0AndReserve[key]) {
     return cacheForPreparedMetaByAsset0AndReserve[key];
@@ -64,11 +64,15 @@ export async function getPreparedMeta(metaByAA) {
     metaByAA.stakingParams,
     metaByAA.stakingVars
   );
+
+  const vp = metaByAA.stakingVars[`user_${userAddress}_a0`]?.normalized_vp || 0;
+
   const meta = {
     symbolAndDecimals: await getAssetMetadata(metaByAA.state.asset0),
     priceAAsMeta,
     reserveAsset: await getAssetMetadata(metaByAA.reserve_asset),
     rawMeta: metaByAA,
+    allowedControl: vp > 0,
   };
   cacheForPreparedMetaByAsset0AndReserve[key] = meta;
 

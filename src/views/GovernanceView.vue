@@ -19,7 +19,7 @@ async function init() {
 
   const m = {};
   for (let aa in meta.value) {
-    m[aa] = await getPreparedMeta(meta.value[aa]);
+    m[aa] = await getPreparedMeta(meta.value[aa], address.value);
   }
 
   aasWithMeta.value = m;
@@ -64,7 +64,12 @@ watch(meta, init, { deep: true });
                 </div>
                 <div>
                   <RouterLink
-                    class="btn btn-sm btn-primary"
+                    class="btn btn-sm"
+                    :class="
+                      perpetualAAMeta.allowedControl
+                        ? 'btn-primary'
+                        : 'btn-disabled'
+                    "
                     :to="`/governance/management/${perpetualAA}`"
                   >
                     Manage AA
@@ -75,6 +80,17 @@ watch(meta, init, { deep: true });
                 :perpetual-aa-meta="perpetualAAMeta"
                 :is-main-page="true"
               />
+              <div
+                v-if="!perpetualAAMeta.allowedControl"
+                class="mt-4 text-center"
+              >
+                To manage this aa you need to
+                <RouterLink
+                  class="link text-sky-500 link-hover font-light"
+                  :to="`/stake/${perpetualAA}`"
+                  >stake</RouterLink
+                >
+              </div>
             </div>
           </div>
         </div>

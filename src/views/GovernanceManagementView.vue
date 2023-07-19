@@ -71,8 +71,11 @@ async function init() {
   notFound.value = false;
   timestamp.value = Math.floor(Date.now() / 1000);
 
-  preparedMeta.value = await getPreparedMeta(metaByAA);
-  console.log("meta", preparedMeta.value);
+  preparedMeta.value = await getPreparedMeta(metaByAA, address.value);
+  if (!preparedMeta.value.allowedControl) {
+    return router.push("/governance");
+  }
+
   for (const priceAA of preparedMeta.value.priceAAsMeta.allPriceAAs) {
     const priceAADefinition = await Client.api.getDefinition(priceAA);
     priceAAsDefinition.value[priceAA] = priceAADefinition[1].params;
