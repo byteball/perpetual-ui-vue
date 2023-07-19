@@ -1,7 +1,9 @@
 <script setup>
 import { ref } from "vue";
+import { storeToRefs } from "pinia";
 import { getParam } from "@/utils/governanceUtils";
 import VotingTable from "@/components/governance/VotingTable.vue";
+import { useAddressStore } from "@/stores/addressStore";
 
 const props = defineProps([
   "title",
@@ -12,6 +14,9 @@ const props = defineProps([
 ]);
 
 const emit = defineEmits(["reqVote"]);
+
+const addressStore = useAddressStore();
+const { address } = storeToRefs(addressStore);
 
 const suffix = ref("");
 const currentValue = ref(getParam(props.name, props.preparedMeta.rawMeta));

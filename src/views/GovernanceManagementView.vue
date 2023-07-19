@@ -7,9 +7,8 @@ import { useAddressStore } from "@/stores/addressStore";
 import { getAllVotes, getPreparedMeta } from "@/utils/governanceUtils";
 import { generateAndFollowLinkForVoteInGovernance } from "@/utils/generateLink";
 import { getNotDefaultAssetsFromMeta } from "@/utils/assetsUtils";
-import { getVP } from "@/utils/getVP";
+import { getVP, getVPFromNormalized } from "@/utils/getVP";
 import Client from "@/services/Obyte";
-import GovernanceAsset from "@/components/governance/GovernanceAsset.vue";
 import PriceAANotFinished from "@/components/governance/PriceAANotFinished.vue";
 import { Dialog } from "@headlessui/vue";
 import VoteBlock from "@/components/governance/VoteBlock.vue";
@@ -43,22 +42,16 @@ const { address } = storeToRefs(addressStore);
 
 const timestamp = ref(0);
 
-const currentBalance = computed(() => {
-  const metaByAA = meta.value[perpetualAA.value];
-  console.log(metaByAA.stakingVars[`user_${address.value}_a0`].balance);
-  const balance = metaByAA.stakingVars[`user_${address.value}_a0`]?.balance;
-  return Number(balance) || 0;
-});
-
 const currentVP = computed(() => {
   const metaByAA = meta.value[perpetualAA.value];
+  const normalizedVp =
+    metaByAA.stakingVars[`user_${address.value}_a0`]?.normalized_vp;
   const decimals = preparedMeta.value.symbolAndDecimals.decimals;
+
   return (
-    getVP(
-      currentBalance.value,
+    getVPFromNormalized(
+      normalizedVp,
       metaByAA["decay_factor"],
-      metaByAA["max_term"],
-      360,
       timestamp.value
     ) /
     10 ** decimals
