@@ -4,7 +4,7 @@ import { storeToRefs } from "pinia";
 import { useRoute, useRouter } from "vue-router";
 
 import { generateLink } from "@/utils/generateLink";
-import { getVP } from "@/utils/getVP";
+import { getVP, getVPFromNormalized } from "@/utils/getVP";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import { useAddressStore } from "@/stores/addressStore";
 import { getAssetMetadata } from "@/services/DAGApi";
@@ -45,13 +45,14 @@ const currentBalance = computed(() => {
 });
 
 const currentVP = computed(() => {
+  const normalizedVp =
+    metaByAA.value.stakingVars[`user_${address.value}_a0`]?.normalized_vp;
   const decimals = poolSymbolAndDecimalByAA.value[metaByAA.value.aa].decimals;
+
   return (
-    getVP(
-      currentBalance.value,
+    getVPFromNormalized(
+      normalizedVp,
       metaByAA.value["decay_factor"],
-      metaByAA.value["max_term"],
-      Number(term.value.value),
       timestamp.value
     ) /
     10 ** decimals
@@ -62,7 +63,8 @@ const newVP = computed(() => {
   const decimals = poolSymbolAndDecimalByAA.value[metaByAA.value.aa].decimals;
   return (
     getVP(
-      currentBalance.value + Number(amount.value.value) * 10 ** decimals,
+      Number(currentBalance.value) +
+        Number(amount.value.value) * 10 ** decimals,
       metaByAA.value["decay_factor"],
       metaByAA.value["max_term"],
       Number(term.value.value),
