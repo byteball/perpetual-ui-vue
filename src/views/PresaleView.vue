@@ -3,7 +3,7 @@ import { onMounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useRoute, useRouter } from "vue-router";
 import dayjs from "dayjs";
-import * as duration from "dayjs/plugin/duration";
+import duration from "dayjs/plugin/duration";
 
 import { generateLink } from "@/utils/generateLink";
 import { useAaInfoStore } from "@/stores/aaInfo";

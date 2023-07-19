@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
-import * as dayjs from "dayjs";
+import dayjs from "dayjs";
 
 import { useAddressStore } from "@/stores/addressStore";
 import { useAaInfoStore } from "@/stores/aaInfo";
