@@ -16,6 +16,7 @@ import VoteModal from "@/components/governance/VoteModal.vue";
 import { getAssetMetadata } from "@/services/DAGApi";
 import PriceAAFinished from "@/components/governance/PriceAAFinished.vue";
 import RegisterSymbolModal from "@/components/RegisterSymbolModal.vue";
+import AddressController from "@/components/AddressController.vue";
 
 const store = useAaInfoStore();
 const { aas, meta } = storeToRefs(store);
@@ -175,9 +176,16 @@ watch(meta, init, { deep: true });
 
 <template>
   <div
-    class="container w-[320px] sm:w-[768px] m-auto mt-8 mb-36 p-8"
-    v-if="ready"
+    v-if="!address"
+    class="container w-[320px] sm:w-[512px] m-auto mt-8 mb-36 p-8"
   >
+    <AddressController />
+  </div>
+  <div
+    class="container w-[320px] sm:w-[768px] m-auto mt-8 mb-36 p-8"
+    v-else-if="ready"
+  >
+    <AddressController />
     <div @click="goBack()" class="p-2 mb-6 cursor-pointer">
       <div class="flex items-center">
         <div class="inline-block mr-2">
