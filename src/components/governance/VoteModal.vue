@@ -11,6 +11,7 @@ import VoteInput from "@/components/inputs/VoteInput.vue";
 
 const props = defineProps(["params"]);
 const emit = defineEmits(["vote"]);
+
 const inputValue = ref("");
 const isNewValue = !props.params.value;
 
@@ -20,6 +21,48 @@ if (props.params.value !== undefined) {
     props.params.value
   );
 }
+
+const leader = computed(() => {
+  let l = 0;
+  props.params.votesByName.forEach((v) => {
+    if (v.amount > l) {
+      l = v.amount;
+    }
+  });
+
+  return Number(
+    (l / 10 ** props.params.decimals).toFixed(props.params.decimals)
+  );
+});
+
+const vp = computed(() => {
+  if (isNewValue) {
+    return {
+      newVP: (props.params.userVP / 10 ** props.params.decimals).toFixed(
+        props.params.decimals
+      ),
+    };
+  }
+  const currentVp =
+    props.params.votesByName.find((v) => v.value === props.params.value)
+      ?.amount || 0;
+
+  let newVP = 0 + currentVp;
+  const userVote = props.params.userVote;
+  if (userVote.vp && userVote.value === props.params.value) {
+    newVP -= userVote.vp;
+  }
+  newVP += props.params.userVP;
+
+  return {
+    currentVp: Number(
+      (currentVp / 10 ** props.params.decimals).toFixed(props.params.decimals)
+    ),
+    newVP: Number(
+      (newVP / 10 ** props.params.decimals).toFixed(props.params.decimals)
+    ),
+  };
+});
 
 const isValidValue = computed(() => isValidNumber(inputValue.value));
 
@@ -50,8 +93,18 @@ function sendVotingEmit() {
         </label>
       </div>
       <div>
-        <GovernanceAssetField title="Current VP" :value="`0%`" class="mt-2" />
-        <GovernanceAssetField title="New VP" :value="`0%`" class="mt-2" />
+        <GovernanceAssetField
+          v-if="!isNewValue"
+          title="Current VP"
+          :value="vp.currentVp"
+          class="mt-2"
+        />
+        <GovernanceAssetField
+          title="New VP"
+          :value="vp.newVP"
+          :leader="leader"
+          class="mt-2"
+        />
       </div>
     </div>
     <div class="form-control text-center">

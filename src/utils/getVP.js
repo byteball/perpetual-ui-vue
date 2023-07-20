@@ -24,5 +24,5 @@ export function getVPFromNormalized(
 ) {
   if (!normalized_vp) return 0;
 
-  return normalized_vp * decay_factor ** ((timestamp - COMMON_TS) / year);
+  return normalized_vp / decay_factor ** ((timestamp - COMMON_TS) / year);
 }

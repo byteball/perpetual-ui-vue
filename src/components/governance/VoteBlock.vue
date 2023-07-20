@@ -1,9 +1,12 @@
 <script setup>
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { storeToRefs } from "pinia";
 import { getParam } from "@/utils/governanceUtils";
+import { calcVoteValue } from "@/utils/voteUtils";
 import VotingTable from "@/components/governance/VotingTable.vue";
 import { useAddressStore } from "@/stores/addressStore";
+import { getVPFromNormalized } from "@/utils/getVP";
+import { useAaInfoStore } from "@/stores/aaInfo";
 
 const props = defineProps([
   "title",
@@ -15,19 +18,35 @@ const props = defineProps([
 
 const emit = defineEmits(["reqVote"]);
 
+const store = useAaInfoStore();
+const { timestamp } = storeToRefs(store);
 const addressStore = useAddressStore();
 const { address } = storeToRefs(addressStore);
 
 const suffix = ref("");
 const currentValue = ref(getParam(props.name, props.preparedMeta.rawMeta));
 
-if (props.type === "date") {
-  suffix.value = " days";
-  currentValue.value = currentValue.value / 24 / 3600;
-} else {
-  suffix.value = "%";
-  currentValue.value = currentValue.value * 100;
-}
+suffix.value = props.type === "date" ? " days" : "%";
+currentValue.value = calcVoteValue(currentValue.value, props.type);
+
+const userVote = computed(() => {
+  const stakingVars = props.preparedMeta.rawMeta.stakingVars;
+  const vote = stakingVars[`user_value_votes_${address.value}_${props.name}`];
+
+  if (vote) {
+    const df = props.preparedMeta.rawMeta["decay_factor"];
+    const decimals = props.preparedMeta.symbolAndDecimals.decimals;
+    const vp =
+      getVPFromNormalized(vote.vp, df, timestamp.value) / 10 ** decimals;
+
+    return {
+      vp: vp.toFixed(decimals),
+      value: calcVoteValue(vote.value, props.type),
+    };
+  } else {
+    return { vp: 0, value: 0 };
+  }
+});
 
 function voteFromTable(value) {
   emit("reqVote", props.name, props.type, suffix.value, value);
@@ -54,6 +73,11 @@ function voteFromTable(value) {
               :decimals="preparedMeta.symbolAndDecimals.decimals"
               @vote-from-table="voteFromTable"
             />
+            <div v-if="userVote?.vp" class="mt-2">
+              You vote for
+              <span class="font-bold">{{ userVote.value }}{{ suffix }}</span>
+              (vp: {{ userVote.vp }})
+            </div>
           </div>
           <div class="text-left">
             <a

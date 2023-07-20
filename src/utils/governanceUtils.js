@@ -1,5 +1,6 @@
 import { getAssetMetadata } from "@/services/DAGApi";
 import { perpDefaults } from "@/config";
+import { getVPFromNormalized } from "@/utils/getVP";
 
 function getMajorityThreshold(aaState, stakingVars) {
   return (
@@ -72,6 +73,7 @@ export async function getPreparedMeta(metaByAA, userAddress) {
     priceAAsMeta,
     reserveAsset: await getAssetMetadata(metaByAA.reserve_asset),
     rawMeta: metaByAA,
+    vp,
     allowedControl: vp > 0,
   };
   cacheForPreparedMetaByAsset0AndReserve[key] = meta;
@@ -97,21 +99,23 @@ function sortVotes(votes) {
     votes[k].sort((a, b) => b.amount - a.amount);
   });
 }
-export function getAllVotes(vars) {
+export function getAllVotes(vars, timestamp, decayFactor) {
   const votes = {
     add_price_aa: {},
     change_price_aa: {},
     change_drift_rate: {},
   };
+
   Object.keys(vars).forEach((k) => {
     if (k.startsWith("value_votes_")) {
       let v = k.substring(12).split("_");
-      const value = v.pop();
+      const value = Number(v.pop());
       const key = v.join("_");
+      const amount = getVPFromNormalized(vars[k], decayFactor, timestamp);
 
       if (Object.keys(perpDefaults).includes(key)) {
         if (!votes[key]) votes[key] = [];
-        votes[key].push({ value: Number(value), amount: vars[k] });
+        votes[key].push({ value: value, amount });
       } else {
         let length = 0;
         if (key.startsWith("add_price_aa")) {
@@ -126,7 +130,7 @@ export function getAllVotes(vars) {
 
         let a = key.substring(length);
         if (!votes.add_price_aa[a]) votes.add_price_aa[a] = [];
-        votes.add_price_aa[a].push({ value: value, amount: vars[k] });
+        votes.add_price_aa[a].push({ value: value, amount });
       }
     }
   });
