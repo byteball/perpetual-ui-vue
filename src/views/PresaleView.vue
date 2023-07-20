@@ -57,12 +57,6 @@ const setTab = (tabName) => {
 const filterReserveAssetsWithoutPresale = () => {
   const reserveAssetsToFilter = [];
   for (let i = 0; i < Object.keys(reserveAssets.value).length; i++) {
-    console.log(
-      `${Object.keys(reserveAssets.value)[i]} - ${
-        reserveAssets.value[Object.keys(reserveAssets.value)[i]].length
-      }`
-    );
-
     if (!reserveAssets.value[Object.keys(reserveAssets.value)[i]].length) {
       reserveAssetsToFilter.push(Object.keys(reserveAssets.value)[i]);
     }

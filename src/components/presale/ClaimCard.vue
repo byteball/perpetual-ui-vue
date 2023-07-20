@@ -33,8 +33,6 @@ const isPresaleFinished = (aa, presaleAsset) => {
 
   const targetPresaleAmount = tokenShareThreshold * reserve;
 
-  console.log(targetPresaleAmount, "<=", currentPresaleAmount);
-
   return (
     targetPresaleAmount <= currentPresaleAmount ||
     !presaleAssetData?.presale ||
@@ -82,8 +80,6 @@ const prepareClaimPresaleByAddress = async () => {
 
     for (const aaAddressContribution of aaAddressContributions) {
       const presaleAsset = aaAddressContribution.split("_")[2];
-
-      console.log(presaleAsset);
 
       if (!isPresaleFinished(aa, presaleAsset)) continue;
 

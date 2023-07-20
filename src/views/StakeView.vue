@@ -17,7 +17,7 @@ const route = useRoute();
 
 const store = useAaInfoStore();
 const addressStore = useAddressStore();
-const { aas, meta, status } = storeToRefs(store);
+const { aas, meta, status, timestamp } = storeToRefs(store);
 const { address } = storeToRefs(addressStore);
 
 const pools = ref([]);
@@ -36,8 +36,6 @@ const percentages = ref({ value: "100", error: "" });
 const buttonDisabled = ref(true);
 const activeTab = ref("stake");
 
-const timestamp = ref(0);
-
 const currentBalance = computed(() => {
   const balance =
     metaByAA.value?.stakingVars[`user_${address.value}_a0`]?.balance;
@@ -49,44 +47,41 @@ const currentVP = computed(() => {
     metaByAA.value.stakingVars[`user_${address.value}_a0`]?.normalized_vp;
   const decimals = poolSymbolAndDecimalByAA.value[metaByAA.value.aa].decimals;
 
-  console.log(
-    normalizedVp,
-    decimals,
-    getVPFromNormalized(
-      normalizedVp,
-      metaByAA.value["decay_factor"],
-      timestamp.value
-    )
-  );
-  return (
-    getVPFromNormalized(
-      normalizedVp,
-      metaByAA.value["decay_factor"],
-      timestamp.value
-    ) /
-    10 ** decimals
+  return Number(
+    (
+      getVPFromNormalized(
+        normalizedVp,
+        metaByAA.value["decay_factor"],
+        timestamp.value
+      ) /
+      10 ** decimals
+    ).toFixed(decimals)
   );
 });
 
 const newVP = computed(() => {
+  if (Number(amount.value.value) === 0) return currentVP;
+
   const decimals = poolSymbolAndDecimalByAA.value[metaByAA.value.aa].decimals;
-  return (
-    getVP(
-      Number(currentBalance.value) +
-        Number(amount.value.value) * 10 ** decimals,
-      metaByAA.value["decay_factor"],
-      metaByAA.value["max_term"],
-      Number(term.value.value),
-      timestamp.value
-    ) /
-    10 ** decimals
+  const vp = getVP(
+    Number(currentBalance.value) + Number(amount.value.value) * 10 ** decimals,
+    metaByAA.value["decay_factor"],
+    metaByAA.value["max_term"],
+    Number(term.value.value),
+    timestamp.value
+  );
+
+  return Number(
+    (
+      getVPFromNormalized(vp, metaByAA.value["decay_factor"], timestamp.value) /
+      10 ** decimals
+    ).toFixed(decimals)
   );
 });
 
 async function initPools() {
   if (status.value !== "initialized") return;
   if (!address.value) return;
-  timestamp.value = Math.floor(Date.now() / 1000);
 
   const p = [];
   for (let aa of aas.value) {

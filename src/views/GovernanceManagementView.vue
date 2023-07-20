@@ -19,7 +19,9 @@ import RegisterSymbolModal from "@/components/RegisterSymbolModal.vue";
 import AddressController from "@/components/AddressController.vue";
 
 const store = useAaInfoStore();
-const { aas, meta } = storeToRefs(store);
+const { aas, meta, timestamp } = storeToRefs(store);
+const addressStore = useAddressStore();
+const { address } = storeToRefs(addressStore);
 
 const route = useRoute();
 const router = useRouter();
@@ -38,24 +40,21 @@ const metaForFinishedAssets = ref({});
 const modalForVoteIsOpen = ref(false);
 const modalForRegisterSymbolIsOpen = ref(false);
 
-const addressStore = useAddressStore();
-const { address } = storeToRefs(addressStore);
-
-const timestamp = ref(0);
-
 const currentVP = computed(() => {
   const metaByAA = meta.value[perpetualAA.value];
   const normalizedVp =
     metaByAA.stakingVars[`user_${address.value}_a0`]?.normalized_vp;
   const decimals = preparedMeta.value.symbolAndDecimals.decimals;
 
-  return (
-    getVPFromNormalized(
-      normalizedVp,
-      metaByAA["decay_factor"],
-      timestamp.value
-    ) /
-    10 ** decimals
+  return Number(
+    (
+      getVPFromNormalized(
+        normalizedVp,
+        metaByAA["decay_factor"],
+        timestamp.value
+      ) /
+      10 ** decimals
+    ).toFixed(decimals)
   );
 });
 
@@ -69,7 +68,6 @@ async function init() {
     return false;
   }
   notFound.value = false;
-  timestamp.value = Math.floor(Date.now() / 1000);
 
   preparedMeta.value = await getPreparedMeta(metaByAA, address.value);
   if (!preparedMeta.value.allowedControl) {
@@ -81,7 +79,11 @@ async function init() {
     priceAAsDefinition.value[priceAA] = priceAADefinition[1].params;
   }
 
-  votes.value = getAllVotes(metaByAA.stakingVars);
+  votes.value = getAllVotes(
+    metaByAA.stakingVars,
+    timestamp.value,
+    metaByAA["decay_factor"]
+  );
 
   const assets = getNotDefaultAssetsFromMeta(metaByAA);
   const mForFinishedAssets = {};
@@ -113,10 +115,11 @@ function reqVote(name, type, suffix, value) {
 const userVote = (name) => {
   const stakingVars = preparedMeta.value.rawMeta.stakingVars;
   const vote = stakingVars[`user_value_votes_${address.value}_${name}`];
+  const df = meta.value[perpetualAA.value]["decay_factor"];
 
   if (vote) {
     return {
-      vp: vote.vp,
+      vp: getVPFromNormalized(vote.vp, df, timestamp.value),
       value: vote.value,
     };
   } else {
@@ -126,6 +129,13 @@ const userVote = (name) => {
 
 function showModalForVote(title, name, type, suffix, value) {
   const metaByAA = meta.value[perpetualAA.value];
+  const df = metaByAA["decay_factor"];
+  const userVP = getVPFromNormalized(
+    metaByAA.stakingVars[`user_${address.value}_a0`]?.normalized_vp,
+    df,
+    timestamp.value
+  );
+
   modalParams.value = {
     title,
     name,
@@ -134,7 +144,7 @@ function showModalForVote(title, name, type, suffix, value) {
     value,
     votesByName: votes.value[name],
     userVote: userVote(name),
-    userVP: metaByAA.stakingVars[`user_${address.value}_a0`]?.normalized_vp,
+    userVP,
     decimals: preparedMeta.value.symbolAndDecimals.decimals,
   };
   modalForVoteIsOpen.value = true;

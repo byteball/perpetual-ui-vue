@@ -5,6 +5,8 @@ import { getParam } from "@/utils/governanceUtils";
 import { calcVoteValue } from "@/utils/voteUtils";
 import VotingTable from "@/components/governance/VotingTable.vue";
 import { useAddressStore } from "@/stores/addressStore";
+import { getVPFromNormalized } from "@/utils/getVP";
+import { useAaInfoStore } from "@/stores/aaInfo";
 
 const props = defineProps([
   "title",
@@ -16,6 +18,8 @@ const props = defineProps([
 
 const emit = defineEmits(["reqVote"]);
 
+const store = useAaInfoStore();
+const { timestamp } = storeToRefs(store);
 const addressStore = useAddressStore();
 const { address } = storeToRefs(addressStore);
 
@@ -30,8 +34,13 @@ const userVote = computed(() => {
   const vote = stakingVars[`user_value_votes_${address.value}_${props.name}`];
 
   if (vote) {
+    const df = props.preparedMeta.rawMeta["decay_factor"];
+    const decimals = props.preparedMeta.symbolAndDecimals.decimals;
+    const vp =
+      getVPFromNormalized(vote.vp, df, timestamp.value) / 10 ** decimals;
+
     return {
-      vp: vote.vp / 10 ** props.preparedMeta.symbolAndDecimals.decimals,
+      vp: vp.toFixed(decimals),
       value: calcVoteValue(vote.value, props.type),
     };
   } else {
@@ -64,7 +73,7 @@ function voteFromTable(value) {
               :decimals="preparedMeta.symbolAndDecimals.decimals"
               @vote-from-table="voteFromTable"
             />
-            <div v-if="userVote.vp" class="mt-2">
+            <div v-if="userVote?.vp" class="mt-2">
               You vote for
               <span class="font-bold">{{ userVote.value }}{{ suffix }}</span>
               (vp: {{ userVote.vp }})

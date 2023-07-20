@@ -1,5 +1,12 @@
 <script setup>
-defineProps(["title", "value", "valueLink", "subValue", "subValueLink"]);
+defineProps([
+  "title",
+  "value",
+  "valueLink",
+  "subValue",
+  "subValueLink",
+  "leader",
+]);
 </script>
 
 <template>
@@ -13,6 +20,7 @@ defineProps(["title", "value", "valueLink", "subValue", "subValueLink"]);
       >{{ value }}</a
     >
     <span v-else>{{ value }}</span>
+    <span v-if="leader !== undefined && value > leader"> (new leader)</span>
 
     <template v-if="subValue">
       (<a

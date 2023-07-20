@@ -11,16 +11,29 @@ import VoteInput from "@/components/inputs/VoteInput.vue";
 
 const props = defineProps(["params"]);
 const emit = defineEmits(["vote"]);
+
 const inputValue = ref("");
 const isNewValue = !props.params.value;
 
-console.log("props", props.params);
 if (props.params.value !== undefined) {
   inputValue.value = rawToFormatVotingValue(
     props.params.type,
     props.params.value
   );
 }
+
+const leader = computed(() => {
+  let l = 0;
+  props.params.votesByName.forEach((v) => {
+    if (v.amount > l) {
+      l = v.amount;
+    }
+  });
+
+  return Number(
+    (l / 10 ** props.params.decimals).toFixed(props.params.decimals)
+  );
+});
 
 const vp = computed(() => {
   if (isNewValue) {
@@ -42,10 +55,12 @@ const vp = computed(() => {
   newVP += props.params.userVP;
 
   return {
-    currentVp: (currentVp / 10 ** props.params.decimals).toFixed(
-      props.params.decimals
+    currentVp: Number(
+      (currentVp / 10 ** props.params.decimals).toFixed(props.params.decimals)
     ),
-    newVP: (newVP / 10 ** props.params.decimals).toFixed(props.params.decimals),
+    newVP: Number(
+      (newVP / 10 ** props.params.decimals).toFixed(props.params.decimals)
+    ),
   };
 });
 
@@ -84,7 +99,12 @@ function sendVotingEmit() {
           :value="vp.currentVp"
           class="mt-2"
         />
-        <GovernanceAssetField title="New VP" :value="vp.newVP" class="mt-2" />
+        <GovernanceAssetField
+          title="New VP"
+          :value="vp.newVP"
+          :leader="leader"
+          class="mt-2"
+        />
       </div>
     </div>
     <div class="form-control text-center">
