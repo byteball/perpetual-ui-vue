@@ -4,6 +4,24 @@ import { vMaska } from "maska";
 
 const props = defineProps({ decimals: Number, modelValue: String });
 
+const options = computed(() => {
+  return {
+    preProcess: (val) => {
+      val = val
+        .replace(/,/g, ".")
+        .replace(/[^0-9.]/, "")
+        .replace(/\.\./g, ".");
+
+      if (val.match(/\./g)?.length > 1) {
+        const s = val.split(".");
+        const f = s.shift();
+        val = f + "." + s.join("");
+      }
+      return val;
+    },
+  };
+});
+
 const mask = computed(() => {
   let s = "0";
   if (props.decimals) {
@@ -24,7 +42,7 @@ watch(
 
 <template>
   <input
-    v-maska
+    v-maska:[options]
     :data-maska="mask"
     :placeholder="mask"
     data-maska-tokens="0:\d:multiple|9:\d:optional"

@@ -8,6 +8,9 @@ const value = ref("");
 
 const options = computed(() => {
   return {
+    preProcess: (val) => {
+      return val.replace(/,/g, ".").replace(/[^0-9.]/, "");
+    },
     postProcess: (val) => {
       if (props.type === "percent" && val > 100) {
         return 100;
