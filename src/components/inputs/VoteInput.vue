@@ -19,7 +19,7 @@ const options = computed(() => {
 });
 
 watch(
-  props.modelValue,
+  () => props.modelValue,
   () => {
     value.value = props.modelValue;
   },

@@ -49,6 +49,15 @@ const currentVP = computed(() => {
     metaByAA.value.stakingVars[`user_${address.value}_a0`]?.normalized_vp;
   const decimals = poolSymbolAndDecimalByAA.value[metaByAA.value.aa].decimals;
 
+  console.log(
+    normalizedVp,
+    decimals,
+    getVPFromNormalized(
+      normalizedVp,
+      metaByAA.value["decay_factor"],
+      timestamp.value
+    )
+  );
   return (
     getVPFromNormalized(
       normalizedVp,

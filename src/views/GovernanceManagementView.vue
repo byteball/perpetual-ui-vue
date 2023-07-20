@@ -7,7 +7,7 @@ import { useAddressStore } from "@/stores/addressStore";
 import { getAllVotes, getPreparedMeta } from "@/utils/governanceUtils";
 import { generateAndFollowLinkForVoteInGovernance } from "@/utils/generateLink";
 import { getNotDefaultAssetsFromMeta } from "@/utils/assetsUtils";
-import { getVP, getVPFromNormalized } from "@/utils/getVP";
+import { getVPFromNormalized } from "@/utils/getVP";
 import Client from "@/services/Obyte";
 import PriceAANotFinished from "@/components/governance/PriceAANotFinished.vue";
 import { Dialog } from "@headlessui/vue";
@@ -110,13 +110,32 @@ function reqVote(name, type, suffix, value) {
   showModalForVote(title, name, type, suffix, value);
 }
 
+const userVote = (name) => {
+  const stakingVars = preparedMeta.value.rawMeta.stakingVars;
+  const vote = stakingVars[`user_value_votes_${address.value}_${name}`];
+
+  if (vote) {
+    return {
+      vp: vote.vp,
+      value: vote.value,
+    };
+  } else {
+    return { vp: 0, value: 0 };
+  }
+};
+
 function showModalForVote(title, name, type, suffix, value) {
+  const metaByAA = meta.value[perpetualAA.value];
   modalParams.value = {
     title,
     name,
     type,
     suffix,
     value,
+    votesByName: votes.value[name],
+    userVote: userVote(name),
+    userVP: metaByAA.stakingVars[`user_${address.value}_a0`]?.normalized_vp,
+    decimals: preparedMeta.value.symbolAndDecimals.decimals,
   };
   modalForVoteIsOpen.value = true;
 }

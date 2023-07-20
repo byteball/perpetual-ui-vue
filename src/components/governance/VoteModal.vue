@@ -14,12 +14,40 @@ const emit = defineEmits(["vote"]);
 const inputValue = ref("");
 const isNewValue = !props.params.value;
 
+console.log("props", props.params);
 if (props.params.value !== undefined) {
   inputValue.value = rawToFormatVotingValue(
     props.params.type,
     props.params.value
   );
 }
+
+const vp = computed(() => {
+  if (isNewValue) {
+    return {
+      newVP: (props.params.userVP / 10 ** props.params.decimals).toFixed(
+        props.params.decimals
+      ),
+    };
+  }
+  const currentVp =
+    props.params.votesByName.find((v) => v.value === props.params.value)
+      ?.amount || 0;
+
+  let newVP = 0 + currentVp;
+  const userVote = props.params.userVote;
+  if (userVote.vp && userVote.value === props.params.value) {
+    newVP -= userVote.vp;
+  }
+  newVP += props.params.userVP;
+
+  return {
+    currentVp: (currentVp / 10 ** props.params.decimals).toFixed(
+      props.params.decimals
+    ),
+    newVP: (newVP / 10 ** props.params.decimals).toFixed(props.params.decimals),
+  };
+});
 
 const isValidValue = computed(() => isValidNumber(inputValue.value));
 
@@ -50,8 +78,13 @@ function sendVotingEmit() {
         </label>
       </div>
       <div>
-        <GovernanceAssetField title="Current VP" :value="`0%`" class="mt-2" />
-        <GovernanceAssetField title="New VP" :value="`0%`" class="mt-2" />
+        <GovernanceAssetField
+          v-if="!isNewValue"
+          title="Current VP"
+          :value="vp.currentVp"
+          class="mt-2"
+        />
+        <GovernanceAssetField title="New VP" :value="vp.newVP" class="mt-2" />
       </div>
     </div>
     <div class="form-control text-center">

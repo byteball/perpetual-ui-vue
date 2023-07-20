@@ -72,6 +72,7 @@ export async function getPreparedMeta(metaByAA, userAddress) {
     priceAAsMeta,
     reserveAsset: await getAssetMetadata(metaByAA.reserve_asset),
     rawMeta: metaByAA,
+    vp,
     allowedControl: vp > 0,
   };
   cacheForPreparedMetaByAsset0AndReserve[key] = meta;

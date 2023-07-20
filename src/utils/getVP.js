@@ -11,6 +11,7 @@ export function getVP(
   timestamp
 ) {
   const final_voting_power = balance / decay_factor ** (max_term / 360);
+  console.log("final_voting_power", final_voting_power);
   return (
     final_voting_power *
     decay_factor ** (term / 360 + (timestamp - COMMON_TS) / year)
@@ -24,5 +25,16 @@ export function getVPFromNormalized(
 ) {
   if (!normalized_vp) return 0;
 
+  console.log(
+    "getVP",
+    {
+      normalized_vp,
+      decay_factor,
+      timestamp,
+      COMMON_TS,
+      year,
+    },
+    (timestamp - COMMON_TS) / year
+  );
   return normalized_vp * decay_factor ** ((timestamp - COMMON_TS) / year);
 }
