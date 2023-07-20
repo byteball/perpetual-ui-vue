@@ -13,7 +13,7 @@ export function getVP(
   const final_voting_power = balance / decay_factor ** (max_term / 360);
   console.log("final_voting_power", final_voting_power);
   return (
-    final_voting_power *
+    final_voting_power /
     decay_factor ** (term / 360 + (timestamp - COMMON_TS) / year)
   );
 }
