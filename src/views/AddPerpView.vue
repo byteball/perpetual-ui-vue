@@ -5,7 +5,7 @@ import Client from "@/services/Obyte";
 import { generateDefinitionLink, generateLink } from "@/utils/generateLink";
 import { storeToRefs } from "pinia";
 import { useAaInfoStore } from "@/stores/aaInfo";
-import { getDataFeed } from "@/services/DAGApi";
+import {getAssetMetadata, getDataFeed} from "@/services/DAGApi";
 import debounce from "lodash.debounce";
 import IntegerInput from "@/components/inputs/IntegerInput.vue";
 
@@ -20,6 +20,7 @@ const router = useRouter();
 const oracle = ref("F4KHJUCLJKY4JV7M5F754LAJX4EB7M4N");
 const feedName = ref("GBYTE_USD");
 const multiplier = ref("1");
+const tokens = ref("");
 
 const priceAA = ref("");
 const needCheckPriceAA = ref(false);
@@ -115,7 +116,7 @@ watch(
 
 watch(
   [currentRate, multiplier],
-  () => {
+  async () => {
     buttonDisabled.value = true;
 
     if (
@@ -125,6 +126,13 @@ watch(
       multiplier.value !== "0"
     ) {
       buttonDisabled.value = false;
+
+      const reserveAsset = meta.value[route.params.aa].reserve_asset;
+      const reserveAssetData = await getAssetMetadata(reserveAsset);
+
+      tokens.value =
+        10 ** reserveAssetData.decimals /
+        (multiplier.value * currentRate.value);
     }
   },
   { immediate: true }
@@ -279,9 +287,11 @@ onUnmounted(() => {
               />
 
               <div v-if="currentRate !== undefined" class="mt-4 text-sm">
-                <div v-if="currentRate">
-                  <span class="font-medium"> Current rate: </span>
-                  {{ `${currentRate}` }}
+                <div v-if="currentRate && multiplier">
+                  <div class="mt-2">
+                    <span class="font-medium"> Tokens: </span>
+                    {{ `${tokens}` }}
+                  </div>
                 </div>
                 <div v-else class="tracking-wide text-red-500">
                   {{
