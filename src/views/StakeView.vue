@@ -43,6 +43,12 @@ const currentBalance = computed(() => {
 });
 
 const currentVP = computed(() => {
+  if (
+    !metaByAA.value ||
+    !metaByAA.value.stakingVars[`user_${address.value}_a0`]
+  )
+    return 0;
+
   const normalizedVp =
     metaByAA.value.stakingVars[`user_${address.value}_a0`]?.normalized_vp;
   const decimals = poolSymbolAndDecimalByAA.value[metaByAA.value.aa].decimals;
