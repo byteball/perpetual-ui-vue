@@ -18,7 +18,6 @@ function reqRegister() {
 }
 
 function reqVote(name, type, value) {
-  console.log("req", name, type, value);
   emit("reqVote", "change_" + name, type, "", value, props.asset);
 }
 </script>

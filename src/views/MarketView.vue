@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import {
@@ -8,12 +8,19 @@ import {
   getAssetInfoFromMeta,
   getAssetsOnlyWithSymbolsAndDecimals,
 } from "@/utils/assetsUtils";
+import { useAddressStore } from "@/stores/addressStore";
+import { useUserBalance } from "@/composables/useUserBalance";
 import { generateLink } from "@/utils/generateLink";
 import { getExchangeResultByState } from "@/utils/getExchangeResultByState";
 import NumberInput from "@/components/inputs/NumberInput.vue";
+import AddressController from "@/components/AddressController.vue";
 
 const store = useAaInfoStore();
 const { aas, meta, status } = storeToRefs(store);
+const addressStore = useAddressStore();
+const { address } = storeToRefs(addressStore);
+
+const { balance } = useUserBalance(address);
 
 const assets = ref({
   assetList: [],
@@ -28,6 +35,12 @@ const asset2Amount = ref("");
 const metaByActiveAA = ref();
 const modalForAsset1 = ref();
 const modalForAsset2 = ref();
+
+const balanceByAsset = computed(() => {
+  if (!asset1.value) return 0;
+
+  return balance.value[asset1.value]?.stable || 0;
+});
 
 const link = ref("");
 const percent = ref(0);
@@ -55,12 +68,24 @@ function asset2Handler() {
   }
 }
 
+function setAmount1ByBalance() {
+  if (!balanceByAsset.value) {
+    asset1Amount.value = "";
+    return;
+  }
+
+  asset1Amount.value = String(
+    getDecimalsAmountByAsset(balanceByAsset.value, asset1.value)
+  );
+}
+
 function setAsset1(asset) {
   asset1.value = asset;
   asset2.value = "";
   asset1Amount.value = "";
   asset2Amount.value = "";
   modalForAsset1.value.checked = false;
+  setAmount1ByBalance();
 }
 
 function setAsset2(asset) {
@@ -68,17 +93,28 @@ function setAsset2(asset) {
   modalForAsset2.value.checked = false;
 }
 
+function getAmountByAsset(amount, asset) {
+  return asset === "base"
+    ? Number(amount) * 10 ** 9 + 1000
+    : Number(
+        amount * 10 ** assets.value.nameAndDecimalsByAsset[asset].decimals
+      );
+}
+
+function getDecimalsAmountByAsset(amount, asset) {
+  return asset === "base"
+    ? (Number(amount) - 1000) / 10 ** 9
+    : Number(
+        amount / 10 ** assets.value.nameAndDecimalsByAsset[asset].decimals
+      );
+}
+
 function calcDataForBuy() {
   const { reserve_asset, state, asset0 } = metaByActiveAA.value;
   const aa = pairedAssets.value[asset2.value];
 
   const l = generateLink(
-    reserve_asset === "base"
-      ? Number(asset1Amount.value) * 10 ** 9 + 1000
-      : Number(
-          asset1Amount.value *
-            10 ** assets.value.nameAndDecimalsByAsset[asset1.value].decimals
-        ),
+    getAmountByAsset(asset1Amount.value, asset1.value),
     {
       asset: asset2.value,
     },
@@ -115,8 +151,7 @@ function calcDataForSell() {
   const aa = pairedAssets.value[asset2.value];
 
   const l = generateLink(
-    Number(asset1Amount.value) *
-      10 ** assets.value.nameAndDecimalsByAsset[asset1.value].decimals,
+    getAmountByAsset(asset1Amount.value, asset1.value),
     {
       asset: asset1.value,
     },
@@ -152,6 +187,17 @@ function calcAndSetDataForMetaAndLink() {
   if (!asset1.value || !asset2.value) return;
 
   resultError.value = "";
+
+  if (
+    balanceByAsset.value < getAmountByAsset(asset1Amount.value, asset1.value)
+  ) {
+    const amount = getDecimalsAmountByAsset(balanceByAsset.value, asset1.value);
+    const symbol = assets.value.nameAndDecimalsByAsset[asset1.value].name;
+    resultError.value = `You don't have enough funds. Your balance: ${amount} ${symbol}`;
+    asset2Amount.value = 0;
+    link.value = "";
+    return;
+  }
 
   let data;
   if (metaByActiveAA.value.reserve_asset === asset1.value) {
@@ -202,6 +248,7 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
 </style>
 <template>
   <div class="container w-[320px] sm:w-[512px] m-auto mt-8 mb-36 p-8">
+    <AddressController :not-req="true" />
     <div class="p-2 mb-6">
       <div class="text-lg font-semibold leading-7">Market</div>
       <p class="mt-2 leading-6">
