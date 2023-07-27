@@ -133,7 +133,6 @@ const userVote = (name, priceAsset) => {
 };
 
 function showModalForVote(title, name, type, suffix, value, priceAsset) {
-  console.log(title, name, type, suffix, value, votes.value);
   const metaByAA = meta.value[perpetualAA.value];
   const df = metaByAA["decay_factor"];
   const userVP = getVPFromNormalized(

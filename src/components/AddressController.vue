@@ -3,11 +3,14 @@ import { ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useAddressStore } from "@/stores/addressStore";
 
+defineProps(["notReq"]);
+
 const store = useAddressStore();
 const { address } = storeToRefs(store);
 
 const addressInput = ref("");
 const changeMode = ref(false);
+const isHidden = ref(true);
 
 function setAddress() {
   if (!addressInput.value) return;
@@ -21,6 +24,10 @@ function setAddress() {
 
 function toggleChangeMode() {
   changeMode.value = !changeMode.value;
+}
+
+function showAddressBlock() {
+  isHidden.value = false;
 }
 
 watch(
@@ -37,10 +44,17 @@ watch(
 <template>
   <div class="card bg-base-200 shadow-xl mb-4">
     <div class="card-body">
-      <div v-if="!address || changeMode">
+      <div v-if="notReq && isHidden">
+        <div class="text-sm">
+          <div>For your convenience, you can add your Obyte address.</div>
+          <div><a class="link" @click="showAddressBlock">Add address</a></div>
+        </div>
+      </div>
+      <div v-else-if="!address || changeMode">
         <div class="text-xl">
           <div v-if="!changeMode">
-            Please add your Obyte address for continue
+            Please add your Obyte address for
+            {{ notReq ? "your convenience" : "continue" }}
           </div>
           <div v-else>Change address</div>
         </div>
