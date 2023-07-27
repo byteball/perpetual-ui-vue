@@ -1,4 +1,4 @@
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { defineStore } from "pinia";
 
 export const useAaInfoStore = defineStore("aaInfo", () => {
@@ -6,6 +6,14 @@ export const useAaInfoStore = defineStore("aaInfo", () => {
   const status = ref("not_init");
   const meta = ref({});
   const timestamp = ref(Math.floor(Date.now() / 1000));
+
+  const activeAddress = ref("");
+
+  const metaByActiveAddress = computed(() => {
+    if (activeAddress.value === "") return null;
+
+    return meta.value[activeAddress.value];
+  });
 
   function setAAs(_aas) {
     aas.value = _aas;
@@ -19,5 +27,20 @@ export const useAaInfoStore = defineStore("aaInfo", () => {
     meta.value = _meta;
   }
 
-  return { aas, status, meta, timestamp, setAAs, setStatus, setMeta };
+  function setActiveAddress(_activeAddress) {
+    activeAddress.value = _activeAddress;
+  }
+
+  return {
+    aas,
+    status,
+    meta,
+    timestamp,
+    activeAddress,
+    metaByActiveAddress,
+    setAAs,
+    setStatus,
+    setMeta,
+    setActiveAddress,
+  };
 });

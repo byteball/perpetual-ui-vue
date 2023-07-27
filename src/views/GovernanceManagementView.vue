@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useRoute, useRouter } from "vue-router";
 import { useAaInfoStore } from "@/stores/aaInfo";
@@ -19,6 +19,7 @@ import RegisterSymbolModal from "@/components/RegisterSymbolModal.vue";
 import AddressController from "@/components/AddressController.vue";
 
 const store = useAaInfoStore();
+const { setActiveAddress } = store;
 const { aas, meta, timestamp } = storeToRefs(store);
 const addressStore = useAddressStore();
 const { address } = storeToRefs(addressStore);
@@ -65,8 +66,10 @@ async function init() {
   if (!metaByAA) {
     notFound.value = true;
     ready.value = true;
+    setActiveAddress("");
     return false;
   }
+  setActiveAddress(perpetualAA.value);
   notFound.value = false;
 
   preparedMeta.value = await getPreparedMeta(metaByAA, address.value);
@@ -97,24 +100,26 @@ async function init() {
   }
 
   metaForFinishedAssets.value = mForFinishedAssets;
-  console.log("metaForFinishedAssets", mForFinishedAssets);
 
   ready.value = true;
 }
 
-function reqVote(name, type, suffix, value) {
+function reqVote(name, type, suffix, value, priceAsset) {
   let title;
   if (value) {
     title = `Vote for ${getTitleByName(name)} value`;
   } else {
     title = `Set new value for ${getTitleByName(name)}`;
   }
-  showModalForVote(title, name, type, suffix, value);
+  showModalForVote(title, name, type, suffix, value, priceAsset);
 }
 
-const userVote = (name) => {
+const userVote = (name, priceAsset) => {
   const stakingVars = preparedMeta.value.rawMeta.stakingVars;
-  const vote = stakingVars[`user_value_votes_${address.value}_${name}`];
+  const vote =
+    stakingVars[
+      `user_value_votes_${address.value}_${name}${priceAsset ? priceAsset : ""}`
+    ];
   const df = meta.value[perpetualAA.value]["decay_factor"];
 
   if (vote) {
@@ -127,7 +132,8 @@ const userVote = (name) => {
   }
 };
 
-function showModalForVote(title, name, type, suffix, value) {
+function showModalForVote(title, name, type, suffix, value, priceAsset) {
+  console.log(title, name, type, suffix, value, votes.value);
   const metaByAA = meta.value[perpetualAA.value];
   const df = metaByAA["decay_factor"];
   const userVP = getVPFromNormalized(
@@ -136,25 +142,32 @@ function showModalForVote(title, name, type, suffix, value) {
     timestamp.value
   );
 
+  let votesByName = votes.value[name];
+  if (priceAsset) {
+    votesByName = votesByName[priceAsset];
+  }
+
   modalParams.value = {
     title,
     name,
     type,
     suffix,
     value,
-    votesByName: votes.value[name],
-    userVote: userVote(name),
+    votesByName,
+    userVote: userVote(name, priceAsset),
     userVP,
     decimals: preparedMeta.value.symbolAndDecimals.decimals,
+    priceAsset,
   };
   modalForVoteIsOpen.value = true;
 }
 
-function vote(name, value) {
+function vote(name, value, priceAsset) {
   generateAndFollowLinkForVoteInGovernance(
     name,
     value,
-    preparedMeta.value.rawMeta.staking_aa
+    preparedMeta.value.rawMeta.staking_aa,
+    priceAsset
   );
 }
 
@@ -164,32 +177,7 @@ function reqRegister(asset) {
 }
 
 function getTitleByName(name, toUpper) {
-  let title;
-  switch (name) {
-    case "swap_fee":
-      title = "swap fee";
-      break;
-    case "arb_profit_tax":
-      title = "arb profit tax";
-      break;
-    case "adjustment_period":
-      title = "adjustment period";
-      break;
-    case "presale_period":
-      title = "presale period";
-      break;
-    case "auction_price_halving_period":
-      title = "auction price halving period";
-      break;
-    case "token_share_threshold":
-      title = "token share threshold";
-      break;
-    case "min_s0_share":
-      title = "min s0 share";
-      break;
-    default:
-      title = name;
-  }
+  let title = name.replace(/_/g, " ");
 
   if (toUpper) {
     title = title.charAt(0).toUpperCase() + title.substring(1);
@@ -203,6 +191,9 @@ async function goBack() {
 }
 
 onMounted(init);
+onUnmounted(() => {
+  setActiveAddress("");
+});
 watch(meta, init, { deep: true });
 </script>
 
@@ -328,7 +319,9 @@ watch(meta, init, { deep: true });
               :staking-aa="preparedMeta.rawMeta.staking_aa"
               :price-aa="assetMeta.price_aa"
               :price-aa-definition="priceAAsDefinition[assetMeta.price_aa]"
+              :votes="votes"
               @reqRegister="reqRegister"
+              @reqVote="reqVote"
             />
           </div>
           <div

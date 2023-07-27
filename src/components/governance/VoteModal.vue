@@ -24,11 +24,13 @@ if (props.params.value !== undefined) {
 
 const leader = computed(() => {
   let l = 0;
-  props.params.votesByName.forEach((v) => {
-    if (v.amount > l) {
-      l = v.amount;
-    }
-  });
+  if (props.params.votesByName) {
+    props.params.votesByName.forEach((v) => {
+      if (v.amount > l) {
+        l = v.amount;
+      }
+    });
+  }
 
   return Number(
     (l / 10 ** props.params.decimals).toFixed(props.params.decimals)
@@ -64,11 +66,17 @@ const vp = computed(() => {
   };
 });
 
-const isValidValue = computed(() => isValidNumber(inputValue.value));
+const isValidValue = computed(() => {
+  if (props.params.type === "date" || props.params.type === "percent") {
+    return isValidNumber(inputValue.value);
+  }
+
+  return inputValue.value !== "";
+});
 
 function sendVotingEmit() {
   const value = formatToRawVotingValue(props.params.type, inputValue.value);
-  emit("vote", props.params.name, value);
+  emit("vote", props.params.name, value, props.params.priceAsset);
 }
 </script>
 
@@ -85,11 +93,23 @@ function sendVotingEmit() {
       <div class="mt-2 form-control">
         <label v-if="isNewValue" class="input-group">
           <VoteInput
+            v-if="
+              params.type === 'date' ||
+              params.type === 'percent' ||
+              params.type === 'number'
+            "
             class="input input-bordered join-item w-full"
             v-model="inputValue"
             :type="props.params.type"
           />
-          <span class="join-item">{{ params.suffix }}</span>
+          <input
+            v-else
+            class="input input-bordered join-item w-full"
+            v-model="inputValue"
+          />
+          <span v-if="params.suffix" class="join-item">{{
+            params.suffix
+          }}</span>
         </label>
       </div>
       <div>
