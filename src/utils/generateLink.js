@@ -45,20 +45,18 @@ export function generateAndFollowLinkForVoteAddPriceAA(
 export function generateAndFollowLinkForVoteInGovernance(
   name,
   value,
-  stakingAA
+  stakingAA,
+  priceAsset
 ) {
-  const link = generateLink(
-    10000,
-    {
-      vote_value: 1,
-      name: name,
-      value: value,
-    },
-    null,
-    stakingAA,
-    "base",
-    true
-  );
+  const data = {
+    vote_value: 1,
+    name: name,
+    value: value,
+  };
+  if (priceAsset) {
+    data.asset = priceAsset;
+  }
+  const link = generateLink(10000, data, null, stakingAA, "base", true);
 
   const a = document.createElement("a");
   a.href = link;

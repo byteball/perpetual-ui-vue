@@ -108,9 +108,9 @@ export function getAllVotes(vars, timestamp, decayFactor) {
 
   Object.keys(vars).forEach((k) => {
     if (k.startsWith("value_votes_")) {
-      let v = k.substring(12).split("_");
-      const value = Number(v.pop());
-      const key = v.join("_");
+      let v = k.substring(12).split("_"); // deleting value_votes_
+      let value = v.pop();
+      let key = v.join("_");
       const amount = getVPFromNormalized(vars[k], decayFactor, timestamp);
 
       if (Object.keys(perpDefaults).includes(key)) {
@@ -118,19 +118,26 @@ export function getAllVotes(vars, timestamp, decayFactor) {
         votes[key].push({ value: value, amount });
       } else {
         let length = 0;
+        let type = "";
         if (key.startsWith("add_price_aa")) {
+          type = "add_price_aa";
           length = 12;
         } else if (key.startsWith("change_price_aa")) {
+          type = "change_price_aa";
           length = 15;
         } else if (key.startsWith("change_drift_rate")) {
+          type = "change_drift_rate";
           length = 17;
         } else {
           return; // not supported
         }
 
-        let a = key.substring(length);
-        if (!votes.add_price_aa[a]) votes.add_price_aa[a] = [];
-        votes.add_price_aa[a].push({ value: value, amount });
+        key = key.substring(length);
+        if (!votes[type][key]) votes[type][key] = [];
+        if (type === "add_price_aa") value = Number(value);
+        if (!votes[type][key]) votes[type][key] = [];
+
+        votes[type][key].push({ value, amount });
       }
     }
   });
