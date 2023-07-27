@@ -44,7 +44,7 @@ watch(
 <template>
   <div class="card bg-base-200 shadow-xl mb-4">
     <div class="card-body">
-      <div v-if="notReq && isHidden">
+      <div v-if="notReq && isHidden && !address">
         <div class="text-sm">
           <div>For your convenience, you can add your Obyte address.</div>
           <div><a class="link" @click="showAddressBlock">Add address</a></div>
