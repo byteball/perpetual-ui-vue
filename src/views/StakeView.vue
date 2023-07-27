@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useRoute, useRouter } from "vue-router";
+import dayjs from "dayjs";
 
 import { generateLink } from "@/utils/generateLink";
 import { getVP, getVPFromNormalized } from "@/utils/getVP";
@@ -43,6 +44,12 @@ const currentBalance = computed(() => {
 });
 
 const currentVP = computed(() => {
+  if (
+    !metaByAA.value ||
+    !metaByAA.value.stakingVars[`user_${address.value}_a0`]
+  )
+    return 0;
+
   const normalizedVp =
     metaByAA.value.stakingVars[`user_${address.value}_a0`]?.normalized_vp;
   const decimals = poolSymbolAndDecimalByAA.value[metaByAA.value.aa].decimals;
@@ -77,6 +84,45 @@ const newVP = computed(() => {
       10 ** decimals
     ).toFixed(decimals)
   );
+});
+
+const termMeta = computed(() => {
+  if (
+    !metaByAA.value ||
+    !metaByAA.value.stakingVars[`user_${address.value}_a0`]
+  )
+    return { days: 0, ended: true };
+
+  const expiry_ts =
+    metaByAA.value.stakingVars[`user_${address.value}_a0`]?.expiry_ts;
+
+  if (!expiry_ts) return { days: 0, ended: true };
+
+  const days = Math.floor((expiry_ts - Math.floor(Date.now() / 1000)) / 86400);
+
+  return {
+    days: days,
+    ended: !(days > 0),
+    date: dayjs.unix(expiry_ts).format("DD MMM YYYY HH:mm:ss"),
+  };
+});
+
+const userStakeBalance = computed(() => {
+  if (
+    !metaByAA.value ||
+    !metaByAA.value.stakingVars[`user_${address.value}_a0`]
+  )
+    return 0;
+
+  let balance =
+    metaByAA.value.stakingVars[`user_${address.value}_a0`]?.balance || 0;
+
+  if (balance) {
+    const decimals = poolSymbolAndDecimalByAA.value[metaByAA.value.aa].decimals;
+    balance = balance / 10 ** decimals;
+  }
+
+  return balance;
 });
 
 async function initPools() {
@@ -171,15 +217,21 @@ watch(
   [amount, term, votedGroupKey, percentages],
   () => {
     if (!metaByAA.value) return;
+    buttonDisabled.value = false;
 
     if (!amount.value.value) {
       buttonDisabled.value = true;
-      return;
     }
 
     if (!term.value.value) {
       buttonDisabled.value = true;
       term.value.error = "Term is required field!";
+      return;
+    }
+
+    if (Number(term.value.value) <= termMeta.value.days) {
+      buttonDisabled.value = true;
+      term.value.error = `Time must be more than ${termMeta.value.days} days`;
       return;
     }
 
@@ -194,8 +246,6 @@ watch(
       percentages.value.error = "Percentages group key is required field!";
       return;
     }
-
-    buttonDisabled.value = false;
 
     const data = getData();
 
@@ -310,6 +360,10 @@ watch(
             </label>
           </div>
           <div v-if="metaByAA && poolSymbolAndDecimalByAA[metaByAA.aa]">
+            <div v-if="address" class="mt-4 mb-4">
+              Your stake balance: {{ userStakeBalance }}
+              {{ poolSymbolAndDecimalByAA[selectedAA].name }}
+            </div>
             <div class="tabs tabs-boxed mt-8 mb-4">
               <a
                 class="tab tab-lifted"
@@ -406,22 +460,30 @@ watch(
                 <label class="label">
                   <span class="label-text">Amount</span>
                 </label>
-                <div class="input-group">
-                  <NumberInput
-                    v-model="amount.value"
-                    class="input input-bordered w-full"
-                    :decimals="poolSymbolAndDecimalByAA[metaByAA.aa].decimals"
-                  />
-                  <label class="btn no-pointer">{{
-                    poolSymbolAndDecimalByAA[metaByAA.aa].name
-                  }}</label>
+                <div v-if="termMeta.ended || !address">
+                  <div class="input-group">
+                    <NumberInput
+                      v-model="amount.value"
+                      class="input input-bordered w-full"
+                      :decimals="poolSymbolAndDecimalByAA[metaByAA.aa].decimals"
+                    />
+                    <label class="btn no-pointer">{{
+                      poolSymbolAndDecimalByAA[metaByAA.aa].name
+                    }}</label>
+                  </div>
+                  <span
+                    v-if="amount.error"
+                    class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"
+                  >
+                    {{ amount.error }}
+                  </span>
                 </div>
-                <span
-                  v-if="amount.error"
-                  class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"
-                >
-                  {{ amount.error }}
-                </span>
+                <div v-else>
+                  <div class="text-center mt-8 mb-8">
+                    The withdrawal will be available after the end of the stake
+                    period: {{ termMeta.date }}
+                  </div>
+                </div>
               </div>
             </div>
             <div class="form-control mt-6">
