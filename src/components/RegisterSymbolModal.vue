@@ -5,6 +5,7 @@ import { generateLink } from "@/utils/generateLink";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import { storeToRefs } from "pinia";
 import Client from "@/services/Obyte";
+import debounce from "lodash.debounce";
 
 const store = useAaInfoStore();
 
@@ -12,48 +13,67 @@ const { meta } = storeToRefs(store);
 
 const props = defineProps(["asset", "perpAa"]);
 
+const registryAA = ref("");
+
 const symbol = ref("");
+const symbolFieldError = ref("");
 const decimals = ref(0);
 const buttonEnabled = ref(false);
 const link = ref("");
 
-watch([symbol, decimals], () => {
-  buttonEnabled.value = false;
+watch(
+  [symbol, decimals],
+  debounce(async () => {
+    symbolFieldError.value = "";
+    buttonEnabled.value = false;
 
-  if (!symbol.value) {
-    return;
-  }
+    if (!symbol.value) {
+      return;
+    }
 
-  if (decimals.value === "") {
-    return;
-  }
+    const isSymbolTaken = await Client.api.getAssetBySymbol(
+      registryAA.value,
+      symbol.value
+    );
 
-  link.value = generateLink(
-    100000000,
-    {
-      asset: props.asset,
-      symbol: symbol.value,
-      decimals: decimals.value,
-      description: `Asset for perpetual futures AA ${props.perpAa}`,
-    },
-    null,
-    import.meta.env.VITE_REGISTRY_AA,
-    "base",
-    true
-  );
+    if (isSymbolTaken) {
+      symbolFieldError.value =
+        "Symbol is already taken, please use another one";
+      return;
+    }
 
-  buttonEnabled.value = true;
-});
+    if (decimals.value === "") {
+      return;
+    }
+
+    link.value = generateLink(
+      100000000,
+      {
+        asset: props.asset,
+        symbol: symbol.value,
+        decimals: decimals.value,
+        description: `Asset for perpetual futures AA ${props.perpAa}`,
+      },
+      null,
+      import.meta.env.VITE_REGISTRY_AA,
+      "base",
+      true
+    );
+
+    buttonEnabled.value = true;
+  }, 500),
+  { immediate: true }
+);
 
 const suggestValueForSymbolField = async (feedName) => {
-  const registryAa = Client.api.getOfficialTokenRegistryAddress();
-  const reserveAssetSymbol = `${feedName.split("_")[0]}`;
+  registryAA.value = Client.api.getOfficialTokenRegistryAddress();
+  const reserveAssetSymbol = feedName.split("_")[0];
 
   let index = 1;
   let newSymbolSuggestion = `${reserveAssetSymbol}${index}`;
   while (true) {
     const asset = await Client.api.getAssetBySymbol(
-      registryAa,
+      registryAA.value,
       newSymbolSuggestion
     );
 
@@ -100,6 +120,12 @@ onMounted(async () => {
         @input="() => (symbol = symbol.toUpperCase())"
         class="input input-bordered input-sm"
       />
+      <span
+        v-if="symbolFieldError"
+        class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"
+      >
+        {{ symbolFieldError }}
+      </span>
     </div>
     <div class="form-control mt-2">
       <label class="label">
