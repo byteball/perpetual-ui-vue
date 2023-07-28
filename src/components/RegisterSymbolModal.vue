@@ -1,7 +1,14 @@
 <script setup>
-import { ref, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { DialogPanel } from "@headlessui/vue";
 import { generateLink } from "@/utils/generateLink";
+import { useAaInfoStore } from "@/stores/aaInfo";
+import { storeToRefs } from "pinia";
+import Client from "@/services/Obyte";
+
+const store = useAaInfoStore();
+
+const { meta } = storeToRefs(store);
 
 const props = defineProps(["asset", "perpAa"]);
 
@@ -36,6 +43,34 @@ watch([symbol, decimals], () => {
   );
 
   buttonEnabled.value = true;
+});
+
+const suggestValueForSymbolField = async (feedName) => {
+  const registryAa = Client.api.getOfficialTokenRegistryAddress();
+  const reserveAssetSymbol = `${feedName.split("_")[0]}`;
+
+  let index = 1;
+  let newSymbolSuggestion = `${reserveAssetSymbol}${index}`;
+  while (true) {
+    const asset = await Client.api.getAssetBySymbol(
+      registryAa,
+      newSymbolSuggestion
+    );
+
+    if (!asset) break;
+
+    newSymbolSuggestion = `${reserveAssetSymbol}${++index}`;
+  }
+
+  symbol.value = newSymbolSuggestion;
+};
+
+onMounted(async () => {
+  const priceAA = meta.value[props.perpAa][`asset_${props.asset}`].price_aa;
+
+  const priceAADefinition = await Client.api.getDefinition(priceAA);
+
+  await suggestValueForSymbolField(priceAADefinition[1].params.feed_name);
 });
 </script>
 
