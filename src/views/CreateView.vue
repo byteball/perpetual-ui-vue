@@ -11,6 +11,10 @@ import AutoComplete from "@tarekraafat/autocomplete.js";
 import emitter from "@/services/emitter";
 
 import Client from "@/services/Obyte";
+import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/vue";
+import { ChevronRightIcon } from "@heroicons/vue/20/solid";
+import VoteInput from "@/components/inputs/VoteInput.vue";
+import { convertObjectFieldValues } from "@/utils/convertValue";
 
 const router = useRouter();
 
@@ -18,13 +22,13 @@ const awaiting = ref(false);
 const link = ref("");
 const reserveAssetInput = ref("");
 const reserveAsset = ref("");
-const swapFee = ref({ value: "0.003", error: "" });
-const arbProfitTax = ref({ value: "0.9", error: "" });
-const adjustmentPeriod = ref({ value: "", error: "" });
-const presalePeriod = ref({ value: "", error: "" });
-const auctionPriceHalvingPeriod = ref({ value: "", error: "" });
-const tokenShareThreshhold = ref({ value: "", error: "" });
-const minS0Share = ref({ value: "", error: "" });
+const swapFee = ref("3");
+const arbProfitTax = ref("90");
+const adjustmentPeriod = ref("3");
+const presalePeriod = ref("14");
+const auctionPriceHalvingPeriod = ref("3");
+const tokenShareThreshhold = ref("10");
+const minS0Share = ref("1");
 
 const SI = ref();
 const autoComplete = ref();
@@ -147,14 +151,16 @@ emitter.on(`aa_request_${import.meta.env.VITE_FACTORY_AA}`, async (data) => {
   const _d = parseDataForFactoryRequest(data);
   const obj = clearObject({
     reserve_asset: reserveAsset.value,
-    swap_fee: swapFee.value.value,
-    arb_profit_tax: arbProfitTax.value.value,
-    adjustment_period: adjustmentPeriod.value.value,
-    presale_period: presalePeriod.value.value,
-    auction_price_halving_period: auctionPriceHalvingPeriod.value.value,
-    token_share_threshold: tokenShareThreshhold.value.value,
-    min_s0_share: minS0Share.value.value,
+    swap_fee: swapFee.value,
+    arb_profit_tax: arbProfitTax.value,
+    adjustment_period: adjustmentPeriod.value,
+    presale_period: presalePeriod.value,
+    auction_price_halving_period: auctionPriceHalvingPeriod.value,
+    token_share_threshold: tokenShareThreshhold.value,
+    min_s0_share: minS0Share.value,
   });
+
+  convertObjectFieldValues(obj);
 
   if (JSON.stringify(_d) === JSON.stringify(obj)) {
     const result = await Client.api.dryRunAa({
@@ -189,18 +195,22 @@ watch(
     minS0Share,
   ],
   () => {
+    const obj = clearObject({
+      reserve_asset: reserveAsset.value,
+      swap_fee: swapFee.value,
+      arb_profit_tax: arbProfitTax.value,
+      adjustment_period: adjustmentPeriod.value,
+      presale_period: presalePeriod.value,
+      auction_price_halving_period: auctionPriceHalvingPeriod.value,
+      token_share_threshold: tokenShareThreshhold.value,
+      min_s0_share: minS0Share.value,
+    });
+
+    convertObjectFieldValues(obj);
+
     link.value = generateLink(
       10000,
-      clearObject({
-        reserve_asset: reserveAsset.value,
-        swap_fee: swapFee.value.value,
-        arb_profit_tax: arbProfitTax.value.value,
-        adjustment_period: adjustmentPeriod.value.value,
-        presale_period: presalePeriod.value.value,
-        auction_price_halving_period: auctionPriceHalvingPeriod.value.value,
-        token_share_threshold: tokenShareThreshhold.value.value,
-        min_s0_share: minS0Share.value.value,
-      }),
+      obj,
       null,
       import.meta.env.VITE_FACTORY_AA,
       "base",
@@ -238,94 +248,6 @@ watch(
 //     reserveAsset.value.error = "Asset not found";
 //   }
 // }
-
-watch(
-  () => tokenShareThreshhold.value.value,
-  () => {
-    tokenShareThreshhold.value.error = "";
-
-    const tokenShareThreshholdValue = tokenShareThreshhold.value.value;
-    if (!tokenShareThreshholdValue) {
-      return;
-    }
-
-    if (tokenShareThreshholdValue < 0) {
-      tokenShareThreshhold.value.error = "Must be a non-negative number";
-    }
-
-    if (tokenShareThreshholdValue >= 1) {
-      tokenShareThreshhold.value.error = "Must be less than 1";
-    }
-  },
-  {
-    immediate: true,
-  }
-);
-
-watch(
-  () => swapFee.value.value,
-  () => {
-    swapFee.value.error = "";
-
-    const swapFeeValue = swapFee.value.value;
-    if (!swapFeeValue) {
-      return;
-    }
-
-    if (swapFeeValue < 0) {
-      swapFee.value.error = "Must be a non-negative number";
-    }
-
-    if (swapFeeValue >= 1) {
-      swapFee.value.error = "Must be less than 1";
-    }
-  },
-  {
-    immediate: true,
-  }
-);
-
-watch(
-  () => minS0Share.value.value,
-  () => {
-    minS0Share.value.error = "";
-
-    const minS0ShareValue = minS0Share.value.value;
-    if (!minS0ShareValue) {
-      return;
-    }
-
-    if (minS0ShareValue < 0) {
-      minS0Share.value.error = "Must be a non-negative number";
-    }
-
-    if (minS0ShareValue >= 1) {
-      minS0Share.value.error = "Must be less than 1";
-    }
-  },
-  {
-    immediate: true,
-  }
-);
-
-watch(
-  () => arbProfitTax.value.value,
-  () => {
-    arbProfitTax.value.error = "";
-
-    const arbProfitTaxValue = arbProfitTax.value.value;
-    if (!arbProfitTaxValue) {
-      return;
-    }
-
-    if (arbProfitTaxValue < 0) {
-      arbProfitTax.value.error = "Must be a non-negative number";
-    }
-  },
-  {
-    immediate: true,
-  }
-);
 
 watch(
   reserveAssetInput,
@@ -410,131 +332,117 @@ watch(
               class="!input !input-bordered !w-full"
             />
           </div>
-          <!--      <div class="form-control">-->
-          <!--        <label class="label">-->
-          <!--          <span class="label-text">Swap fee</span>-->
-          <!--        </label>-->
-          <!--        <input-->
-          <!--          type="text"-->
-          <!--          placeholder="Swap fee"-->
-          <!--          v-model="swapFee.value"-->
-          <!--          class="input input-bordered"-->
-          <!--          :class="{ 'input-error': swapFee.error }"-->
-          <!--        />-->
-          <!--        <span-->
-          <!--          v-if="swapFee.error"-->
-          <!--          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"-->
-          <!--        >-->
-          <!--          {{ swapFee.error }}-->
-          <!--        </span>-->
-          <!--      </div>-->
-          <!--      <div class="form-control">-->
-          <!--        <label class="label">-->
-          <!--          <span class="label-text">Arb profit tax</span>-->
-          <!--        </label>-->
-          <!--        <input-->
-          <!--          type="text"-->
-          <!--          placeholder="Arb profit tax"-->
-          <!--          v-model="arbProfitTax.value"-->
-          <!--          class="input input-bordered"-->
-          <!--          :class="{ 'input-error': arbProfitTax.error }"-->
-          <!--        />-->
-          <!--        <span-->
-          <!--          v-if="arbProfitTax.error"-->
-          <!--          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"-->
-          <!--        >-->
-          <!--          {{ arbProfitTax.error }}-->
-          <!--        </span>-->
-          <!--      </div>-->
-          <!--      <div class="form-control">-->
-          <!--        <label class="label">-->
-          <!--          <span class="label-text">Adjustment period</span>-->
-          <!--        </label>-->
-          <!--        <IntegerInput-->
-          <!--          :inputType="'integer'"-->
-          <!--          :inputProperty="adjustmentPeriod"-->
-          <!--        />-->
-          <!--        <span-->
-          <!--          v-if="adjustmentPeriod.error"-->
-          <!--          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"-->
-          <!--        >-->
-          <!--          {{ adjustmentPeriod.error }}-->
-          <!--        </span>-->
-          <!--      </div>-->
-          <!--      <div class="form-control">-->
-          <!--        <label class="label">-->
-          <!--          <span class="label-text">Presale period</span>-->
-          <!--        </label>-->
-          <!--        <input-->
-          <!--          type="text"-->
-          <!--          placeholder="Presale period"-->
-          <!--          v-model="presalePeriod.value"-->
-          <!--          @input="handleIntegerInput"-->
-          <!--          class="input input-bordered"-->
-          <!--          :class="{ 'input-error': presalePeriod.error }"-->
-          <!--        />-->
-          <!--        <span-->
-          <!--          v-if="presalePeriod.error"-->
-          <!--          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"-->
-          <!--        >-->
-          <!--          {{ presalePeriod.error }}-->
-          <!--        </span>-->
-          <!--      </div>-->
-          <!--      <div class="form-control">-->
-          <!--        <label class="label">-->
-          <!--          <span class="label-text">Auction price halving period</span>-->
-          <!--        </label>-->
-          <!--        <input-->
-          <!--          type="text"-->
-          <!--          placeholder="Auction price halving period"-->
-          <!--          v-model="auctionPriceHalvingPeriod.value"-->
-          <!--          @input="handleIntegerInput"-->
-          <!--          class="input input-bordered"-->
-          <!--          :class="{ 'input-error': auctionPriceHalvingPeriod.error }"-->
-          <!--        />-->
-          <!--        <span-->
-          <!--          v-if="auctionPriceHalvingPeriod.error"-->
-          <!--          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"-->
-          <!--        >-->
-          <!--          {{ auctionPriceHalvingPeriod.error }}-->
-          <!--        </span>-->
-          <!--      </div>-->
-          <!--      <div class="form-control">-->
-          <!--        <label class="label">-->
-          <!--          <span class="label-text">Token share threshhold</span>-->
-          <!--        </label>-->
-          <!--        <input-->
-          <!--          type="text"-->
-          <!--          placeholder="Token share threshhold"-->
-          <!--          v-model="tokenShareThreshhold.value"-->
-          <!--          class="input input-bordered"-->
-          <!--          :class="{ 'input-error': tokenShareThreshhold.error }"-->
-          <!--        />-->
-          <!--        <span-->
-          <!--          v-if="tokenShareThreshhold.error"-->
-          <!--          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"-->
-          <!--        >-->
-          <!--          {{ tokenShareThreshhold.error }}-->
-          <!--        </span>-->
-          <!--      </div>-->
-          <!--      <div class="form-control">-->
-          <!--        <label class="label">-->
-          <!--          <span class="label-text">Min s0 share</span>-->
-          <!--        </label>-->
-          <!--        <input-->
-          <!--          type="text"-->
-          <!--          placeholder="Min s0 share"-->
-          <!--          v-model="minS0Share.value"-->
-          <!--          class="input input-bordered"-->
-          <!--          :class="{ 'input-error': minS0Share.error }"-->
-          <!--        />-->
-          <!--        <span-->
-          <!--          v-if="minS0Share.error"-->
-          <!--          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"-->
-          <!--        >-->
-          <!--          {{ minS0Share.error }}-->
-          <!--        </span>-->
-          <!--      </div>-->
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Swap fee</span>
+            </label>
+            <label class="input-group">
+              <VoteInput
+                class="input input-bordered join-item w-full"
+                v-model="swapFee"
+                :type="'percent'"
+              />
+              <span class="join-item">%</span>
+            </label>
+          </div>
+          <Disclosure v-slot="{ open }">
+            <DisclosureButton class="py-2 text-gray-500 flex items-center">
+              <span>Show all details</span>
+              <ChevronRightIcon
+                :class="open && 'rotate-90 transform'"
+                class="w-5"
+              />
+            </DisclosureButton>
+            <transition
+              enter-active-class="transition duration-100 ease-out"
+              enter-from-class="transform scale-95 opacity-0"
+              enter-to-class="transform scale-100 opacity-100"
+              leave-active-class="transition duration-75 ease-out"
+              leave-from-class="transform scale-100 opacity-100"
+              leave-to-class="transform scale-95 opacity-0"
+            >
+              <DisclosurePanel>
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text">Arb profit tax</span>
+                  </label>
+                  <label class="input-group">
+                    <VoteInput
+                      class="input input-bordered join-item w-full"
+                      v-model="arbProfitTax"
+                      :type="'percent'"
+                    />
+                    <span class="join-item">%</span>
+                  </label>
+                </div>
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text">Adjustment period</span>
+                  </label>
+                  <label class="input-group">
+                    <VoteInput
+                      class="input input-bordered join-item w-full"
+                      v-model="adjustmentPeriod"
+                      :type="'date'"
+                    />
+                    <span class="join-item">day(s)</span>
+                  </label>
+                </div>
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text">Presale period</span>
+                  </label>
+                  <label class="input-group">
+                    <VoteInput
+                      class="input input-bordered join-item w-full"
+                      v-model="presalePeriod"
+                      :type="'date'"
+                    />
+                    <span class="join-item">day(s)</span>
+                  </label>
+                </div>
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text">Auction price halving period</span>
+                  </label>
+                  <label class="input-group">
+                    <VoteInput
+                      class="input input-bordered join-item w-full"
+                      v-model="auctionPriceHalvingPeriod"
+                      :type="'date'"
+                    />
+                    <span class="join-item">day(s)</span>
+                  </label>
+                </div>
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text">Token share threshold</span>
+                  </label>
+                  <label class="input-group">
+                    <VoteInput
+                      class="input input-bordered join-item w-full"
+                      v-model="tokenShareThreshhold"
+                      :type="'percent'"
+                    />
+                    <span class="join-item">%</span>
+                  </label>
+                </div>
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text">Min s0 share</span>
+                  </label>
+                  <label class="input-group">
+                    <VoteInput
+                      class="input input-bordered join-item w-full"
+                      v-model="minS0Share"
+                      :type="'percent'"
+                    />
+                    <span class="join-item">%</span>
+                  </label>
+                </div>
+              </DisclosurePanel>
+            </transition>
+          </Disclosure>
           <div class="form-control mt-6">
             <a
               class="btn btn-primary"
