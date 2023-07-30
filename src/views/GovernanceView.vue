@@ -30,13 +30,7 @@ watch(meta, init, { deep: true });
 </script>
 <template>
   <div
-    v-if="!address"
-    class="container w-[320px] sm:w-[512px] m-auto mt-8 mb-36 p-8"
-  >
-    <AddressController />
-  </div>
-  <div
-    v-else-if="Object.keys(aasWithMeta).length"
+    v-if="Object.keys(aasWithMeta).length"
     class="container w-[320px] sm:w-[768px] m-auto mt-8 mb-36 p-8"
   >
     <AddressController />
@@ -90,6 +84,7 @@ watch(meta, init, { deep: true });
                   :to="`/stake/${perpetualAA}`"
                   >stake</RouterLink
                 >
+                {{ !address ? " and add your address" : "" }}
               </div>
             </div>
           </div>

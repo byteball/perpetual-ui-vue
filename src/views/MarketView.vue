@@ -69,6 +69,8 @@ function asset2Handler() {
 }
 
 function setAmount1ByBalance() {
+  if (!address.value) return;
+
   if (!balanceByAsset.value) {
     asset1Amount.value = "";
     return;
@@ -189,6 +191,7 @@ function calcAndSetDataForMetaAndLink() {
   resultError.value = "";
 
   if (
+    address.value &&
     balanceByAsset.value < getAmountByAsset(asset1Amount.value, asset1.value)
   ) {
     const amount = getDecimalsAmountByAsset(balanceByAsset.value, asset1.value);
@@ -248,7 +251,7 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
 </style>
 <template>
   <div class="container w-[320px] sm:w-[512px] m-auto mt-8 mb-36 p-8">
-    <AddressController :not-req="true" />
+    <AddressController />
     <div class="p-2 mb-6">
       <div class="text-lg font-semibold leading-7">Market</div>
       <p class="mt-2 leading-6">

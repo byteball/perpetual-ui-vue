@@ -88,8 +88,7 @@ onMounted(async () => {
     placeHolder: "",
     data: {
       src: async (query) => {
-        let assets = [];
-        assets = [...Object.keys(oswapAssets.value), "GBYTE"];
+        let assets = [...Object.keys(oswapAssets.value), "GBYTE"];
 
         const asset = await Client.api.getAssetBySymbol(registry, query);
         if (asset) {
@@ -287,10 +286,10 @@ watch(
     </div>
 
     <div v-if="awaiting">
-      <div class="alert shadow-lg">
-        <div>
+      <div class="card bg-base-200 shadow-lg p-8">
+        <div class="flex items-center">
           <svg
-            class="animate-spin h-5 w-5 ml-2 mr-3"
+            class="animate-spin w-14 ml-2 mr-3"
             viewBox="0 0 24 24"
             fill="none"
           >
@@ -310,7 +309,7 @@ watch(
           </svg>
           <span>Waiting for transaction creation</span>
         </div>
-        <div class="flex-none">
+        <div class="mt-4 text-center">
           <button class="btn btn-sm btn-primary" @click="setAwaiting(false)">
             Cancel
           </button>

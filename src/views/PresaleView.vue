@@ -294,13 +294,7 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
 }
 </style>
 <template>
-  <div
-    v-if="!address"
-    class="container w-[320px] sm:w-[512px] m-auto mt-8 mb-36 p-8"
-  >
-    <AddressController />
-  </div>
-  <div v-else class="container w-[320px] sm:w-[512px] m-auto mt-8 mb-36 p-8">
+  <div class="container w-[320px] sm:w-[512px] m-auto mt-8 mb-36 p-8">
     <div v-if="toastMessage" class="toast toast-top toast-end">
       <div class="alert alert-error">
         <span>{{ toastMessage }}</span>
@@ -309,7 +303,7 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
 
     <AddressController />
 
-    <ClaimCard />
+    <ClaimCard v-if="address" />
 
     <div class="p-2 mb-6">
       <div class="text-lg font-semibold leading-7">Presale</div>

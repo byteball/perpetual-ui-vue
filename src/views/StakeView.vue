@@ -127,15 +127,15 @@ const userStakeBalance = computed(() => {
 
 async function initPools() {
   if (status.value !== "initialized") return;
-  if (!address.value) return;
 
   const p = [];
   for (let aa of aas.value) {
     const poolAssetData = await getAssetMetadata(meta.value[aa].state.asset0);
     if (!poolAssetData) continue;
-    stakeBalanceByPool.value[aa] =
-      meta.value[aa]?.stakingVars[`user_${address.value}_a0`]?.balance || 0;
-
+    if (address.value) {
+      stakeBalanceByPool.value[aa] =
+        meta.value[aa]?.stakingVars[`user_${address.value}_a0`]?.balance || 0;
+    }
     p.push(aa);
     poolSymbolAndDecimalByAA.value[aa] = poolAssetData;
 
@@ -329,13 +329,7 @@ watch(
 }
 </style>
 <template>
-  <div
-    v-if="!address"
-    class="container w-[320px] sm:w-[512px] m-auto mt-8 mb-36 p-8"
-  >
-    <AddressController />
-  </div>
-  <div v-else class="container w-[320px] sm:w-[512px] m-auto mt-8 mb-36 p-8">
+  <div class="container w-[320px] sm:w-[512px] m-auto mt-8 mb-36 p-8">
     <AddressController />
     <div class="p-2 mb-6">
       <div class="text-lg font-semibold leading-7">Stake</div>
@@ -418,7 +412,7 @@ watch(
                   {{ term.error }}
                 </span>
               </div>
-              <div class="mt-2">
+              <div class="mt-2" v-if="address">
                 <div>Your VP: {{ currentVP }}</div>
                 <div>New VP: {{ newVP }}</div>
               </div>
