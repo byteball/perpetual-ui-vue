@@ -323,7 +323,7 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
             <div class="form-control">
               <label
                 for="presaleModal"
-                class="btn btn-neutral !whitespace-pre-wrap leading-4"
+                class="btn btn-primary !whitespace-pre-wrap leading-4"
               >
                 {{
                   selectedAA

@@ -345,7 +345,7 @@ watch(
         </div>
         <div v-if="pools.length">
           <div class="form-control">
-            <label for="poolModal" class="btn btn-neutral">
+            <label for="poolModal" class="btn btn-primary">
               {{
                 selectedAA
                   ? `${poolReserveNameByAA[selectedAA]}/${poolSymbolAndDecimalByAA[selectedAA].name}`
