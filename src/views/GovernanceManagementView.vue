@@ -198,14 +198,8 @@ watch(meta, init, { deep: true });
 
 <template>
   <div
-    v-if="!address"
-    class="container w-[320px] sm:w-[512px] m-auto mt-8 mb-36 p-8"
-  >
-    <AddressController />
-  </div>
-  <div
     class="container w-[320px] sm:w-[768px] m-auto mt-8 mb-36 p-8"
-    v-else-if="ready"
+    v-if="ready"
   >
     <AddressController />
     <div @click="goBack()" class="p-2 mb-6 cursor-pointer">

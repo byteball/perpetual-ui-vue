@@ -139,7 +139,7 @@ onMounted(() => {
   <div class="container w-[320px] sm:w-[512px] m-auto mt-8 mb-36 p-8">
     <div v-if="!exists" class="text-center">
       <div class="alert shadow-lg">
-        <div>
+        <div class="flex items-center">
           <svg
             class="animate-spin h-5 w-5 ml-2 mr-3"
             viewBox="0 0 24 24"
@@ -220,14 +220,14 @@ onMounted(() => {
       </div>
     </div>
     <div v-if="exists && route.query.step === '3'" class="text-center">
-      <div class="alert shadow-lg">
-        <div>
+      <div class="card bg-base-200 shadow-lg p-8">
+        <div class="flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
-            class="stroke-info h-6 w-6 ml-2 mr-2"
+            class="stroke-info w-14 ml-2 mr-2"
           >
             <path
               stroke-linecap="round"
@@ -241,14 +241,14 @@ onMounted(() => {
             Done. After confirming the registration of the aa symbol, it will be
             available in the market
           </span>
-          <div class="flex-none">
-            <button
-              class="btn btn-sm btn-primary"
-              @click="() => router.push('/')"
-            >
-              Back to market
-            </button>
-          </div>
+        </div>
+        <div class="mt-4 text-center">
+          <button
+            class="btn btn-sm btn-primary"
+            @click="() => router.push('/')"
+          >
+            Back to market
+          </button>
         </div>
       </div>
     </div>
