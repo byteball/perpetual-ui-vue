@@ -246,7 +246,7 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
 </script>
 <style>
 .disabled-card-input {
-  background-color: hsl(var(--b1) / var(--tw-bg-opacity)) !important;
+  background-color: #1e2228 !important;
 }
 </style>
 <template>
@@ -273,7 +273,7 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
               :decimals="assets.nameAndDecimalsByAsset[asset1]?.decimals"
               :disabled="!asset1"
             />
-            <label for="asset1Modal" class="btn">{{
+            <label for="asset1Modal" class="btn btn-primary">{{
               asset1
                 ? assets.nameAndDecimalsByAsset[asset1].name
                 : "Select asset"
@@ -308,8 +308,8 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
             />
             <label
               for="asset2Modal"
-              class="btn"
-              :class="{ 'btn-disabled': !asset1 }"
+              class="btn btn-primary"
+              :class="{ '!btn-disabled': !asset1 }"
               >{{
                 asset2
                   ? assets.nameAndDecimalsByAsset[asset2].name

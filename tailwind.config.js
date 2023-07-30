@@ -6,6 +6,18 @@ module.exports = {
   theme: {
     extend: {},
   },
+  daisyui: {
+    themes: [
+      {
+        light: {
+          ...require("daisyui/src/theming/themes")["[data-theme=dark]"],
+          "background-color": "#131519",
+          color: "#fff",
+          "base-200": "#24292f",
+        },
+      },
+    ],
+  },
   plugins: [
     require("@tailwindcss/typography"),
     require("@tailwindcss/forms"),
