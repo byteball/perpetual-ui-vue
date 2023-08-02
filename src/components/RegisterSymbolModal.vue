@@ -71,6 +71,8 @@ const suggestValueForSymbolField = async (feedName) => {
 
   let index = 1;
   let newSymbolSuggestion = `${reserveAssetSymbol}${index}`;
+
+  // eslint-disable-next-line no-constant-condition
   while (true) {
     const asset = await Client.api.getAssetBySymbol(
       registryAA.value,

@@ -8,7 +8,11 @@ import duration from "dayjs/plugin/duration";
 import { generateLink } from "@/utils/generateLink";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import { getPresaleAssetsFromMeta } from "@/utils/getAssetsFromMeta";
-import { executeAAGetter, getAssetMetadata } from "@/services/DAGApi";
+import {
+  executeAAGetter,
+  getAssetMetadata,
+  getAssetMetadataByArray,
+} from "@/services/DAGApi";
 import NumberInput from "@/components/inputs/NumberInput.vue";
 import { getParam } from "@/utils/governanceUtils";
 import AddressController from "@/components/AddressController.vue";
@@ -78,13 +82,14 @@ const showToastMessage = (message) => {
 };
 
 const preparePresaleList = async () => {
+  const promisesForPrepare = [];
   presaleList.value = [];
 
   if (!Object.keys(meta.value).length) {
     return;
   }
 
-  for (const aa of aas.value) {
+  async function prepare(aa) {
     const asset0 = meta.value[aa]?.state?.asset0;
     const presalePeriod = getParam("presale_period", meta.value[aa]);
     const tokenShareThreshold = getParam(
@@ -93,16 +98,17 @@ const preparePresaleList = async () => {
     );
     const reserve = meta.value[aa].state.reserve;
 
-    const asset0Data = await getAssetMetadata(asset0);
+    const reserveAsset = meta.value[aa].reserve_asset;
+    const [asset0Data, reserveAssetData] = await Promise.all([
+      getAssetMetadata(asset0),
+      getAssetMetadata(reserveAsset),
+    ]);
 
     if (!assetsMetadata.value[asset0]) {
       assetsMetadata.value[asset0] = asset0Data;
     }
 
-    const reserveAsset = meta.value[aa].reserve_asset;
-    const reserveAssetData = await getAssetMetadata(reserveAsset);
-
-    if (!reserveAssetData) continue;
+    if (!reserveAssetData) return;
 
     if (!assetsMetadata.value[reserveAsset]) {
       assetsMetadata.value[reserveAsset] = reserveAssetData;
@@ -111,10 +117,10 @@ const preparePresaleList = async () => {
     const presaleAssets = getPresaleAssetsFromMeta(meta.value[aa]);
 
     const presaleAssetsWithMetadata = [];
-    for (const presaleAsset of presaleAssets) {
-      const presaleAssetData = await getAssetMetadata(presaleAsset);
+    const metadataByAsset = await getAssetMetadataByArray(presaleAssets);
 
-      if (!presaleAssetData) continue;
+    for (const presaleAsset in metadataByAsset) {
+      const presaleAssetData = metadataByAsset[presaleAssets];
 
       if (!assetsMetadata.value[presaleAsset]) {
         assetsMetadata.value[presaleAsset] = presaleAssetData;
@@ -155,6 +161,11 @@ const preparePresaleList = async () => {
       aAsPairs.value[`${reserveAsset}_${presaleAsset}`] = aa;
     }
   }
+
+  for (const aa of aas.value) {
+    promisesForPrepare.push(prepare(aa));
+  }
+  await Promise.all(promisesForPrepare);
 
   if (Object.keys(reserveAssets.value).length) {
     filterReserveAssetsWithoutPresale();

@@ -5,7 +5,7 @@ import Client from "@/services/Obyte";
 import { generateDefinitionLink, generateLink } from "@/utils/generateLink";
 import { storeToRefs } from "pinia";
 import { useAaInfoStore } from "@/stores/aaInfo";
-import {getAssetMetadata, getDataFeed} from "@/services/DAGApi";
+import { getAssetMetadata, getDataFeed } from "@/services/DAGApi";
 import debounce from "lodash.debounce";
 import IntegerInput from "@/components/inputs/IntegerInput.vue";
 
