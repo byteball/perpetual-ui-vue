@@ -68,9 +68,9 @@ const route = useRoute();
             </li>
           </ul>
         </div>
-        <RouterLink class="btn btn-ghost normal-case text-xl" to="/"
-          >Perpetual</RouterLink
-        >
+        <RouterLink class="hover:bg-none" to="/">
+          <img src="/logo.svg" class="h-14 w-14" alt="pyth.ooo" />
+        </RouterLink>
       </div>
       <div class="navbar-center hidden lg:flex">
         <ul class="menu menu-horizontal px-1">
