@@ -1,4 +1,4 @@
-import { getAssetMetadata } from "@/services/DAGApi";
+import { getAssetMetadataByArray } from "@/services/DAGApi";
 import { fullExplorerUrlForAsset, fullExplorerUrlForUnit } from "@/config";
 
 export function getNotDefaultAssetsFromMeta(meta, onlyNotPresale) {
@@ -81,13 +81,9 @@ export async function getAssetsOnlyWithSymbolsAndDecimals(assets) {
   const assetList = [];
   const assetsByAA = {};
 
-  for (let i in assets.assetList) {
-    const asset = assets.assetList[i];
-    const metaData = await getAssetMetadata(asset);
-    if (!metaData) {
-      continue;
-    }
-    nameAndDecimalsByAsset[asset] = metaData;
+  const metadataByAsset = await getAssetMetadataByArray(assets.assetList);
+  for (let asset in metadataByAsset) {
+    nameAndDecimalsByAsset[asset] = metadataByAsset[asset];
     assetList.push(asset);
   }
 

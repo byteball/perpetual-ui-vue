@@ -18,9 +18,16 @@ async function init() {
   if (!aas.value.length) return;
 
   const m = {};
+  const promises = [];
+
   for (let aa in meta.value) {
-    m[aa] = await getPreparedMeta(meta.value[aa], address.value);
+    promises.push(getPreparedMeta(meta.value[aa], address.value));
   }
+  const result = await Promise.all(promises);
+  result.forEach((v) => {
+    if (!v) return;
+    m[v.rawMeta.aa] = v;
+  });
 
   aasWithMeta.value = m;
 }

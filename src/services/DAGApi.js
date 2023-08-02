@@ -16,30 +16,63 @@ export async function getAasCreatedByFactory() {
   return aasList;
 }
 
+const cacheForDefinition = {};
+export async function getDefinition(aa) {
+  if (cacheForDefinition[aa]) {
+    return { aa, definition: cacheForDefinition[aa] };
+  }
+
+  let definition;
+
+  try {
+    definition = await client.api.getDefinition(aa);
+    cacheForDefinition[aa] = definition;
+  } catch (e) {
+    console.log(e);
+    return { aa, definition: null };
+  }
+
+  return { aa, definition };
+}
+
+async function getMeta(aa) {
+  let meta = {};
+  try {
+    const definition = (await getDefinition(aa)).definition;
+    meta = { ...definition[1].params };
+
+    const vars = await client.api.getAaStateVars({ address: aa });
+    meta = { ...meta, ...vars };
+
+    const stakingDefinition = (await getDefinition(meta.staking_aa)).definition;
+    meta.stakingParams = stakingDefinition[1].params;
+
+    meta.stakingVars = await client.api.getAaStateVars({
+      address: meta.staking_aa,
+    });
+
+    meta.aa = aa;
+
+    return meta;
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
+}
+
 export async function getMetaForPerpAAs(aas) {
   const meta = {};
+  const promises = [];
 
   for (let aa of aas) {
-    let m = {};
-    try {
-      const definition = await client.api.getDefinition(aa);
-      m = { ...definition[1].params };
-
-      const vars = await client.api.getAaStateVars({ address: aa });
-      m = { ...m, ...vars };
-
-      const stakingDefinition = await client.api.getDefinition(m.staking_aa);
-      m.stakingParams = stakingDefinition[1].params;
-
-      m.stakingVars = await client.api.getAaStateVars({
-        address: m.staking_aa,
-      });
-
-      meta[aa] = m;
-    } catch (e) {
-      console.error(e);
-    }
+    promises.push(getMeta(aa));
   }
+
+  const result = await Promise.all(promises);
+  result.forEach((v) => {
+    if (!v) return;
+    meta[v.aa] = v;
+  });
 
   return meta;
 }
@@ -98,6 +131,22 @@ export async function getAssetMetadata(asset) {
   } catch (e) {
     return null;
   }
+}
+
+export async function getAssetMetadataByArray(assets) {
+  const metadataByAsset = {};
+
+  const result = await Promise.all(
+    assets.map((asset) => getAssetMetadata(asset))
+  );
+
+  result.forEach((v) => {
+    if (!v) return;
+
+    metadataByAsset[v.asset] = v;
+  });
+
+  return metadataByAsset;
 }
 
 export async function executeAAGetter(aa, getter) {

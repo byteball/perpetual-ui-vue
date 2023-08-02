@@ -128,15 +128,17 @@ const userStakeBalance = computed(() => {
 async function initPools() {
   if (status.value !== "initialized") return;
 
-  const p = [];
-  for (let aa of aas.value) {
+  const _pools = [];
+  const promises = [];
+
+  async function getAndSetPoolData(aa) {
     const poolAssetData = await getAssetMetadata(meta.value[aa].state.asset0);
-    if (!poolAssetData) continue;
+    if (!poolAssetData) return;
     if (address.value) {
       stakeBalanceByPool.value[aa] =
         meta.value[aa]?.stakingVars[`user_${address.value}_a0`]?.balance || 0;
     }
-    p.push(aa);
+    _pools.push(aa);
     poolSymbolAndDecimalByAA.value[aa] = poolAssetData;
 
     const reserveAssetData = await getAssetMetadata(
@@ -145,13 +147,18 @@ async function initPools() {
 
     if (!reserveAssetData) {
       poolReserveNameByAA.value[aa] = meta.value[aa].reserve_asset;
-      continue;
+      return;
     }
 
     poolReserveNameByAA.value[aa] = reserveAssetData.name;
   }
 
-  pools.value = p;
+  for (let aa of aas.value) {
+    promises.push(getAndSetPoolData(aa));
+  }
+  await Promise.all(promises);
+
+  pools.value = _pools;
 }
 
 function setTab(tabName) {

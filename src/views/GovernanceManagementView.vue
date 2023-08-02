@@ -8,12 +8,11 @@ import { getAllVotes, getPreparedMeta } from "@/utils/governanceUtils";
 import { generateAndFollowLinkForVoteInGovernance } from "@/utils/generateLink";
 import { getNotDefaultAssetsFromMeta } from "@/utils/assetsUtils";
 import { getVPFromNormalized } from "@/utils/getVP";
-import Client from "@/services/Obyte";
+import { getAssetMetadataByArray, getDefinition } from "@/services/DAGApi";
 import PriceAANotFinished from "@/components/governance/PriceAANotFinished.vue";
 import { Dialog } from "@headlessui/vue";
 import VoteBlock from "@/components/governance/VoteBlock.vue";
 import VoteModal from "@/components/governance/VoteModal.vue";
-import { getAssetMetadata } from "@/services/DAGApi";
 import PriceAAFinished from "@/components/governance/PriceAAFinished.vue";
 import RegisterSymbolModal from "@/components/RegisterSymbolModal.vue";
 import AddressController from "@/components/AddressController.vue";
@@ -77,10 +76,15 @@ async function init() {
     return router.push("/governance");
   }
 
+  const defPromises = [];
   for (const priceAA of preparedMeta.value.priceAAsMeta.allPriceAAs) {
-    const priceAADefinition = await Client.api.getDefinition(priceAA);
-    priceAAsDefinition.value[priceAA] = priceAADefinition[1].params;
+    defPromises.push(getDefinition(priceAA));
   }
+
+  const result = await Promise.all(defPromises);
+  result.forEach((v) => {
+    priceAAsDefinition.value[v.aa] = v.definition[1].params;
+  });
 
   votes.value = getAllVotes(
     metaByAA.stakingVars,
@@ -90,11 +94,13 @@ async function init() {
 
   const assets = getNotDefaultAssetsFromMeta(metaByAA);
   const mForFinishedAssets = {};
+  const metadataByAsset = await getAssetMetadataByArray(assets);
+
   for (let asset of assets) {
     const m = metaByAA[`asset_${asset}`];
     mForFinishedAssets[asset] = {
       metaByPriceAA: preparedMeta.value.priceAAsMeta.finished[m.price_aa],
-      assetMetaData: await getAssetMetadata(asset),
+      assetMetaData: metadataByAsset[asset],
       ...m,
     };
   }
