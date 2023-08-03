@@ -168,7 +168,7 @@ onUnmounted(() => {
 });
 </script>
 <template>
-  <div class="container w-[320px] sm:w-[640px] m-auto mt-8 mb-36 p-8">
+  <div class="container w-full sm:w-[640px] m-auto mt-8 mb-36 p-6 sm:p-8">
     <div @click="goBack()" class="p-2 mb-6 cursor-pointer">
       <div class="flex items-center">
         <div class="inline-block mr-2">
@@ -201,7 +201,7 @@ onUnmounted(() => {
 
     <div v-if="step === 1">
       <div class="card bg-base-200 shadow-xl">
-        <div class="card-body">
+        <div class="card-body p-6 sm:p-8">
           <div class="!form-control">
             <div class="pt-2">
               <div class="flex items-center">
@@ -363,7 +363,7 @@ onUnmounted(() => {
     </div>
     <div v-else-if="step === 4">
       <div class="card bg-base-200 shadow-xl mt-2">
-        <div class="card-body gap-0">
+        <div class="card-body gap-0 p-6 sm:p-8">
           <div class="text-sm font-medium inline-block mb-2">
             Perp AA:
             <div class="text-sm font-light inline-block">

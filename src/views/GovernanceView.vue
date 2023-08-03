@@ -6,6 +6,7 @@ import { useAddressStore } from "@/stores/addressStore";
 import { getPreparedMeta } from "@/utils/governanceUtils";
 import GovernanceAsset from "@/components/governance/GovernanceAsset.vue";
 import AddressController from "@/components/AddressController.vue";
+import Loading from "@/components/icons/LoadingIcon.vue";
 
 const store = useAaInfoStore();
 const addressStore = useAddressStore();
@@ -38,7 +39,7 @@ watch(meta, init, { deep: true });
 <template>
   <div
     v-if="Object.keys(aasWithMeta).length"
-    class="container w-[320px] sm:w-[768px] m-auto mt-8 mb-36 p-8"
+    class="container w-full sm:w-[768px] m-auto mt-8 mb-36 p-6 sm:p-8"
   >
     <AddressController />
     <div class="p-2 mb-6">
@@ -55,15 +56,15 @@ watch(meta, init, { deep: true });
     >
       <div v-if="perpetualAAMeta.symbolAndDecimals">
         <div class="card bg-base-200 shadow-xl mb-4">
-          <div class="card-body">
+          <div class="card-body p-6 sm:p-8">
             <div>
-              <div class="flex justify-between items-center">
+              <div class="block sm:flex justify-between items-center">
                 <div class="text-lg font-bold">
                   {{ perpetualAAMeta.reserveAsset.name }}/{{
                     perpetualAAMeta.symbolAndDecimals.name
                   }}
                 </div>
-                <div>
+                <div class="mt-3 mb-6 sm:my-0">
                   <RouterLink
                     class="btn btn-sm"
                     :class="
@@ -101,8 +102,8 @@ watch(meta, init, { deep: true });
   </div>
   <div
     v-else
-    class="container w-[320px] sm:w-[512px] m-auto mt-40 mb-36 p-8 text-center"
+    class="container w-full sm:w-[512px] m-auto mt-40 mb-36 p-6 sm:p-8 text-center"
   >
-    <span class="loading loading-spinner loading-md"></span>
+    <Loading />
   </div>
 </template>

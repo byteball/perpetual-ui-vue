@@ -55,31 +55,35 @@ function voteFromTable(value) {
 
 <template>
   <div class="mb-8">
-    <div class="flex justify-between mt-8 font-bold text-lg">
-      <div>{{ title }}</div>
-      <div>
+    <div class="block sm:flex justify-between mt-8 font-bold text-lg">
+      <div class="text-center sm:text-left">{{ title }}</div>
+      <div
+        class="text-center sm:text-left text-base sm:text-lg font-medium sm:font-bold"
+      >
         Current value:
         {{ currentValue }}{{ suffix }}
       </div>
     </div>
     <div class="card bg-base-300 shadow-xl mt-2.5">
-      <div class="card-body gap-0">
+      <div class="card-body gap-0 p-3 sm:p-8">
         <div class="text-center">
           <div v-if="votesByName?.length" class="mb-4">
-            <VotingTable
-              :votes="votesByName"
-              :type="type"
-              :suffix="suffix"
-              :decimals="preparedMeta.symbolAndDecimals.decimals"
-              @vote-from-table="voteFromTable"
-            />
+            <div class="w-full overflow-auto">
+              <VotingTable
+                :votes="votesByName"
+                :type="type"
+                :suffix="suffix"
+                :decimals="preparedMeta.symbolAndDecimals.decimals"
+                @vote-from-table="voteFromTable"
+              />
+            </div>
             <div v-if="userVote?.vp" class="mt-2">
               You vote for
               <span class="font-bold">{{ userVote.value }}{{ suffix }}</span>
               (vp: {{ userVote.vp }})
             </div>
           </div>
-          <div class="text-left">
+          <div class="text-center sm:text-left">
             <a
               class="link text-sky-500 link-hover"
               @click="$emit('reqVote', name, type, suffix)"

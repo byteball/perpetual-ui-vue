@@ -136,7 +136,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="container w-[320px] sm:w-[512px] m-auto mt-8 mb-36 p-8">
+  <div class="container w-full sm:w-[512px] m-auto mt-8 mb-36 p-6 sm:p-8">
     <div v-if="!exists" class="text-center">
       <div class="alert shadow-lg">
         <div class="flex items-center">
@@ -165,7 +165,7 @@ onMounted(() => {
     </div>
     <div v-if="exists && route.query.step !== '3'">
       <div class="card bg-base-200 shadow-xl">
-        <div class="card-body">
+        <div class="card-body p-6 sm:p-8">
           <div class="form-control">
             <label class="label">
               <span class="label-text">Asset</span>

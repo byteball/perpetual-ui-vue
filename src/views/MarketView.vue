@@ -14,6 +14,7 @@ import { generateLink } from "@/utils/generateLink";
 import { getExchangeResultByState } from "@/utils/getExchangeResultByState";
 import NumberInput from "@/components/inputs/NumberInput.vue";
 import AddressController from "@/components/AddressController.vue";
+import Loading from "@/components/icons/LoadingIcon.vue";
 
 const store = useAaInfoStore();
 const { aas, meta, status } = storeToRefs(store);
@@ -250,7 +251,7 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
 }
 </style>
 <template>
-  <div class="container w-[320px] sm:w-[512px] m-auto mt-8 mb-36 p-8">
+  <div class="container w-full sm:w-[512px] m-auto mt-8 mb-36 p-6 sm:p-8">
     <AddressController />
     <div class="p-2 mb-6">
       <div class="text-lg font-semibold leading-7">Market</div>
@@ -261,9 +262,9 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
     </div>
 
     <div class="card bg-base-200 shadow-xl">
-      <div class="card-body">
+      <div class="card-body p-6 sm:p-8">
         <div v-if="!assets.assetList.length" class="text-center">
-          <span class="loading loading-spinner loading-md"></span>
+          <Loading />
         </div>
         <div class="form-control" v-if="assets.assetList.length">
           <div class="input-group">

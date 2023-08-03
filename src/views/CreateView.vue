@@ -276,7 +276,7 @@ watch(
 );
 </script>
 <template>
-  <div class="container w-[320px] sm:w-[512px] m-auto mt-8 mb-36 p-8">
+  <div class="container w-full sm:w-[512px] m-auto mt-8 mb-36 p-6 sm:p-8">
     <div v-if="!awaiting" class="p-2 mb-6">
       <div class="text-lg font-semibold leading-7">Create</div>
       <p class="mt-2 leading-6">
@@ -318,7 +318,7 @@ watch(
     </div>
     <div v-show="!awaiting">
       <div class="card bg-base-200 shadow-xl">
-        <div class="card-body">
+        <div class="card-body p-6 sm:p-8">
           <div class="!form-control">
             <label class="label">
               <span class="label-text">Reserve asset</span>

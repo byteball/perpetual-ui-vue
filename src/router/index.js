@@ -30,11 +30,6 @@ const router = createRouter({
       component: () => import("../views/AddPerpView.vue"),
     },
     {
-      path: "/vote/:aa(.*)?",
-      name: "vote",
-      component: () => import("../views/VoteView.vue"),
-    },
-    {
       path: "/presale/:presale(.*)?",
       name: "presale",
       component: () => import("../views/PresaleView.vue"),
