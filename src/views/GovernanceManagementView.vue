@@ -16,6 +16,7 @@ import VoteModal from "@/components/governance/VoteModal.vue";
 import PriceAAFinished from "@/components/governance/PriceAAFinished.vue";
 import RegisterSymbolModal from "@/components/RegisterSymbolModal.vue";
 import AddressController from "@/components/AddressController.vue";
+import Loading from "@/components/icons/LoadingIcon.vue";
 
 const store = useAaInfoStore();
 const { setActiveAddress } = store;
@@ -204,7 +205,7 @@ watch(meta, init, { deep: true });
 
 <template>
   <div
-    class="container w-[320px] sm:w-[768px] m-auto mt-8 mb-36 p-8"
+    class="container w-full sm:w-[768px] m-auto mt-8 mb-36 p-6 sm:p-8"
     v-if="ready"
   >
     <AddressController />
@@ -241,7 +242,7 @@ watch(meta, init, { deep: true });
     </div>
     <div v-if="notFound" class="text-center">AA not found</div>
     <div v-else class="card bg-base-200 shadow-xl mb-4">
-      <div class="card-body">
+      <div class="card-body p-6 sm:p-8">
         <div>
           <div class="text-lg font-bold">
             {{ preparedMeta.reserveAsset.name }}/{{
@@ -329,7 +330,7 @@ watch(meta, init, { deep: true });
             :key="priceAA"
           >
             <div class="card bg-base-300 shadow-xl mb-8">
-              <div class="card-body gap-0">
+              <div class="card-body gap-0 p-3 sm:p-8">
                 <div>
                   <PriceAANotFinished
                     :price-aa="priceAA"
@@ -355,9 +356,9 @@ watch(meta, init, { deep: true });
   </div>
   <div
     v-else
-    class="container w-[320px] sm:w-[512px] m-auto mt-40 mb-36 p-8 text-center"
+    class="container w-full sm:w-[512px] m-auto mt-40 mb-36 p-6 sm:p-8 text-center"
   >
-    <span class="loading loading-spinner loading-md"></span>
+    <Loading />
   </div>
   <Dialog
     :open="modalForVoteIsOpen"

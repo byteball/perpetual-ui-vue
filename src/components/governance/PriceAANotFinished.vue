@@ -8,14 +8,14 @@ defineProps(["priceAa", "stakingAa", "definition", "priceAasMeta"]);
 <template>
   <div class="text-sm font-medium inline-block mb-2">
     Price AA:
-    <div class="text-sm font-light inline-block">
+    <div class="text-xs sm:text-sm font-light block sm:inline-block">
       {{ priceAa }}
     </div>
   </div>
-  <div class="flex justify-between">
+  <div class="block sm:flex justify-between">
     <div class="font-medium text-sm inline-block mb-2">
       Oracle:
-      <div class="font-light text-sm inline-block">
+      <div class="font-light text-xs sm:text-sm block sm:inline-block">
         {{ definition.oracle }}
       </div>
     </div>
@@ -32,22 +32,22 @@ defineProps(["priceAa", "stakingAa", "definition", "priceAasMeta"]);
       {{ definition.feed_name }}
     </div>
   </div>
-  <div class="flex justify-between">
-    <div class="text-sm font-medium inline-block">
+  <div class="block sm:flex justify-between">
+    <div class="text-sm font-medium block sm:inline-block">
       Status:
       <div class="text-sm font-light inline-block">
         <p v-if="priceAasMeta.vpAddPriceBCommit">waiting commit</p>
         <p v-else>not finished</p>
       </div>
     </div>
-    <div class="font-medium text-sm inline-block">
+    <div class="font-medium text-sm block sm:inline-block">
       {{ priceAasMeta.vpAddPriceBCommit ? "Result: " : "Leader: " }}
       <div class="font-light text-sm inline-block">
         {{ priceAasMeta.leaderAddPriceAA.value }}
       </div>
     </div>
   </div>
-  <div class="card-actions justify-start mt-4">
+  <div class="card-actions justify-start mt-4 text-center sm:text-left">
     <div v-if="!priceAasMeta.vpAddPriceBCommit">
       <button
         class="btn btn-sm gap-2 mr-4"
@@ -59,7 +59,7 @@ defineProps(["priceAa", "stakingAa", "definition", "priceAasMeta"]);
         Vote for no
       </button>
       <button
-        class="btn btn-sm gap-2"
+        class="btn btn-sm gap-2 mt-4 sm:mt-0"
         @click="
           generateAndFollowLinkForVoteAddPriceAA(
             priceAa,
@@ -83,7 +83,7 @@ defineProps(["priceAa", "stakingAa", "definition", "priceAasMeta"]);
         Vote for no
       </button>
       <button
-        class="btn btn-sm gap-2"
+        class="btn btn-sm gap-2 mt-4 sm:mt-0"
         @click="
           generateAndFollowLinkForVoteAddPriceAA(priceAa, 'yes', stakingAa)
         "

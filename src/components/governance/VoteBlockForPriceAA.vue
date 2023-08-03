@@ -57,7 +57,7 @@ function voteFromTable(value) {
       Current value:
       <a
         v-if="type === 'address'"
-        class="link underline"
+        class="link underline block sm:inline-block text-xs sm:text-sm"
         target="_blank"
         :href="fullExplorerUrlForAddress + currentValue"
         >{{ currentValue }}</a
@@ -66,18 +66,22 @@ function voteFromTable(value) {
     </div>
     <div class="mt-2">
       <div v-if="votesByName?.length" class="mb-4">
-        <VotingTable
-          :votes="votesByName"
-          :decimals="assetMeta.assetMetaData.decimals"
-          @vote-from-table="voteFromTable"
-        />
+        <div class="overflow-auto">
+          <VotingTable
+            :votes="votesByName"
+            :decimals="assetMeta.assetMetaData.decimals"
+            @vote-from-table="voteFromTable"
+          />
+        </div>
         <div v-if="userVote?.vp" class="mt-2 text-center">
           You vote for
-          <span class="font-bold">{{ userVote.value }}</span>
+          <span class="font-normal sm:font-bold text-xs sm:text-sm">{{
+            userVote.value
+          }}</span>
           (vp: {{ userVote.vp }})
         </div>
       </div>
-      <div class="text-left">
+      <div class="text-center sm:text-left">
         <a
           class="link text-sky-500 link-hover"
           @click="$emit('reqVote', name, type)"

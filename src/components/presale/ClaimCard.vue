@@ -116,7 +116,7 @@ onMounted(async () => {
 
 <template>
   <div v-if="addressClaims.length" class="card bg-base-200 shadow-xl mb-4">
-    <div class="card-body">
+    <div class="card-body p-4 sm:p-8">
       <div class="text-sm text-center">
         <table class="table w-full">
           <thead>

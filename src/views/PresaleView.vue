@@ -18,6 +18,7 @@ import { getParam } from "@/utils/governanceUtils";
 import AddressController from "@/components/AddressController.vue";
 import { useAddressStore } from "@/stores/addressStore";
 import ClaimCard from "@/components/presale/ClaimCard.vue";
+import Loading from "@/components/icons/LoadingIcon.vue";
 
 dayjs.extend(duration);
 
@@ -305,7 +306,7 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
 }
 </style>
 <template>
-  <div class="container w-[320px] sm:w-[512px] m-auto mt-8 mb-36 p-8">
+  <div class="container w-full sm:w-[512px] m-auto mt-8 mb-36 p-6 sm:p-8">
     <div v-if="toastMessage" class="toast toast-top toast-end">
       <div class="alert alert-error">
         <span>{{ toastMessage }}</span>
@@ -325,9 +326,9 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
     </div>
 
     <div class="card bg-base-200 shadow-xl">
-      <div class="card-body">
+      <div class="card-body p-6 sm:p-8">
         <div v-if="!isLoaded" class="text-center">
-          <span class="loading loading-spinner loading-md"></span>
+          <Loading />
         </div>
         <div v-else>
           <div v-if="presaleList.length">

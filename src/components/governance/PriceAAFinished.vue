@@ -24,7 +24,7 @@ function reqVote(name, type, value) {
 
 <template>
   <div class="card bg-base-300 shadow-xl mb-8">
-    <div class="card-body gap-0">
+    <div class="card-body gap-0 p-3 sm:p-8">
       <div v-if="assetMeta.assetMetaData?.name">
         <div class="font-medium mb-2">
           {{ assetMeta.assetMetaData.name }}
@@ -39,18 +39,20 @@ function reqVote(name, type, value) {
       <div v-else>
         <div class="font-medium text-sm mb-2">
           Asset:
-          <span class="font-light text-sm">
+          <span
+            class="font-light text-xs sm:text-sm block sm:inline-block text-ellipsis overflow-hidden sm:overflow-auto"
+          >
             {{ asset }}
           </span>
         </div>
-        <div class="flex justify-between">
-          <div class="font-medium text-sm inline-block mb-2">
+        <div class="block sm:flex justify-between">
+          <div class="font-medium text-sm sm:inline-block mb-2">
             Oracle:
-            <div class="font-light text-sm inline-block">
+            <div class="font-light text-xs sm:text-sm inline-block">
               {{ priceAaDefinition.oracle }}
             </div>
           </div>
-          <div class="font-medium text-sm inline-block mb-2">
+          <div class="font-medium text-sm sm:inline-block mb-2">
             Multiplier:
             <div class="font-light text-sm inline-block">
               {{ priceAaDefinition.multiplier || 1 }}
@@ -73,7 +75,9 @@ function reqVote(name, type, value) {
           voting is completed, but need register symbol
         </span>
       </div>
-      <div class="card-actions justify-start">
+      <div
+        class="card-actions sm:justify-start block sm:flex text-center sm:text-left"
+      >
         <button
           v-if="!assetMeta.assetMetaData"
           class="btn btn-sm gap-2 mt-4"

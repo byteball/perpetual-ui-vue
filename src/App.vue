@@ -26,7 +26,7 @@ const route = useRoute();
           </label>
           <ul
             tabindex="0"
-            class="menu menu-sm dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-50"
+            class="menu menu-sm dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-50 z-50"
           >
             <li>
               <RouterLink

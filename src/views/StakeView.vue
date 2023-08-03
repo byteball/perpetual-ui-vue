@@ -12,6 +12,7 @@ import { getAssetMetadata } from "@/services/DAGApi";
 import NumberInput from "@/components/inputs/NumberInput.vue";
 import IntegerInput from "@/components/inputs/IntegerInput.vue";
 import AddressController from "@/components/AddressController.vue";
+import Loading from "@/components/icons/LoadingIcon.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -336,7 +337,7 @@ watch(
 }
 </style>
 <template>
-  <div class="container w-[320px] sm:w-[512px] m-auto mt-8 mb-36 p-8">
+  <div class="container w-full sm:w-[512px] m-auto mt-8 mb-36 p-6 sm:p-8">
     <AddressController />
     <div class="p-2 mb-6">
       <div class="text-lg font-semibold leading-7">Stake</div>
@@ -346,9 +347,9 @@ watch(
       </p>
     </div>
     <div class="card bg-base-200 shadow-xl">
-      <div class="card-body">
+      <div class="card-body p-6 sm:p-8">
         <div v-if="!pools.length" class="text-center">
-          <span class="loading loading-spinner loading-md"></span>
+          <Loading />
         </div>
         <div v-if="pools.length">
           <div class="form-control">
