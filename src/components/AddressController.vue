@@ -2,6 +2,7 @@
 import { ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useAddressStore } from "@/stores/addressStore";
+import { utils } from "obyte";
 
 const store = useAddressStore();
 const { address } = storeToRefs(store);
@@ -9,6 +10,7 @@ const { address } = storeToRefs(store);
 const addressInput = ref("");
 const changeMode = ref(false);
 const isHidden = ref(true);
+const isValidAddress = ref(false);
 
 function setAddress() {
   if (!addressInput.value) return;
@@ -27,6 +29,13 @@ function toggleChangeMode() {
 function showAddressBlock() {
   isHidden.value = false;
 }
+
+watch(
+  () => addressInput.value,
+  () => {
+    isValidAddress.value = utils.isValidAddress(addressInput.value);
+  }
+);
 
 watch(
   () => address.value,
@@ -66,7 +75,11 @@ watch(
           />
         </div>
         <div class="text-center mt-2.5">
-          <button class="btn btn-primary" @click="setAddress">
+          <button
+            class="btn btn-primary"
+            :class="{ '!btn-disabled': !isValidAddress }"
+            @click="setAddress"
+          >
             Save address
           </button>
         </div>
