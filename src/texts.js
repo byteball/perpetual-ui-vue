@@ -1,15 +1,15 @@
 export const propertyTips = {
   oracle:
     "Address of Oracle that publishes the data that will be used to form the price",
-  feedName: "Name of the asset in Obyte network",
-  multiplier: "multiplier",
-  swapFee: "Swapping fee, percentage of traded amount.",
-  arbProfitTax: `Additional fee that is charged as a percentage of arbitrageur profit.
+  feed_name: "Name of the asset in Obyte network",
+  multiplier: "Multiplier",
+  swap_fee: "Swapping fee, percentage of traded amount.",
+  arb_profit_tax: `Additional fee that is charged as a percentage of arbitrageur profit.
    It is assumed that arbitrageurs buy from the pool in order
    to sell elsewhere and make a profit from the difference in prices.`,
-  adjustmentPeriod: "adjustment period",
-  presalePeriod: "Presale duration in days",
-  auctionPriceHalvingPeriod: "auction price halving period",
-  tokenShareThreshold: "token share threshold",
-  minS0Share: "mon s0 share",
+  adjustment_period: "adjustment period",
+  presale_period: "Presale duration in days",
+  auction_price_halving_period: "Auction price halving period",
+  token_share_threshold: "Token share threshold",
+  min_s0_share: "min s0 share",
 };

@@ -11,6 +11,7 @@ export function useUserBalance(address) {
     }
 
     balance.value = b[address.value];
+    setTimeout(updateBalance, 60000);
   }
 
   if (address.value) {

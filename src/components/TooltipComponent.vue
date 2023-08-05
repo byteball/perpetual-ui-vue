@@ -7,12 +7,15 @@ const props = defineProps(["fieldName"]);
 const dataTip = ref("");
 
 onMounted(() => {
-  dataTip.value = propertyTips[props.fieldName];
+  dataTip.value = propertyTips[props.fieldName] || "";
+  if (!dataTip.value) {
+    console.log("data tip error, field name: " + props.fieldName);
+  }
 });
 </script>
 
 <template>
-  <div class="tooltip" :data-tip="dataTip">
+  <div class="tooltip font-normal" :data-tip="dataTip">
     <svg
       xmlns="http://www.w3.org/2000/svg"
       fill="none"

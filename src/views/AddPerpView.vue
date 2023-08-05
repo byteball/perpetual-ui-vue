@@ -36,7 +36,7 @@ function setLinkForPriceAA() {
   linkForPriceAA.value = generateDefinitionLink([
     "autonomous agent",
     {
-      base_aa: "33QMBZUN3ZB3ETXLJAX4PULREZTSW55Q",
+      base_aa: import.meta.env.VITE_BASE_PRICE_AA,
       params: {
         oracle: oracle.value,
         feed_name: feedName.value,
@@ -54,7 +54,7 @@ async function checkExistsPriceAA() {
       [
         "autonomous agent",
         {
-          base_aa: "33QMBZUN3ZB3ETXLJAX4PULREZTSW55Q",
+          base_aa: import.meta.env.VITE_BASE_PRICE_AA,
           params: {
             oracle: oracle.value,
             feed_name: feedName.value,
@@ -83,9 +83,16 @@ function clearPriceInterval() {
 
 async function checkPriceAA() {
   console.log("check checkPriceAA");
-  const def = await Client.api.getDefinition(priceAA.value);
-  if (def) {
-    console.log("check checkPriceAA def");
+  const q = await Client.api.getAasByBaseAas({
+    base_aa: import.meta.env.VITE_BASE_PRICE_AA,
+  });
+
+  const addressExists = !!q.find((v) => {
+    return v.address === priceAA.value;
+  });
+
+  if (addressExists) {
+    console.log("check checkPriceAA exists");
     clearPriceInterval();
     needCheckPriceAA.value = false;
     step.value = 4;
@@ -93,7 +100,7 @@ async function checkPriceAA() {
   console.log("check price done");
 }
 function setTimerForCheckPriceAA() {
-  intervalId = setInterval(checkPriceAA, 5000);
+  intervalId = setInterval(checkPriceAA, 10000);
   checkPriceAA();
 }
 
@@ -116,11 +123,12 @@ watch(
 );
 
 watch(
-  [currentRate, multiplier],
+  [currentRate, multiplier, meta],
   async () => {
     buttonDisabled.value = true;
 
     if (
+      meta.value[route.params.aa]?.reserve_asset &&
       currentRate.value !== null &&
       currentRate.value !== undefined &&
       multiplier.value &&
@@ -209,7 +217,7 @@ onUnmounted(() => {
                 <label class="label">
                   <span class="label-text">Oracle</span>
                 </label>
-                <TooltipComponent :field-name="'oracle'"> </TooltipComponent>
+                <TooltipComponent field-name="oracle"> </TooltipComponent>
               </div>
               <input
                 type="text"
@@ -222,7 +230,7 @@ onUnmounted(() => {
                 <label class="label">
                   <span class="label-text">Feed name</span>
                 </label>
-                <TooltipComponent :field-name="'feedName'"> </TooltipComponent>
+                <TooltipComponent field-name="feed_name"> </TooltipComponent>
               </div>
               <input
                 type="text"
@@ -235,8 +243,7 @@ onUnmounted(() => {
                 <label class="label">
                   <span class="label-text">Multiplier</span>
                 </label>
-                <TooltipComponent :field-name="'multiplier'">
-                </TooltipComponent>
+                <TooltipComponent field-name="multiplier"> </TooltipComponent>
               </div>
               <IntegerInput
                 v-model="multiplier"

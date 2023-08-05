@@ -7,6 +7,7 @@ import Client from "@/services/Obyte";
 import { getAssetMetadata, getMetaForPerpAAs } from "@/services/DAGApi";
 import { generateLink } from "@/utils/generateLink";
 import { parseDataForFactoryRequest } from "@/utils/parseDataForFactoryRequest";
+import IntegerInput from "@/components/inputs/IntegerInput.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -15,6 +16,7 @@ const exists = ref(false);
 const link = ref("");
 const asset = ref("");
 const symbol = ref("");
+const isSymbolExists = ref(false);
 const decimals = ref(0);
 const description = ref("");
 const buttonEnabled = ref(false);
@@ -22,7 +24,7 @@ const buttonEnabled = ref(false);
 const fillInputsForStep = (assetUnit) => {
   asset.value = assetUnit;
   symbol.value = "";
-  decimals.value = 0;
+  decimals.value = 9;
   description.value = "";
 
   if (route.query.step === "2") {
@@ -30,17 +32,41 @@ const fillInputsForStep = (assetUnit) => {
   }
 };
 
+const suggestValueForSymbolField = async (reserveSymbol) => {
+  if (route.query.step !== "2") return;
+  const registryAA = Client.api.getOfficialTokenRegistryAddress();
+
+  let index = 1;
+  let newSymbolSuggestion = `${reserveSymbol}_P${index}`;
+
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const asset = await Client.api.getAssetBySymbol(
+      registryAA,
+      newSymbolSuggestion
+    );
+
+    if (!asset) break;
+
+    newSymbolSuggestion = `${reserveSymbol}_P${++index}`;
+  }
+
+  symbol.value = newSymbolSuggestion;
+};
+
 watch(exists, async () => {
   const currentPerpetualMeta = await getMetaForPerpAAs([route.params.aa]);
+  console.log("currentPerpetualMeta", currentPerpetualMeta);
   const reserveAsset = currentPerpetualMeta[route.params.aa].reserve_asset;
+  const asset0 = currentPerpetualMeta[route.params.aa].state.asset0;
 
   if (reserveAsset === "base") {
     await router.push({
       path: `/create/${route.params.aa}`,
       query: { step: 2 },
     });
-    fillInputsForStep(currentPerpetualMeta[route.params.aa].state.asset0);
-
+    fillInputsForStep(asset0);
+    await suggestValueForSymbolField("GBYTE");
     return;
   }
 
@@ -51,7 +77,7 @@ watch(exists, async () => {
       path: `/create/${route.params.aa}`,
       query: { step: 1 },
     });
-    fillInputsForStep(currentPerpetualMeta[route.params.aa].reserve_asset);
+    fillInputsForStep(reserveAsset);
 
     return;
   }
@@ -60,7 +86,8 @@ watch(exists, async () => {
     path: `/create/${route.params.aa}`,
     query: { step: 2 },
   });
-  fillInputsForStep(currentPerpetualMeta[route.params.aa].state.asset0);
+  fillInputsForStep(asset0);
+  await suggestValueForSymbolField(reserveAssetMetadata.name);
 });
 
 emitter.on(`aa_request_${import.meta.env.VITE_REGISTRY_AA}`, async (data) => {
@@ -95,12 +122,24 @@ emitter.on(`aa_response_${import.meta.env.VITE_FACTORY_AA}`, (data) => {
   }
 });
 
-watch([asset, symbol, decimals, description], () => {
+watch([asset, symbol, decimals, description], async () => {
+  const registryAA = Client.api.getOfficialTokenRegistryAddress();
   buttonEnabled.value = false;
 
   if (!symbol.value) {
     return;
   }
+
+  const isSymbolTaken = await Client.api.getAssetBySymbol(
+    registryAA,
+    symbol.value
+  );
+
+  if (isSymbolTaken) {
+    isSymbolExists.value = true;
+    return;
+  }
+  isSymbolExists.value = false;
 
   if (decimals.value === "") {
     return;
@@ -187,17 +226,15 @@ onMounted(() => {
               @input="() => (symbol = symbol.toUpperCase())"
               class="input input-bordered"
             />
+            <div class="p-1 text-red-500">
+              {{ isSymbolExists ? "This symbol is already in use" : "" }}
+            </div>
           </div>
           <div class="form-control">
             <label class="label">
               <span class="label-text">Decimals</span>
             </label>
-            <input
-              type="number"
-              v-model="decimals"
-              min="0"
-              class="input input-bordered"
-            />
+            <IntegerInput v-model="decimals" class="input input-bordered" />
           </div>
           <div class="form-control">
             <label class="label">

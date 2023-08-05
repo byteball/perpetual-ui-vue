@@ -9,6 +9,7 @@ import { getVP, getVPFromNormalized } from "@/utils/getVP";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import { useAddressStore } from "@/stores/addressStore";
 import { getAssetMetadata } from "@/services/DAGApi";
+import { useUserBalance } from "@/composables/useUserBalance";
 import NumberInput from "@/components/inputs/NumberInput.vue";
 import IntegerInput from "@/components/inputs/IntegerInput.vue";
 import AddressController from "@/components/AddressController.vue";
@@ -21,6 +22,8 @@ const store = useAaInfoStore();
 const addressStore = useAddressStore();
 const { aas, meta, status, timestamp } = storeToRefs(store);
 const { address } = storeToRefs(addressStore);
+
+const { balance } = useUserBalance(address);
 
 const pools = ref([]);
 const poolSymbolAndDecimalByAA = ref({});
@@ -37,6 +40,25 @@ const votedGroupKey = ref({ value: "g1", error: "" });
 const percentages = ref({ value: "100", error: "" });
 const buttonDisabled = ref(true);
 const activeTab = ref("stake");
+
+const balanceByAsset = computed(() => {
+  if (
+    !metaByAA.value?.aa ||
+    !poolSymbolAndDecimalByAA.value[metaByAA.value.aa]?.asset
+  ) {
+    return 0;
+  }
+
+  const asset = poolSymbolAndDecimalByAA.value[metaByAA.value.aa].asset;
+  const decimals = poolSymbolAndDecimalByAA.value[metaByAA.value.aa].decimals;
+
+  let b = balance.value[asset]?.stable || 0;
+  if (b) {
+    b = b / 10 ** decimals;
+  }
+
+  return b;
+});
 
 const currentBalance = computed(() => {
   const balance =
@@ -231,6 +253,13 @@ watch(
       buttonDisabled.value = true;
     }
 
+    if (address.value && amount.value.value > balanceByAsset.value) {
+      buttonDisabled.value = true;
+      term.value.error =
+        "Insufficient funds, please buy tokens on the Market page";
+      return;
+    }
+
     if (!term.value.value) {
       buttonDisabled.value = true;
       term.value.error = "Term is required field!";
@@ -363,8 +392,14 @@ watch(
           </div>
           <div v-if="metaByAA && poolSymbolAndDecimalByAA[metaByAA.aa]">
             <div v-if="address" class="mt-4 mb-4">
-              Your stake balance: {{ userStakeBalance }}
-              {{ poolSymbolAndDecimalByAA[selectedAA].name }}
+              <div>
+                Balance by address: {{ balanceByAsset }}
+                {{ poolSymbolAndDecimalByAA[selectedAA].name }}
+              </div>
+              <div>
+                Your stake: {{ userStakeBalance }}
+                {{ poolSymbolAndDecimalByAA[selectedAA].name }}
+              </div>
             </div>
             <div class="tabs tabs-boxed mt-8 mb-4">
               <a

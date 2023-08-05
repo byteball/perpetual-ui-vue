@@ -16,6 +16,7 @@ import { ChevronRightIcon } from "@heroicons/vue/20/solid";
 import VoteInput from "@/components/inputs/VoteInput.vue";
 import { convertObjectFieldValues } from "@/utils/convertValue";
 import TooltipComponent from "@/components/TooltipComponent.vue";
+import { isValidUnit } from "@/utils/validates";
 
 const router = useRouter();
 
@@ -35,6 +36,7 @@ const SI = ref();
 const autoComplete = ref();
 const assocAssetBySymbol = ref({});
 const oswapAssets = ref({});
+const existsError = ref("");
 
 function keyDown(e) {
   if (e.key === "Enter") {
@@ -80,7 +82,7 @@ async function getOswapPoolsAndSymbols() {
 onMounted(async () => {
   const registry = Client.api.getOfficialTokenRegistryAddress();
   oswapAssets.value = await getOswapPoolsAndSymbols();
-  SI.value.addEventListener("keydown", keyDown);
+  SI.value?.addEventListener("keydown", keyDown);
 
   autoComplete.value = new AutoComplete({
     name: "autoComplete",
@@ -145,10 +147,7 @@ function setAwaiting(value) {
   awaiting.value = value;
 }
 
-emitter.on(`aa_request_${import.meta.env.VITE_FACTORY_AA}`, async (data) => {
-  if (!awaiting.value) return;
-
-  const _d = parseDataForFactoryRequest(data);
+function getObj() {
   const obj = clearObject({
     reserve_asset: reserveAsset.value,
     swap_fee: swapFee.value,
@@ -161,6 +160,15 @@ emitter.on(`aa_request_${import.meta.env.VITE_FACTORY_AA}`, async (data) => {
   });
 
   convertObjectFieldValues(obj);
+
+  return obj;
+}
+
+emitter.on(`aa_request_${import.meta.env.VITE_FACTORY_AA}`, async (data) => {
+  if (!awaiting.value) return;
+
+  const _d = parseDataForFactoryRequest(data);
+  const obj = getObj();
 
   if (JSON.stringify(_d) === JSON.stringify(obj)) {
     const result = await Client.api.dryRunAa({
@@ -194,23 +202,14 @@ watch(
     tokenShareThreshold,
     minS0Share,
   ],
-  () => {
-    const obj = clearObject({
-      reserve_asset: reserveAsset.value,
-      swap_fee: swapFee.value,
-      arb_profit_tax: arbProfitTax.value,
-      adjustment_period: adjustmentPeriod.value,
-      presale_period: presalePeriod.value,
-      auction_price_halving_period: auctionPriceHalvingPeriod.value,
-      token_share_threshold: tokenShareThreshold.value,
-      min_s0_share: minS0Share.value,
-    });
-
-    convertObjectFieldValues(obj);
+  async () => {
+    if (!reserveAsset.value) return;
+    link.value = "";
+    await checkAAForAlreadyExisting();
 
     link.value = generateLink(
       10000,
-      obj,
+      getObj(),
       null,
       import.meta.env.VITE_FACTORY_AA,
       "base",
@@ -249,16 +248,38 @@ watch(
 //   }
 // }
 
+async function checkAAForAlreadyExisting() {
+  const result = await Client.api.dryRunAa({
+    trigger: {
+      address: import.meta.env.VITE_FACTORY_AA,
+      outputs: {
+        base: 10000,
+      },
+      data: getObj(),
+    },
+    address: import.meta.env.VITE_FACTORY_AA, // sent to AA address
+  });
+
+  if (result[0].response.error) {
+    existsError.value = result[0].response.error;
+    return;
+  }
+
+  existsError.value = "";
+}
+
 watch(
   reserveAssetInput,
   debounce(async () => {
+    existsError.value = "";
     if (oswapAssets.value[reserveAssetInput.value]) {
       reserveAsset.value = oswapAssets.value[reserveAssetInput.value];
       return;
     }
 
-    if (["GBYTE", "base"].includes(reserveAssetInput.value)) {
+    if (["GBYTE", "BYTES"].includes(reserveAssetInput.value.toUpperCase())) {
       reserveAsset.value = "base";
+      await checkAAForAlreadyExisting();
       return;
     }
 
@@ -267,12 +288,17 @@ watch(
       registry,
       reserveAssetInput.value
     );
+
     if (asset) {
       reserveAsset.value = asset;
+    } else if (isValidUnit(reserveAssetInput.value)) {
+      reserveAsset.value = reserveAssetInput.value;
+    } else {
+      reserveAsset.value = "";
       return;
     }
 
-    reserveAsset.value = "";
+    await checkAAForAlreadyExisting();
   }, 500)
 );
 </script>
@@ -329,7 +355,8 @@ watch(
               id="assetInput"
               ref="SI"
               v-model="reserveAssetInput"
-              class="!input !input-bordered !w-full"
+              class="!input !input-bordered !w-full !text-white"
+              placeholder="For example: IUSD"
             />
           </div>
           <div class="form-control">
@@ -337,7 +364,7 @@ watch(
               <label class="label">
                 <span class="label-text">Swap fee</span>
               </label>
-              <TooltipComponent :field-name="'swapFee'"></TooltipComponent>
+              <TooltipComponent field-name="swap_fee"></TooltipComponent>
             </div>
             <label class="input-group">
               <VoteInput
@@ -370,7 +397,7 @@ watch(
                     <label class="label">
                       <span class="label-text">Arb profit tax</span>
                     </label>
-                    <TooltipComponent :field-name="'arbProfitTax'">
+                    <TooltipComponent field-name="arb_profit_tax">
                     </TooltipComponent>
                   </div>
                   <label class="input-group">
@@ -387,7 +414,7 @@ watch(
                     <label class="label">
                       <span class="label-text">Adjustment period</span>
                     </label>
-                    <TooltipComponent :field-name="'adjustmentPeriod'">
+                    <TooltipComponent field-name="adjustment_period">
                     </TooltipComponent>
                   </div>
                   <label class="input-group">
@@ -404,7 +431,7 @@ watch(
                     <label class="label">
                       <span class="label-text">Presale period</span>
                     </label>
-                    <TooltipComponent :field-name="'presalePeriod'">
+                    <TooltipComponent field-name="presale_period">
                     </TooltipComponent>
                   </div>
                   <label class="input-group">
@@ -423,7 +450,7 @@ watch(
                         >Auction price halving period</span
                       >
                     </label>
-                    <TooltipComponent :field-name="'auctionPriceHalvingPeriod'">
+                    <TooltipComponent field-name="auction_price_halving_period">
                     </TooltipComponent>
                   </div>
                   <label class="input-group">
@@ -440,7 +467,7 @@ watch(
                     <label class="label">
                       <span class="label-text">Token share threshold</span>
                     </label>
-                    <TooltipComponent :field-name="'tokenShareThreshold'">
+                    <TooltipComponent field-name="token_share_threshold">
                     </TooltipComponent>
                   </div>
                   <label class="input-group">
@@ -457,7 +484,7 @@ watch(
                     <label class="label">
                       <span class="label-text">Min s0 share</span>
                     </label>
-                    <TooltipComponent :field-name="'minS0Share'">
+                    <TooltipComponent field-name="min_s0_share">
                     </TooltipComponent>
                   </div>
                   <label class="input-group">
@@ -472,11 +499,17 @@ watch(
               </DisclosurePanel>
             </transition>
           </Disclosure>
+          <div v-if="existsError" class="my-4 text-red-500">
+            {{ existsError }}
+          </div>
           <div class="form-control mt-6">
             <a
               class="btn btn-primary"
               :href="link"
-              :class="{ '!btn-disabled': reserveAsset === '' }"
+              :class="{
+                '!btn-disabled':
+                  reserveAsset === '' || existsError || link === '',
+              }"
               @click="setAwaiting(true)"
               >Create</a
             >

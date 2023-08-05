@@ -101,7 +101,8 @@ export const getExchangeResultByState = (
     newReserve = Math.ceil(getNewReserve(newSupply, fullFeeRate));
 
     if (newReserve > reserve) {
-      return { error: `New reserve would increase to ${newReserve}!` };
+      console.log("new", newReserve, reserve);
+      return { error: `The amount is too large, try less` };
     }
 
     swapFee = swapFeeRate * (reserve - newReserve);
@@ -146,7 +147,7 @@ export const getExchangeResultByState = (
     deltaSupply = newSupply - oldSupply;
 
     if (deltaSupply < 0) {
-      return { error: `New reserve would decrease by ${deltaSupply}!` };
+      return { error: `The amount is too small, try more` };
     }
 
     state.a0 = bAsset0

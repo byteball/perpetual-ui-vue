@@ -3,17 +3,17 @@ import { getMetaForPerpAAs, getAasCreatedByFactory } from "@/services/DAGApi";
 import emitter from "@/services/emitter";
 import { useAaInfoStore } from "@/stores/aaInfo";
 
-const factoryAaAdress = import.meta.env.VITE_FACTORY_AA;
-const registryAaAdress = import.meta.env.VITE_REGISTRY_AA;
+const factoryAa = import.meta.env.VITE_FACTORY_AA;
+const registryAa = import.meta.env.VITE_REGISTRY_AA;
 
 const aaEventNames = {
-  [factoryAaAdress]: {
-    request: `aa_request_${factoryAaAdress}`,
-    response: `aa_response_${factoryAaAdress}`,
+  [factoryAa]: {
+    request: `aa_request_${factoryAa}`,
+    response: `aa_response_${factoryAa}`,
   },
-  [registryAaAdress]: {
-    request: `aa_request_${registryAaAdress}`,
-    response: `aa_response_${registryAaAdress}`,
+  [registryAa]: {
+    request: `aa_request_${registryAa}`,
+    response: `aa_response_${registryAa}`,
   },
 };
 
@@ -43,11 +43,11 @@ client.onConnect(async () => {
   }, 10 * 1000);
 
   client.justsaying("light/new_aa_to_watch", {
-    aa: import.meta.env.VITE_FACTORY_AA,
+    aa: factoryAa,
   });
 
   client.justsaying("light/new_aa_to_watch", {
-    aa: import.meta.env.VITE_REGISTRY_AA,
+    aa: registryAa,
   });
 
   client.subscribe(function (err, result) {

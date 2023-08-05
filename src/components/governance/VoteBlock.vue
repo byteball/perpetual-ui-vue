@@ -7,6 +7,7 @@ import VotingTable from "@/components/governance/VotingTable.vue";
 import { useAddressStore } from "@/stores/addressStore";
 import { getVPFromNormalized } from "@/utils/getVP";
 import { useAaInfoStore } from "@/stores/aaInfo";
+import TooltipComponent from "@/components/TooltipComponent.vue";
 
 const props = defineProps([
   "title",
@@ -56,7 +57,10 @@ function voteFromTable(value) {
 <template>
   <div class="mb-8">
     <div class="block sm:flex justify-between mt-8 font-bold text-lg">
-      <div class="text-center sm:text-left">{{ title }}</div>
+      <div class="text-center sm:text-left">
+        {{ title }}
+        <TooltipComponent :field-name="props.name"></TooltipComponent>
+      </div>
       <div
         class="text-center sm:text-left text-base sm:text-lg font-medium sm:font-bold"
       >

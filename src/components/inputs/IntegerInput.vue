@@ -9,7 +9,12 @@ const value = ref("");
 const options = computed(() => {
   return {
     preProcess: (val) => {
-      return val.replace(/,/g, ".").replace(/[^0-9.]/);
+      val = val.replace(/,/g, ".").replace(/[^0-9.]/, "");
+      if (val.startsWith("0")) {
+        val = val.replace(/^0+/, "");
+      }
+
+      return val;
     },
   };
 });
