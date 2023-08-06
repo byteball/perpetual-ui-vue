@@ -57,9 +57,12 @@ function voteFromTable(value) {
 <template>
   <div class="mb-8">
     <div class="block sm:flex justify-between mt-8 font-bold text-lg">
-      <div class="text-center sm:text-left">
+      <div class="text-center sm:text-left flex items-center">
         {{ title }}
-        <TooltipComponent :field-name="props.name"></TooltipComponent>
+        <TooltipComponent
+          :field-name="props.name"
+          class="ml-1"
+        ></TooltipComponent>
       </div>
       <div
         class="text-center sm:text-left text-base sm:text-lg font-medium sm:font-bold"

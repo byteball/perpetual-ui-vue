@@ -2,10 +2,12 @@
 import { ref, watch, onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import debounce from "lodash.debounce";
+import { storeToRefs } from "pinia";
+import { useAaInfoStore } from "@/stores/aaInfo";
 import { generateLink } from "@/utils/generateLink";
 import { clearObject } from "@/utils/clearObject";
 import { parseDataForFactoryRequest } from "@/utils/parseDataForFactoryRequest";
-import { getAssetMetadata } from "@/services/DAGApi";
+import { getAssetMetadata, getAssetMetadataByArray } from "@/services/DAGApi";
 
 import AutoComplete from "@tarekraafat/autocomplete.js";
 import emitter from "@/services/emitter";
@@ -17,6 +19,9 @@ import VoteInput from "@/components/inputs/VoteInput.vue";
 import { convertObjectFieldValues } from "@/utils/convertValue";
 import TooltipComponent from "@/components/TooltipComponent.vue";
 import { isValidUnit } from "@/utils/validates";
+
+const store = useAaInfoStore();
+const { meta } = storeToRefs(store);
 
 const router = useRouter();
 
@@ -37,6 +42,7 @@ const autoComplete = ref();
 const assocAssetBySymbol = ref({});
 const oswapAssets = ref({});
 const existsError = ref("");
+const poolNameExistsAA = ref("");
 
 function keyDown(e) {
   if (e.key === "Enter") {
@@ -248,6 +254,15 @@ watch(
 //   }
 // }
 
+async function getNameForExistsAA(address) {
+  const metaByAA = meta.value[address];
+  const reserveAsset = metaByAA.reserve_asset;
+  const asset0 = metaByAA.state.asset0;
+
+  const metadata = await getAssetMetadataByArray([reserveAsset, asset0]);
+  poolNameExistsAA.value = `(${metadata[reserveAsset].name}/${metadata[asset0].name})`;
+}
+
 async function checkAAForAlreadyExisting() {
   const result = await Client.api.dryRunAa({
     trigger: {
@@ -262,6 +277,7 @@ async function checkAAForAlreadyExisting() {
 
   if (result[0].response.error) {
     existsError.value = result[0].response.error;
+    await getNameForExistsAA(existsError.value.substring(27));
     return;
   }
 
@@ -279,7 +295,6 @@ watch(
 
     if (["GBYTE", "BYTES"].includes(reserveAssetInput.value.toUpperCase())) {
       reserveAsset.value = "base";
-      await checkAAForAlreadyExisting();
       return;
     }
 
@@ -295,10 +310,7 @@ watch(
       reserveAsset.value = reserveAssetInput.value;
     } else {
       reserveAsset.value = "";
-      return;
     }
-
-    await checkAAForAlreadyExisting();
   }, 500)
 );
 </script>
@@ -500,7 +512,7 @@ watch(
             </transition>
           </Disclosure>
           <div v-if="existsError" class="my-4 text-red-500">
-            {{ existsError }}
+            {{ existsError }} {{ poolNameExistsAA }}
           </div>
           <div class="form-control mt-6">
             <a
