@@ -9,6 +9,7 @@ import { getAssetMetadata, getDataFeed } from "@/services/DAGApi";
 import debounce from "lodash.debounce";
 import IntegerInput from "@/components/inputs/IntegerInput.vue";
 import TooltipComponent from "@/components/TooltipComponent.vue";
+import TextInput from "@/components/inputs/TextInput.vue";
 
 let intervalId = 0;
 const step = ref(1);
@@ -219,11 +220,7 @@ onUnmounted(() => {
                 </label>
                 <TooltipComponent field-name="oracle"> </TooltipComponent>
               </div>
-              <input
-                type="text"
-                v-model="oracle"
-                class="input input-bordered w-full"
-              />
+              <TextInput v-model="oracle" />
             </div>
             <div class="pt-4">
               <div class="flex items-center">
@@ -232,11 +229,7 @@ onUnmounted(() => {
                 </label>
                 <TooltipComponent field-name="feed_name"> </TooltipComponent>
               </div>
-              <input
-                type="text"
-                v-model="feedName"
-                class="input input-bordered w-full"
-              />
+              <TextInput v-model="feedName" />
             </div>
             <div class="pt-4">
               <div class="flex items-center">
@@ -245,10 +238,7 @@ onUnmounted(() => {
                 </label>
                 <TooltipComponent field-name="multiplier"> </TooltipComponent>
               </div>
-              <IntegerInput
-                v-model="multiplier"
-                class="input input-bordered w-full"
-              />
+              <IntegerInput v-model="multiplier" />
 
               <div v-if="currentRate !== undefined" class="mt-4 text-sm">
                 <div v-if="currentRate && multiplier">

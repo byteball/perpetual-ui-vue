@@ -11,9 +11,10 @@ module.exports = {
       {
         light: {
           ...require("daisyui/src/theming/themes")["[data-theme=dark]"],
-          "background-color": "#131519",
+          "background-color": "#1c1e24",
           color: "#fff",
           "base-200": "#24292f",
+          primary: "#2563eb",
         },
       },
     ],

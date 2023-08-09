@@ -1,30 +1,14 @@
 <script setup>
 import { computed, ref, watch } from "vue";
-import { vMaska } from "maska";
 import { classesList } from "@/components/inputs/classesList";
 
-const props = defineProps({ type: String, modelValue: String, label: String });
+const props = defineProps(["modelValue", "label", "placeholder"]);
 
 const value = ref("");
 const labelBlock = ref();
 const paddingRight = computed(() => {
   if (!props.label || !labelBlock.value) return "16px";
   return labelBlock.value.offsetWidth + "px";
-});
-
-const options = computed(() => {
-  return {
-    preProcess: (val) => {
-      return val.replace(/,/g, ".").replace(/[^0-9.]/, "");
-    },
-    postProcess: (val) => {
-      if (props.type === "percent" && val > 100) {
-        return 100;
-      }
-
-      return val;
-    },
-  };
 });
 
 watch(
@@ -39,13 +23,10 @@ watch(
 <template>
   <div class="relative w-full">
     <input
-      v-maska:[options]
-      placeholder="value"
-      data-maska="0"
-      data-maska-tokens="0:\d:multiple"
       type="text"
-      :class="classesList + ' join-item'"
+      :class="classesList"
       :style="{ paddingRight }"
+      :placeholder="placeholder || ''"
       v-model="value"
       @input="$emit('update:modelValue', $event.target.value)"
     />

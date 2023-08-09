@@ -11,10 +11,10 @@ defineProps([
 
 <template>
   <div class="mt-2">
-    <span class="font-medium">{{ title }}: </span>
+    <span>{{ title }}: </span>
     <a
       v-if="valueLink"
-      class="link text-sky-500 link-hover font-light"
+      class="link text-sky-500 link-hover font-light text-sm"
       :href="valueLink"
       target="_blank"
       >{{ value }}</a

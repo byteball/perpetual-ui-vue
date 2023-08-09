@@ -1,6 +1,13 @@
 <script setup>
+import { storeToRefs } from "pinia";
 import { RouterView, useRoute } from "vue-router";
+import { Dialog } from "@headlessui/vue";
+import AddressController from "@/components/AddressController.vue";
+import { useAddressStore } from "@/stores/addressStore";
 const route = useRoute();
+
+const store = useAddressStore();
+const { address, addressModalIsOpen } = storeToRefs(store);
 </script>
 
 <template>
@@ -26,7 +33,7 @@ const route = useRoute();
           </label>
           <ul
             tabindex="0"
-            class="menu menu-sm dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-50 z-50"
+            class="menu menu-sm menu-vertical dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52 z-50 block"
           >
             <li>
               <RouterLink
@@ -66,6 +73,14 @@ const route = useRoute();
                 >Create</RouterLink
               >
             </li>
+            <li>
+              <label
+                class="select select-sm items-center bg-base-200 border-gray-600"
+                @click="store.openAddressModal"
+              >
+                {{ address ? address.substring(0, 10) + "..." : "Add address" }}
+              </label>
+            </li>
           </ul>
         </div>
         <RouterLink class="hover:bg-none" to="/">
@@ -73,7 +88,7 @@ const route = useRoute();
         </RouterLink>
       </div>
       <div class="navbar-center hidden lg:flex">
-        <ul class="menu menu-horizontal px-1">
+        <ul class="menu menu-horizontal items-center px-1">
           <li>
             <RouterLink
               to="/"
@@ -116,11 +131,29 @@ const route = useRoute();
               >Create</RouterLink
             >
           </li>
+          <li>
+            <label
+              class="select select-sm items-center bg-base-200 border-gray-600 ml-2"
+              @click="store.openAddressModal"
+            >
+              {{ address ? address.substring(0, 10) + "..." : "Add address" }}
+            </label>
+          </li>
         </ul>
       </div>
       <div class="navbar-end"></div>
     </div>
     <nav class="menu"></nav>
+    <Dialog
+      :open="addressModalIsOpen"
+      @close="store.closeAddressModal"
+      class="relative z-50"
+    >
+      <div class="fixed inset-0 bg-black/[.8]" aria-hidden="true" />
+      <div class="fixed inset-0 flex items-center justify-center">
+        <AddressController />
+      </div>
+    </Dialog>
   </header>
 
   <div tabindex="0">

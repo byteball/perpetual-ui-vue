@@ -2,7 +2,13 @@
 import { generateAndFollowLinkForVoteAddPriceAA } from "@/utils/generateLink";
 import LinkIcon from "@/components/icons/LinkIcon.vue";
 
-defineProps(["priceAa", "stakingAa", "definition", "priceAasMeta"]);
+defineProps([
+  "priceAa",
+  "stakingAa",
+  "definition",
+  "priceAasMeta",
+  "allowedControl",
+]);
 </script>
 
 <template>
@@ -47,7 +53,10 @@ defineProps(["priceAa", "stakingAa", "definition", "priceAasMeta"]);
       </div>
     </div>
   </div>
-  <div class="card-actions justify-start mt-4 text-center sm:text-left">
+  <div
+    class="card-actions justify-start mt-4 text-center sm:text-left"
+    v-if="allowedControl"
+  >
     <div v-if="!priceAasMeta.vpAddPriceBCommit">
       <button
         class="btn btn-sm gap-2 mr-4"

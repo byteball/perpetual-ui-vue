@@ -5,7 +5,6 @@ import { useAaInfoStore } from "@/stores/aaInfo";
 import { useAddressStore } from "@/stores/addressStore";
 import { getPreparedMeta } from "@/utils/governanceUtils";
 import GovernanceAsset from "@/components/governance/GovernanceAsset.vue";
-import AddressController from "@/components/AddressController.vue";
 import Loading from "@/components/icons/LoadingIcon.vue";
 
 const store = useAaInfoStore();
@@ -26,7 +25,7 @@ async function init() {
   }
   const result = await Promise.all(promises);
   result.forEach((v) => {
-    if (!v) return;
+    if (!v.symbolAndDecimals) return;
     m[v.rawMeta.aa] = v;
   });
 
@@ -41,7 +40,6 @@ watch(meta, init, { deep: true });
     v-if="Object.keys(aasWithMeta).length"
     class="container w-full sm:w-[768px] m-auto mt-8 mb-36 p-6 sm:p-8"
   >
-    <AddressController />
     <div class="p-2 mb-6">
       <div class="text-lg font-semibold leading-7">Governance</div>
       <p class="mt-1 leading-6">
@@ -66,34 +64,14 @@ watch(meta, init, { deep: true });
                 </div>
                 <div class="mt-3 mb-6 sm:my-0">
                   <RouterLink
-                    class="btn btn-sm"
-                    :class="
-                      perpetualAAMeta.allowedControl
-                        ? 'btn-primary'
-                        : 'btn-disabled'
-                    "
+                    class="btn btn-sm btn-primary"
                     :to="`/governance/management/${perpetualAA}`"
                   >
                     Manage AA
                   </RouterLink>
                 </div>
               </div>
-              <GovernanceAsset
-                :perpetual-aa-meta="perpetualAAMeta"
-                :is-main-page="true"
-              />
-              <div
-                v-if="!perpetualAAMeta.allowedControl"
-                class="mt-4 text-center"
-              >
-                To manage this aa you need to
-                <RouterLink
-                  class="link text-sky-500 link-hover font-light"
-                  :to="`/stake/${perpetualAA}`"
-                  >stake</RouterLink
-                >
-                {{ !address ? " and add your address" : "" }}
-              </div>
+              <GovernanceAsset :perpetual-aa-meta="perpetualAAMeta" />
             </div>
           </div>
         </div>

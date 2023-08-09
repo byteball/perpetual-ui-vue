@@ -13,6 +13,7 @@ const props = defineProps([
   "type",
   "assetMeta",
   "votesByName",
+  "allowedControl",
 ]);
 const emit = defineEmits(["reqVote"]);
 const currentValue = props.assetMeta[props.name] || 0;
@@ -51,7 +52,7 @@ function voteFromTable(value) {
 </script>
 
 <template>
-  <div class="text-sm mt-4">
+  <div class="text-sm mt-4 w-full">
     <div class="font-bold text-lg">{{ title }}</div>
     <div class="mt-2">
       Current value:
@@ -66,10 +67,14 @@ function voteFromTable(value) {
     </div>
     <div class="mt-2">
       <div v-if="votesByName?.length" class="mb-4">
+        <div class="mt-4 mb-1 text-sm sm:text-base text-center font-bold">
+          Votes for changing the value
+        </div>
         <div class="overflow-auto">
           <VotingTable
             :votes="votesByName"
             :decimals="assetMeta.assetMetaData.decimals"
+            :allowed-control="allowedControl"
             @vote-from-table="voteFromTable"
           />
         </div>
@@ -81,7 +86,7 @@ function voteFromTable(value) {
           (vp: {{ userVote.vp }})
         </div>
       </div>
-      <div class="text-center sm:text-left">
+      <div class="text-center sm:text-left" v-if="allowedControl">
         <a
           class="link text-sky-500 link-hover"
           @click="$emit('reqVote', name, type)"

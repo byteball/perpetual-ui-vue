@@ -1,7 +1,7 @@
 <script setup>
 import { rawToFormatVotingValue } from "@/utils/convertValue";
 
-defineProps(["votes", "type", "suffix", "decimals"]);
+defineProps(["votes", "type", "suffix", "decimals", "allowedControl"]);
 defineEmits(["voteFromTable"]);
 </script>
 
@@ -11,7 +11,7 @@ defineEmits(["voteFromTable"]);
       <tr>
         <th>Value</th>
         <th>Voting power</th>
-        <th>Support</th>
+        <th v-if="allowedControl">Support</th>
       </tr>
     </thead>
     <tbody>
@@ -21,7 +21,7 @@ defineEmits(["voteFromTable"]);
           {{ index === 0 ? "(leader)" : "" }}
         </td>
         <td>{{ Number((v.amount / 10 ** decimals).toFixed(decimals)) }}</td>
-        <td>
+        <td v-if="allowedControl">
           <a
             class="link text-sky-500 link-hover"
             @click="$emit('voteFromTable', v.value)"

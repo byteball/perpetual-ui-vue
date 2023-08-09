@@ -13,11 +13,26 @@ function saveAddress(address) {
 
 export const useAddressStore = defineStore("address", () => {
   const address = ref(getAddress());
+  const addressModalIsOpen = ref(false);
 
   function setAddress(_address) {
     address.value = _address;
     saveAddress(_address);
   }
 
-  return { address, setAddress };
+  function openAddressModal() {
+    addressModalIsOpen.value = true;
+  }
+
+  function closeAddressModal() {
+    addressModalIsOpen.value = false;
+  }
+
+  return {
+    address,
+    addressModalIsOpen,
+    setAddress,
+    openAddressModal,
+    closeAddressModal,
+  };
 });

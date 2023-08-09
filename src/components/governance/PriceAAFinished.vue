@@ -10,6 +10,7 @@ const props = defineProps([
   "stakingAa",
   "priceAaDefinition",
   "votes",
+  "allowedControl",
 ]);
 const emit = defineEmits(["reqRegister", "reqVote"]);
 
@@ -78,46 +79,51 @@ function reqVote(name, type, value) {
       <div
         class="card-actions sm:justify-start block sm:flex text-center sm:text-left"
       >
-        <button
-          v-if="!assetMeta.assetMetaData"
-          class="btn btn-sm gap-2 mt-4"
-          @click="reqRegister"
-        >
-          <LinkIcon />
-          Register a symbol
-        </button>
-        <button
-          v-if="assetMeta.metaByPriceAA.result === 'no'"
-          class="btn btn-sm gap-2 mt-4"
-          @click="
-            generateAndFollowLinkForVoteAddPriceAA(priceAa, 'yes', stakingAa)
-          "
-        >
-          <LinkIcon />
-          Vote for add
-        </button>
-        <RouterLink
-          v-if="
-            assetMeta.assetMetaData?.name &&
-            assetMeta.metaByPriceAA.result === 'yes' &&
-            assetMeta.presale
-          "
-          class="btn btn-sm gap-2 mt-4"
-          :to="`/presale/${asset}`"
-        >
-          <LinkIcon />
-          Buy on presale
-        </RouterLink>
+        <div v-if="allowedControl">
+          <button
+            v-if="!assetMeta.assetMetaData"
+            class="btn btn-sm gap-2 mt-4"
+            @click="reqRegister"
+          >
+            <LinkIcon />
+            Register a symbol
+          </button>
+          <button
+            v-if="assetMeta.metaByPriceAA.result === 'no'"
+            class="btn btn-sm gap-2 mt-4"
+            @click="
+              generateAndFollowLinkForVoteAddPriceAA(priceAa, 'yes', stakingAa)
+            "
+          >
+            <LinkIcon />
+            Vote for add
+          </button>
+          <RouterLink
+            v-if="
+              assetMeta.assetMetaData?.name &&
+              assetMeta.metaByPriceAA.result === 'yes' &&
+              assetMeta.presale
+            "
+            class="btn btn-sm gap-2 mt-4"
+            :to="`/presale/${asset}`"
+          >
+            <LinkIcon />
+            Buy on presale
+          </RouterLink>
+        </div>
 
-        <div v-if="!assetMeta.presale" class="mt-8">
+        <div v-if="!assetMeta.presale" class="mt-4 w-full">
+          <div class="divider"></div>
           <VoteBlockForPriceAA
             title="Price aa"
             type="address"
             name="price_aa"
             :asset-meta="assetMeta"
             :votes-by-name="votes['change_price_aa'][asset]"
+            :allowed-control="allowedControl"
             @reqVote="reqVote"
           />
+          <div class="divider mt-8"></div>
           <VoteBlockForPriceAA
             class="mt-8"
             title="Drift rate"
@@ -125,6 +131,7 @@ function reqVote(name, type, value) {
             name="drift_rate"
             :asset-meta="assetMeta"
             :votes-by-name="votes['change_drift_rate'][asset]"
+            :allowed-control="allowedControl"
             @reqVote="reqVote"
           />
         </div>

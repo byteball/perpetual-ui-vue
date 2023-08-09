@@ -15,7 +15,6 @@ import VoteBlock from "@/components/governance/VoteBlock.vue";
 import VoteModal from "@/components/governance/VoteModal.vue";
 import PriceAAFinished from "@/components/governance/PriceAAFinished.vue";
 import RegisterSymbolModal from "@/components/RegisterSymbolModal.vue";
-import AddressController from "@/components/AddressController.vue";
 import Loading from "@/components/icons/LoadingIcon.vue";
 
 const store = useAaInfoStore();
@@ -41,7 +40,11 @@ const metaForFinishedAssets = ref({});
 const modalForVoteIsOpen = ref(false);
 const modalForRegisterSymbolIsOpen = ref(false);
 
+const allowedControl = ref(false);
+
 const currentVP = computed(() => {
+  if (!address.value) return 0;
+
   const metaByAA = meta.value[perpetualAA.value];
   const normalizedVp =
     metaByAA.stakingVars[`user_${address.value}_a0`]?.normalized_vp;
@@ -73,9 +76,7 @@ async function init() {
   notFound.value = false;
 
   preparedMeta.value = await getPreparedMeta(metaByAA, address.value);
-  if (!preparedMeta.value.allowedControl) {
-    return router.push("/governance");
-  }
+  allowedControl.value = preparedMeta.value.allowedControl;
 
   const defPromises = [];
   for (const priceAA of preparedMeta.value.priceAAsMeta.allPriceAAs) {
@@ -122,6 +123,8 @@ function reqVote(name, type, suffix, value, priceAsset) {
 }
 
 const userVote = (name, priceAsset) => {
+  if (!address.value) return { vp: 0, value: 0 };
+
   const stakingVars = preparedMeta.value.rawMeta.stakingVars;
   const vote =
     stakingVars[
@@ -201,6 +204,14 @@ onUnmounted(() => {
   setActiveAddress("");
 });
 watch(meta, init, { deep: true });
+watch(
+  () => address.value,
+  async () => {
+    const metaByAA = meta.value[perpetualAA.value];
+    preparedMeta.value = await getPreparedMeta(metaByAA, address.value);
+    allowedControl.value = preparedMeta.value.allowedControl;
+  }
+);
 </script>
 
 <template>
@@ -208,7 +219,6 @@ watch(meta, init, { deep: true });
     class="container w-full sm:w-[768px] m-auto mt-8 mb-36 p-6 sm:p-8"
     v-if="ready"
   >
-    <AddressController />
     <div @click="goBack()" class="p-2 mb-6 cursor-pointer">
       <div class="flex items-center">
         <div class="inline-block mr-2">
@@ -249,7 +259,38 @@ watch(meta, init, { deep: true });
               preparedMeta.symbolAndDecimals.name
             }}
           </div>
-          <div>Your VP: {{ currentVP }}</div>
+          <div v-if="address">Your VP: {{ currentVP }}</div>
+          <div v-if="!currentVP" class="alert mt-6 bg-base-300">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              class="stroke-current shrink-0 w-6 h-6 text-primary"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+            <span
+              >To manage this aa you need to
+              <RouterLink
+                class="link text-sky-500 link-hover font-light"
+                :to="`/stake/${perpetualAA}`"
+                >stake</RouterLink
+              >
+              <template v-if="!address">
+                and add
+                <a
+                  class="link text-sky-500 link-hover font-light"
+                  @click="addressStore.openAddressModal"
+                  >your address</a
+                >
+              </template>
+            </span>
+          </div>
         </div>
         <div>
           <VoteBlock
@@ -257,6 +298,7 @@ watch(meta, init, { deep: true });
             name="swap_fee"
             :votes-by-name="votes['swap_fee']"
             :prepared-meta="preparedMeta"
+            :allowed-control="allowedControl"
             type="percent"
             @reqVote="reqVote"
           />
@@ -265,6 +307,7 @@ watch(meta, init, { deep: true });
             name="arb_profit_tax"
             :votes-by-name="votes['arb_profit_tax']"
             :prepared-meta="preparedMeta"
+            :allowed-control="allowedControl"
             type="percent"
             @reqVote="reqVote"
           />
@@ -273,6 +316,7 @@ watch(meta, init, { deep: true });
             name="adjustment_period"
             :votes-by-name="votes['adjustment_period']"
             :prepared-meta="preparedMeta"
+            :allowed-control="allowedControl"
             type="date"
             @reqVote="reqVote"
           />
@@ -281,6 +325,7 @@ watch(meta, init, { deep: true });
             name="presale_period"
             :votes-by-name="votes['presale_period']"
             :prepared-meta="preparedMeta"
+            :allowed-control="allowedControl"
             type="date"
             @reqVote="reqVote"
           />
@@ -289,6 +334,7 @@ watch(meta, init, { deep: true });
             name="auction_price_halving_period"
             :votes-by-name="votes['auction_price_halving_period']"
             :prepared-meta="preparedMeta"
+            :allowed-control="allowedControl"
             type="date"
             @reqVote="reqVote"
           />
@@ -297,6 +343,7 @@ watch(meta, init, { deep: true });
             name="token_share_threshold"
             :votes-by-name="votes['token_share_threshold']"
             :prepared-meta="preparedMeta"
+            :allowed-control="allowedControl"
             type="percent"
             @reqVote="reqVote"
           />
@@ -305,12 +352,13 @@ watch(meta, init, { deep: true });
             name="min_s0_share"
             :votes-by-name="votes['min_s0_share']"
             :prepared-meta="preparedMeta"
+            :allowed-control="allowedControl"
             type="percent"
             @reqVote="reqVote"
           />
         </div>
 
-        <div>
+        <div :key="'p_' + address || 'address'">
           <div class="text-lg font-bold mt-8 mb-2.5">Price AAs</div>
           <div v-for="(assetMeta, asset) in metaForFinishedAssets" :key="asset">
             <PriceAAFinished
@@ -320,6 +368,7 @@ watch(meta, init, { deep: true });
               :price-aa="assetMeta.price_aa"
               :price-aa-definition="priceAAsDefinition[assetMeta.price_aa]"
               :votes="votes"
+              :allowed-control="allowedControl"
               @reqRegister="reqRegister"
               @reqVote="reqVote"
             />
@@ -337,6 +386,7 @@ watch(meta, init, { deep: true });
                     :staking-aa="preparedMeta.rawMeta.staking_aa"
                     :definition="priceAAsDefinition[priceAA]"
                     :price-aas-meta="priceAAsMeta"
+                    :allowed-control="allowedControl"
                   />
                 </div>
               </div>
@@ -346,6 +396,7 @@ watch(meta, init, { deep: true });
         <div class="text-center mb-4">
           <RouterLink
             class="btn btn-sm btn-primary"
+            :class="{ '!btn-disabled': !allowedControl }"
             :to="`/addPerp/${perpetualAA}`"
           >
             Add perpetual for voting

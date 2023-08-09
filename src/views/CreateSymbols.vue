@@ -8,6 +8,7 @@ import { getAssetMetadata, getMetaForPerpAAs } from "@/services/DAGApi";
 import { generateLink } from "@/utils/generateLink";
 import { parseDataForFactoryRequest } from "@/utils/parseDataForFactoryRequest";
 import IntegerInput from "@/components/inputs/IntegerInput.vue";
+import TextInput from "@/components/inputs/TextInput.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -209,22 +210,15 @@ onMounted(() => {
             <label class="label">
               <span class="label-text">Asset</span>
             </label>
-            <input
-              type="text"
-              v-model="asset"
-              class="input input-bordered"
-              readonly
-            />
+            <TextInput v-model="asset" readonly />
           </div>
           <div class="form-control">
             <label class="label">
               <span class="label-text">Symbol</span>
             </label>
-            <input
-              type="text"
+            <TextInput
               v-model="symbol"
               @input="() => (symbol = symbol.toUpperCase())"
-              class="input input-bordered"
             />
             <div class="p-1 text-red-500">
               {{ isSymbolExists ? "This symbol is already in use" : "" }}
@@ -234,7 +228,7 @@ onMounted(() => {
             <label class="label">
               <span class="label-text">Decimals</span>
             </label>
-            <IntegerInput v-model="decimals" class="input input-bordered" />
+            <IntegerInput v-model="decimals" />
           </div>
           <div class="form-control">
             <label class="label">
