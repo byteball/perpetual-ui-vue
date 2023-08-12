@@ -19,7 +19,7 @@ const registryAA = ref("");
 
 const symbol = ref("");
 const symbolFieldError = ref("");
-const decimals = ref(0);
+const decimals = ref("9");
 const buttonEnabled = ref(false);
 const link = ref("");
 
@@ -107,7 +107,7 @@ onMounted(async () => {
       <label class="label">
         <span class="label-text">Asset</span>
       </label>
-      <TextInput :value="asset" readonly />
+      <TextInput :static-value="asset" />
     </div>
     <div class="form-control mt-2">
       <label class="label">

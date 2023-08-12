@@ -331,9 +331,9 @@ watch(
 
     <div v-if="awaiting">
       <div class="card bg-base-200 shadow-lg p-8">
-        <div class="flex items-center">
+        <div class="flex items-center justify-center">
           <svg
-            class="animate-spin w-14 ml-2 mr-3"
+            class="animate-spin w-8 ml-2 mr-3"
             viewBox="0 0 24 24"
             fill="none"
           >
@@ -389,7 +389,7 @@ watch(
           </div>
           <Disclosure v-slot="{ open }">
             <DisclosureButton class="py-2 text-gray-500 flex items-center">
-              <span>Show all details</span>
+              <span>Show all params</span>
               <ChevronRightIcon
                 :class="open && 'rotate-90 transform'"
                 class="w-5"

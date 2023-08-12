@@ -359,9 +359,12 @@ watch(
         </div>
 
         <div :key="'p_' + address || 'address'">
-          <div class="text-lg font-bold mt-8 mb-2.5">Price AAs</div>
+          <div class="text-lg font-bold mt-8 mb-2.5">
+            Tokens issued on this AAs
+          </div>
           <div v-for="(assetMeta, asset) in metaForFinishedAssets" :key="asset">
             <PriceAAFinished
+              :perpetual-aa="perpetualAA"
               :asset-meta="assetMeta"
               :asset="asset"
               :staking-aa="preparedMeta.rawMeta.staking_aa"

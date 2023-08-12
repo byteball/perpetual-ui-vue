@@ -1,8 +1,14 @@
 <script setup>
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, ref, useAttrs, watch } from "vue";
 import { classesList } from "@/components/inputs/classesList";
 
-const props = defineProps(["modelValue", "label", "placeholder"]);
+const props = defineProps([
+  "modelValue",
+  "staticValue",
+  "label",
+  "placeholder",
+]);
+const attrs = useAttrs();
 
 const value = ref("");
 const labelBlock = ref();
@@ -18,6 +24,12 @@ watch(
   },
   { immediate: true }
 );
+
+onMounted(() => {
+  if (!props.modelValue && props.staticValue) {
+    value.value = props.staticValue;
+  }
+});
 </script>
 
 <template>
@@ -29,6 +41,7 @@ watch(
       :placeholder="placeholder || ''"
       v-model="value"
       @input="$emit('update:modelValue', $event.target.value)"
+      :readonly="staticValue || attrs.readonly !== undefined"
     />
     <div
       v-show="label"

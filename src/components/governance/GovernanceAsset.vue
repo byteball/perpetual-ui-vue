@@ -28,7 +28,7 @@ defineProps(["perpetualAaMeta"]);
         leave-from-class="transform scale-100 opacity-100"
         leave-to-class="transform scale-95 opacity-0"
       >
-        <DisclosurePanel class="text-slate-300 pb-2">
+        <DisclosurePanel class="text-slate-300 pb-2 pl-2">
           <GovernanceAssetField
             title="Staking aa"
             :value="perpetualAaMeta.rawMeta.staking_aa"

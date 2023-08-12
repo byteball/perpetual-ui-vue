@@ -449,16 +449,23 @@ watch(
                   <label class="label">
                     <span class="label-text">Term (in days)</span>
                   </label>
-                  <IntegerInput v-model="term.value" />
+                  <IntegerInput v-model="term.value" :max-value="360" />
                   <span
                     v-if="term.error"
                     class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"
                   >
                     {{ term.error }}
                   </span>
+                  <div v-if="term.value" class="mt-2 text-sm">
+                    Will be locked until
+                    {{
+                      dayjs().add(term.value, "day").format("DD MMM YYYY HH:mm")
+                    }}
+                    (this applies to the previously locked tokens too)
+                  </div>
                 </div>
-                <div class="mt-4" v-if="address">
-                  <div>Current VP: {{ currentVP }}</div>
+                <div class="mt-4">
+                  <div v-if="address">Current VP: {{ currentVP }}</div>
                   <div>New VP: {{ newVP }}</div>
                 </div>
                 <!--      <div class="form-control">-->

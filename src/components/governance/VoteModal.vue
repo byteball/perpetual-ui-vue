@@ -117,7 +117,7 @@ function sendVotingEmit() {
           title="New VP"
           :value="vp.newVP"
           :leader="leader"
-          class="mt-2"
+          :class="{ '!mt-1': !isNewValue }"
         />
       </div>
     </div>

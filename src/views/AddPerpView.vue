@@ -22,6 +22,8 @@ const router = useRouter();
 const oracle = ref("F4KHJUCLJKY4JV7M5F754LAJX4EB7M4N");
 const feedName = ref("GBYTE_USD");
 const multiplier = ref("1");
+
+const reserveAssetData = ref({});
 const tokens = ref("");
 
 const priceAA = ref("");
@@ -138,10 +140,10 @@ watch(
       buttonDisabled.value = false;
 
       const reserveAsset = meta.value[route.params.aa].reserve_asset;
-      const reserveAssetData = await getAssetMetadata(reserveAsset);
+      reserveAssetData.value = await getAssetMetadata(reserveAsset);
 
       tokens.value =
-        10 ** reserveAssetData.decimals /
+        10 ** reserveAssetData.value.decimals /
         (multiplier.value * currentRate.value);
     }
   },
@@ -240,11 +242,18 @@ onUnmounted(() => {
               </div>
               <IntegerInput v-model="multiplier" />
 
-              <div v-if="currentRate !== undefined" class="mt-4 text-sm">
+              <div v-if="currentRate !== undefined" class="mt-4">
                 <div v-if="currentRate && multiplier">
                   <div class="mt-2">
-                    <span class="font-medium"> Tokens: </span>
-                    {{ `${tokens}` }}
+                    Current value:
+                    <span v-if="oracle === 'F4KHJUCLJKY4JV7M5F754LAJX4EB7M4N'"
+                      >${{ currentRate.toFixed(2) }}</span
+                    >
+                    <span v-else>{{ currentRate }}</span>
+                  </div>
+                  <div class="mt-2">
+                    1 {{ reserveAssetData.name }} = {{ `${tokens}` }} (without
+                    decimals)
                   </div>
                 </div>
                 <div v-else class="tracking-wide text-red-500">
@@ -272,7 +281,8 @@ onUnmounted(() => {
         <div class="ml-2">
           <span>Good, now you need publish price AA</span>
         </div>
-        <div class="flex-none">
+        <div></div>
+        <div>
           <a
             class="btn btn-sm btn-primary"
             :href="linkForPriceAA"

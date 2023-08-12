@@ -14,6 +14,7 @@ import {
   executeAAGetter,
   getAssetMetadata,
   getAssetMetadataByArray,
+  getOracleData,
 } from "@/services/DAGApi";
 import NumberInput from "@/components/inputs/NumberInput.vue";
 import { getParam, getPreparedMeta } from "@/utils/governanceUtils";
@@ -43,6 +44,7 @@ const selectedPresaleFinishDate = ref("");
 const selectedPresaleTargetAmount = ref("");
 const selectedPresaleCurrentAmount = ref("");
 const selectedPresaleAddressAmount = ref(0);
+const selectedOracleData = ref({});
 
 const targetPrice = ref("");
 const receiveAmount = ref("");
@@ -126,7 +128,7 @@ const preparePresaleList = async () => {
     const metadataByAsset = await getAssetMetadataByArray(presaleAssets);
 
     for (const presaleAsset in metadataByAsset) {
-      const presaleAssetData = metadataByAsset[presaleAssets];
+      const presaleAssetData = metadataByAsset[presaleAsset];
 
       if (!assetsMetadata.value[presaleAsset]) {
         assetsMetadata.value[presaleAsset] = presaleAssetData;
@@ -144,8 +146,9 @@ const preparePresaleList = async () => {
       const targetPresaleAmount = tokenShareThreshold * reserve;
 
       const isPresaleFinished =
-        targetPresaleAmount <= currentPresaleAmount ||
-        finishDate.diff(dayjs()) < 0;
+        currentPresaleAmount &&
+        (targetPresaleAmount <= currentPresaleAmount ||
+          finishDate.diff(dayjs()) < 0);
 
       if (isPresaleFinished) continue;
 
@@ -218,7 +221,7 @@ const updateAddressPresaleAmount = () => {
   }
 };
 
-const fillPresaleData = (presale) => {
+const fillPresaleData = async (presale) => {
   selectedPresaleAsset.value = presale.presaleAsset;
   selectedReserveAsset.value = presale.reserveAsset;
   selectedAA.value = presale.aa;
@@ -240,6 +243,10 @@ const fillPresaleData = (presale) => {
   if (selectedPresaleIsFinished.value) {
     activeTab.value = "claim";
   }
+
+  selectedOracleData.value = await getOracleData(
+    meta.value[presale.aa][`asset_${presale.presaleAsset}`].price_aa
+  );
 
   if (address.value && selectedAA.value) {
     updateAddressPresaleAmount();
@@ -375,7 +382,7 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
                     leave-from-class="transform scale-100 opacity-100"
                     leave-to-class="transform scale-95 opacity-0"
                   >
-                    <DisclosurePanel class="text-slate-300 pb-2">
+                    <DisclosurePanel class="text-slate-300 pb-2 pl-2">
                       <GovernanceAssetField
                         title="Swap fee"
                         :value="`${
@@ -456,21 +463,13 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
                     </DisclosurePanel>
                   </transition>
                 </Disclosure>
-                <div class="mt-2">
-                  Price aa:
-                  <a
-                    class="link link-hover text-sky-500 block sm:inline-block text-xs sm:text-sm"
-                    target="_blank"
-                    :href="
-                      fullExplorerUrlForAddress + metaBySelectedAsset?.price_aa
-                    "
-                    >{{ metaBySelectedAsset?.price_aa }}</a
-                  >
+                <div class="mt-0.5">
+                  Currency: {{ selectedOracleData.name }}
                 </div>
-                <div>
-                  Drift rate: {{ metaBySelectedAsset?.drift_rate || 0 }}
+                <div class="mt-0.5">
+                  Current value: {{ selectedOracleData.value }}
                 </div>
-                <div class="mt-2">
+                <div class="mt-3">
                   Finish date: {{ selectedPresaleFinishDate }}
                 </div>
                 <div>
@@ -478,6 +477,7 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
                   {{
                     `${selectedPresaleCurrentAmount} / ${selectedPresaleTargetAmount}`
                   }}
+                  {{ assetsMetadata[selectedPresaleAsset].name }}
                 </div>
               </div>
               <div class="tabs tabs-boxed mt-8 mb-1">
