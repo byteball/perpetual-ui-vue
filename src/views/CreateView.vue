@@ -88,7 +88,7 @@ async function getOswapPoolsAndSymbols() {
 onMounted(async () => {
   const registry = Client.api.getOfficialTokenRegistryAddress();
   oswapAssets.value = await getOswapPoolsAndSymbols();
-  SI.value?.addEventListener("keydown", keyDown);
+  if (SI.value) SI.value.addEventListener("keydown", keyDown);
 
   autoComplete.value = new AutoComplete({
     name: "autoComplete",
@@ -146,7 +146,7 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
-  SI.value.removeEventListener("keydown", keyDown);
+  if (SI.value) SI.value.removeEventListener("keydown", keyDown);
 });
 
 function setAwaiting(value) {
@@ -255,11 +255,16 @@ watch(
 // }
 
 async function getNameForExistsAA(address) {
+  poolNameExistsAA.value = "";
   const metaByAA = meta.value[address];
   const reserveAsset = metaByAA.reserve_asset;
   const asset0 = metaByAA.state.asset0;
 
   const metadata = await getAssetMetadataByArray([reserveAsset, asset0]);
+  if (!metadata[reserveAsset] || !metadata[asset0]) {
+    return (poolNameExistsAA.value = "");
+  }
+
   poolNameExistsAA.value = `(${metadata[reserveAsset].name}/${metadata[asset0].name})`;
 }
 
@@ -326,9 +331,9 @@ watch(
 
     <div v-if="awaiting">
       <div class="card bg-base-200 shadow-lg p-8">
-        <div class="flex items-center">
+        <div class="flex items-center justify-center">
           <svg
-            class="animate-spin w-14 ml-2 mr-3"
+            class="animate-spin w-8 ml-2 mr-3"
             viewBox="0 0 24 24"
             fill="none"
           >
@@ -367,7 +372,7 @@ watch(
               id="assetInput"
               ref="SI"
               v-model="reserveAssetInput"
-              class="!input !input-bordered !w-full !text-white"
+              class="!input !input-bordered !w-full !text-slate-200 !bg-base-200 !border-gray-600"
               placeholder="For example: IUSD"
             />
           </div>
@@ -378,18 +383,13 @@ watch(
               </label>
               <TooltipComponent field-name="swap_fee"></TooltipComponent>
             </div>
-            <label class="input-group">
-              <VoteInput
-                class="input input-bordered join-item w-full"
-                v-model="swapFee"
-                :type="'percent'"
-              />
-              <span class="join-item">%</span>
+            <label>
+              <VoteInput v-model="swapFee" :type="'percent'" label="%" />
             </label>
           </div>
           <Disclosure v-slot="{ open }">
             <DisclosureButton class="py-2 text-gray-500 flex items-center">
-              <span>Show all details</span>
+              <span>Show all params</span>
               <ChevronRightIcon
                 :class="open && 'rotate-90 transform'"
                 class="w-5"
@@ -412,13 +412,12 @@ watch(
                     <TooltipComponent field-name="arb_profit_tax">
                     </TooltipComponent>
                   </div>
-                  <label class="input-group">
+                  <label>
                     <VoteInput
-                      class="input input-bordered join-item w-full"
                       v-model="arbProfitTax"
                       :type="'percent'"
+                      label="%"
                     />
-                    <span class="join-item">%</span>
                   </label>
                 </div>
                 <div class="form-control">
@@ -429,13 +428,12 @@ watch(
                     <TooltipComponent field-name="adjustment_period">
                     </TooltipComponent>
                   </div>
-                  <label class="input-group">
+                  <label>
                     <VoteInput
-                      class="input input-bordered join-item w-full"
                       v-model="adjustmentPeriod"
                       :type="'date'"
+                      label="days"
                     />
-                    <span class="join-item">day(s)</span>
                   </label>
                 </div>
                 <div class="form-control">
@@ -446,13 +444,12 @@ watch(
                     <TooltipComponent field-name="presale_period">
                     </TooltipComponent>
                   </div>
-                  <label class="input-group">
+                  <label>
                     <VoteInput
-                      class="input input-bordered join-item w-full"
                       v-model="presalePeriod"
                       :type="'date'"
+                      label="days"
                     />
-                    <span class="join-item">day(s)</span>
                   </label>
                 </div>
                 <div class="form-control">
@@ -465,13 +462,12 @@ watch(
                     <TooltipComponent field-name="auction_price_halving_period">
                     </TooltipComponent>
                   </div>
-                  <label class="input-group">
+                  <label>
                     <VoteInput
-                      class="input input-bordered join-item w-full"
                       v-model="auctionPriceHalvingPeriod"
                       :type="'date'"
+                      label="days"
                     />
-                    <span class="join-item">day(s)</span>
                   </label>
                 </div>
                 <div class="form-control">
@@ -482,13 +478,12 @@ watch(
                     <TooltipComponent field-name="token_share_threshold">
                     </TooltipComponent>
                   </div>
-                  <label class="input-group">
+                  <label>
                     <VoteInput
-                      class="input input-bordered join-item w-full"
                       v-model="tokenShareThreshold"
                       :type="'percent'"
+                      label="%"
                     />
-                    <span class="join-item">%</span>
                   </label>
                 </div>
                 <div class="form-control">
@@ -499,13 +494,12 @@ watch(
                     <TooltipComponent field-name="min_s0_share">
                     </TooltipComponent>
                   </div>
-                  <label class="input-group">
+                  <label>
                     <VoteInput
-                      class="input input-bordered join-item w-full"
                       v-model="minS0Share"
                       :type="'percent'"
+                      label="%"
                     />
-                    <span class="join-item">%</span>
                   </label>
                 </div>
               </DisclosurePanel>

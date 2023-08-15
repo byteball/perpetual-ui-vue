@@ -8,12 +8,13 @@ import { generateLink } from "@/utils/generateLink";
 import { getVP, getVPFromNormalized } from "@/utils/getVP";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import { useAddressStore } from "@/stores/addressStore";
-import { getAssetMetadata } from "@/services/DAGApi";
 import { useUserBalance } from "@/composables/useUserBalance";
 import NumberInput from "@/components/inputs/NumberInput.vue";
 import IntegerInput from "@/components/inputs/IntegerInput.vue";
-import AddressController from "@/components/AddressController.vue";
 import Loading from "@/components/icons/LoadingIcon.vue";
+import LabelForPoolsComponent from "@/components/LabelForPoolsComponent.vue";
+import { getPreparedMeta } from "@/utils/governanceUtils";
+import GovernanceAsset from "@/components/governance/GovernanceAsset.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -34,6 +35,7 @@ const modalForPool = ref();
 const selectedAA = ref("");
 const link = ref("");
 const metaByAA = ref(null);
+const preparedMetaByAA = ref({});
 const amount = ref({ value: "", error: "" });
 const term = ref({ value: "360", error: "" });
 const votedGroupKey = ref({ value: "g1", error: "" });
@@ -155,28 +157,27 @@ async function initPools() {
   const promises = [];
 
   async function getAndSetPoolData(aa) {
-    const poolAssetData = await getAssetMetadata(meta.value[aa].state.asset0);
-    if (!poolAssetData) return;
+    const result = await getPreparedMeta(meta.value[aa], address.value);
+    if (!result.symbolAndDecimals) return;
+    preparedMetaByAA.value[aa] = result;
+
     if (address.value) {
       stakeBalanceByPool.value[aa] =
         meta.value[aa]?.stakingVars[`user_${address.value}_a0`]?.balance || 0;
     }
+
+    poolSymbolAndDecimalByAA.value[aa] = result.symbolAndDecimals;
     _pools.push(aa);
-    poolSymbolAndDecimalByAA.value[aa] = poolAssetData;
 
-    const reserveAssetData = await getAssetMetadata(
-      meta.value[aa].reserve_asset
-    );
-
-    if (!reserveAssetData) {
+    if (!result.reserveAsset) {
       poolReserveNameByAA.value[aa] = meta.value[aa].reserve_asset;
       return;
     }
 
-    poolReserveNameByAA.value[aa] = reserveAssetData.name;
+    poolReserveNameByAA.value[aa] = result.reserveAsset.name;
   }
 
-  for (let aa of aas.value) {
+  for (let aa in meta.value) {
     promises.push(getAndSetPoolData(aa));
   }
   await Promise.all(promises);
@@ -184,8 +185,30 @@ async function initPools() {
   pools.value = _pools;
 }
 
+watch(balanceByAsset, setAmountByUserBalance);
+function setAmountByUserBalance() {
+  if (address.value && balanceByAsset.value) {
+    amount.value.value = String(balanceByAsset.value);
+  } else {
+    amount.value.value = "";
+  }
+}
+
+function setAmountByUserStakeBalance() {
+  if (address.value && userStakeBalance.value) {
+    amount.value.value = String(userStakeBalance.value);
+  } else {
+    amount.value.value = "";
+  }
+}
+
 function setTab(tabName) {
   activeTab.value = tabName;
+  if (tabName === "stake") {
+    setAmountByUserBalance();
+  } else {
+    setAmountByUserStakeBalance();
+  }
 }
 
 function getData() {
@@ -249,7 +272,7 @@ watch(
     if (!metaByAA.value) return;
     buttonDisabled.value = false;
 
-    if (!amount.value.value) {
+    if (!amount.value.value || Number(amount.value.value) === 0) {
       buttonDisabled.value = true;
     }
 
@@ -284,6 +307,7 @@ watch(
       return;
     }
 
+    term.value.error = "";
     const data = getData();
 
     link.value = generateLink(
@@ -349,25 +373,9 @@ watch(
   }
 );
 </script>
-<style>
-.tab {
-  width: 50%;
-  border-bottom-color: transparent;
-  --tab-bg: transparent;
-  --tab-border-color: transparent;
-}
 
-.no-pointer {
-  pointer-events: none;
-}
-
-.tabs-boxed {
-  background-color: #191d24;
-}
-</style>
 <template>
   <div class="container w-full sm:w-[512px] m-auto mt-8 mb-36 p-6 sm:p-8">
-    <AddressController />
     <div class="p-2 mb-6">
       <div class="text-lg font-semibold leading-7">Stake</div>
       <p class="mt-2 leading-6">
@@ -382,131 +390,53 @@ watch(
         </div>
         <div v-if="pools.length">
           <div class="form-control">
-            <label for="poolModal" class="btn btn-primary">
+            <LabelForPoolsComponent for="poolModal">
               {{
                 selectedAA
                   ? `${poolReserveNameByAA[selectedAA]}/${poolSymbolAndDecimalByAA[selectedAA].name}`
                   : `Please select pool`
               }}
-            </label>
+            </LabelForPoolsComponent>
           </div>
           <div v-if="metaByAA && poolSymbolAndDecimalByAA[metaByAA.aa]">
-            <div v-if="address" class="mt-4 mb-4">
-              <div>
-                Balance by address: {{ balanceByAsset }}
-                {{ poolSymbolAndDecimalByAA[selectedAA].name }}
-              </div>
-              <div>
+            <div class="mt-4 mb-4">
+              <GovernanceAsset
+                :perpetual-aa-meta="preparedMetaByAA[metaByAA.aa]"
+              />
+              <div v-if="address">
                 Your stake: {{ userStakeBalance }}
                 {{ poolSymbolAndDecimalByAA[selectedAA].name }}
               </div>
             </div>
-            <div class="tabs tabs-boxed mt-8 mb-4">
-              <a
-                class="tab tab-lifted"
-                :class="{ 'tab-active': activeTab === 'stake' }"
-                @click="setTab('stake')"
-              >
-                Stake
-              </a>
-              <a
-                class="tab tab-lifted"
-                :class="{ 'tab-active': activeTab === 'withdraw' }"
-                @click="setTab('withdraw')"
-              >
-                Withdraw
-              </a>
-            </div>
+            <div>
+              <div class="tabs tabs-boxed mt-8 mb-1">
+                <a
+                  class="tab"
+                  :class="{ 'tab-active': activeTab === 'stake' }"
+                  @click="setTab('stake')"
+                >
+                  Stake
+                </a>
+                <a
+                  class="tab"
+                  :class="{ 'tab-active': activeTab === 'withdraw' }"
+                  @click="setTab('withdraw')"
+                >
+                  Withdraw
+                </a>
+              </div>
 
-            <div v-if="activeTab === 'stake'">
-              <div class="form-control">
-                <label class="label">
-                  <span class="label-text">Amount</span>
-                </label>
-                <div class="input-group">
-                  <NumberInput
-                    v-model="amount.value"
-                    class="input input-bordered w-full"
-                    :decimals="poolSymbolAndDecimalByAA[metaByAA.aa].decimals"
-                  />
-                  <label class="btn no-pointer">{{
-                    poolSymbolAndDecimalByAA[metaByAA.aa].name
-                  }}</label>
-                </div>
-                <span
-                  v-if="amount.error"
-                  class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"
-                >
-                  {{ amount.error }}
-                </span>
-              </div>
-              <div class="form-control mt-2">
-                <label class="label">
-                  <span class="label-text">Term (in days)</span>
-                </label>
-                <IntegerInput
-                  v-model="term.value"
-                  class="input input-bordered"
-                />
-                <span
-                  v-if="term.error"
-                  class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"
-                >
-                  {{ term.error }}
-                </span>
-              </div>
-              <div class="mt-2" v-if="address">
-                <div>Your VP: {{ currentVP }}</div>
-                <div>New VP: {{ newVP }}</div>
-              </div>
-              <!--      <div class="form-control">-->
-              <!--        <label class="label">-->
-              <!--          <span class="label-text">Voted group key</span>-->
-              <!--        </label>-->
-              <!--        <input-->
-              <!--          type="text"-->
-              <!--          v-model="votedGroupKey.value"-->
-              <!--          class="input input-bordered"-->
-              <!--        />-->
-              <!--        <span-->
-              <!--          v-if="votedGroupKey.error"-->
-              <!--          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"-->
-              <!--        >-->
-              <!--          {{ votedGroupKey.error }}-->
-              <!--        </span>-->
-              <!--      </div>-->
-              <!--      <div class="form-control">-->
-              <!--        <label class="label">-->
-              <!--          <span class="label-text">Percentages</span>-->
-              <!--        </label>-->
-              <!--        <input-->
-              <!--          type="text"-->
-              <!--          v-model="percentages.value"-->
-              <!--          class="input input-bordered"-->
-              <!--        />-->
-              <!--        <span-->
-              <!--          v-if="percentages.error"-->
-              <!--          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"-->
-              <!--        >-->
-              <!--          {{ percentages.error }}-->
-              <!--        </span>-->
-              <!--      </div>-->
-            </div>
-            <div v-if="activeTab === 'withdraw'">
-              <div class="form-control">
-                <label class="label">
-                  <span class="label-text">Amount</span>
-                </label>
-                <div v-if="termMeta.ended || !address">
-                  <div class="input-group">
+              <div v-if="activeTab === 'stake'">
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text">Amount</span>
+                  </label>
+                  <div>
                     <NumberInput
                       v-model="amount.value"
-                      class="input input-bordered w-full"
+                      :label="poolSymbolAndDecimalByAA[metaByAA.aa].name"
                       :decimals="poolSymbolAndDecimalByAA[metaByAA.aa].decimals"
                     />
-                    <label class="btn no-pointer">{{
-                      poolSymbolAndDecimalByAA[metaByAA.aa].name
-                    }}</label>
                   </div>
                   <span
                     v-if="amount.error"
@@ -515,21 +445,100 @@ watch(
                     {{ amount.error }}
                   </span>
                 </div>
-                <div v-else>
-                  <div class="text-center mt-8 mb-8">
-                    The withdrawal will be available after the end of the stake
-                    period: {{ termMeta.date }}
+                <div class="form-control mt-2">
+                  <label class="label">
+                    <span class="label-text">Term (in days)</span>
+                  </label>
+                  <IntegerInput v-model="term.value" :max-value="360" />
+                  <span
+                    v-if="term.error"
+                    class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"
+                  >
+                    {{ term.error }}
+                  </span>
+                  <div v-if="term.value" class="mt-2 text-sm">
+                    Will be locked until
+                    {{
+                      dayjs().add(term.value, "day").format("DD MMM YYYY HH:mm")
+                    }}
+                    (this applies to the previously locked tokens too)
+                  </div>
+                </div>
+                <div class="mt-4">
+                  <div v-if="address">Current VP: {{ currentVP }}</div>
+                  <div>New VP: {{ newVP }}</div>
+                </div>
+                <!--      <div class="form-control">-->
+                <!--        <label class="label">-->
+                <!--          <span class="label-text">Voted group key</span>-->
+                <!--        </label>-->
+                <!--        <input-->
+                <!--          type="text"-->
+                <!--          v-model="votedGroupKey.value"-->
+                <!--          class="input input-bordered"-->
+                <!--        />-->
+                <!--        <span-->
+                <!--          v-if="votedGroupKey.error"-->
+                <!--          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"-->
+                <!--        >-->
+                <!--          {{ votedGroupKey.error }}-->
+                <!--        </span>-->
+                <!--      </div>-->
+                <!--      <div class="form-control">-->
+                <!--        <label class="label">-->
+                <!--          <span class="label-text">Percentages</span>-->
+                <!--        </label>-->
+                <!--        <input-->
+                <!--          type="text"-->
+                <!--          v-model="percentages.value"-->
+                <!--          class="input input-bordered"-->
+                <!--        />-->
+                <!--        <span-->
+                <!--          v-if="percentages.error"-->
+                <!--          class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"-->
+                <!--        >-->
+                <!--          {{ percentages.error }}-->
+                <!--        </span>-->
+                <!--      </div>-->
+              </div>
+              <div v-if="activeTab === 'withdraw'">
+                <div class="form-control">
+                  <label class="label">
+                    <span class="label-text">Amount</span>
+                  </label>
+                  <div v-if="termMeta.ended || !address">
+                    <div>
+                      <NumberInput
+                        v-model="amount.value"
+                        :decimals="
+                          poolSymbolAndDecimalByAA[metaByAA.aa].decimals
+                        "
+                        :label="poolSymbolAndDecimalByAA[metaByAA.aa].name"
+                      />
+                    </div>
+                    <span
+                      v-if="amount.error"
+                      class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"
+                    >
+                      {{ amount.error }}
+                    </span>
+                  </div>
+                  <div v-else>
+                    <div class="text-center mt-8 mb-8">
+                      The withdrawal will be available after the end of the
+                      stake period: {{ termMeta.date }}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div class="form-control mt-6">
-              <a
-                class="btn btn-primary"
-                :class="{ '!btn-disabled': buttonDisabled }"
-                :href="link"
-                >{{ activeTab === "stake" ? "stake" : "withdraw" }}</a
-              >
+              <div class="form-control mt-6">
+                <a
+                  class="btn btn-primary"
+                  :class="{ '!btn-disabled': buttonDisabled }"
+                  :href="link"
+                  >{{ activeTab === "stake" ? "stake" : "withdraw" }}</a
+                >
+              </div>
             </div>
           </div>
         </div>

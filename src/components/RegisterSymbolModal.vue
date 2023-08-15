@@ -6,6 +6,8 @@ import { useAaInfoStore } from "@/stores/aaInfo";
 import { storeToRefs } from "pinia";
 import Client from "@/services/Obyte";
 import debounce from "lodash.debounce";
+import TextInput from "@/components/inputs/TextInput.vue";
+import NumberInput from "@/components/inputs/NumberInput.vue";
 
 const store = useAaInfoStore();
 
@@ -17,7 +19,7 @@ const registryAA = ref("");
 
 const symbol = ref("");
 const symbolFieldError = ref("");
-const decimals = ref(0);
+const decimals = ref("9");
 const buttonEnabled = ref(false);
 const link = ref("");
 
@@ -105,22 +107,15 @@ onMounted(async () => {
       <label class="label">
         <span class="label-text">Asset</span>
       </label>
-      <input
-        type="text"
-        :value="asset"
-        class="input input-bordered input-sm"
-        readonly
-      />
+      <TextInput :static-value="asset" />
     </div>
     <div class="form-control mt-2">
       <label class="label">
         <span class="label-text">Symbol</span>
       </label>
-      <input
-        type="text"
+      <TextInput
         v-model="symbol"
         @input="() => (symbol = symbol.toUpperCase())"
-        class="input input-bordered input-sm"
       />
       <span
         v-if="symbolFieldError"
@@ -133,12 +128,7 @@ onMounted(async () => {
       <label class="label">
         <span class="label-text">Decimals</span>
       </label>
-      <input
-        type="number"
-        v-model="decimals"
-        min="0"
-        class="input input-bordered input-sm"
-      />
+      <NumberInput v-model="decimals" />
     </div>
     <div class="form-control mt-6">
       <a

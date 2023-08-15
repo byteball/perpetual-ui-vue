@@ -91,21 +91,39 @@ export async function getJoint(unit) {
   }
 }
 
-const cacheForAssetMetadata = {};
-
+const cacheForDataFeed = {};
 export async function getDataFeed(oracle, feedName) {
+  const key = `${oracle}_${feedName}`;
+  if (cacheForDataFeed[key]) return cacheForDataFeed[key];
+
   const params = {
     oracles: [oracle],
     feed_name: feedName,
   };
 
   try {
-    return await client.api.getDataFeed(params);
+    const result = await client.api.getDataFeed(params);
+    cacheForDataFeed[key] = result;
+    return result;
   } catch (e) {
     return null;
   }
 }
 
+export async function getOracleData(priceAA) {
+  const { definition } = await getDefinition(priceAA);
+  const { oracle, feed_name } = definition[1].params;
+  let name = feed_name;
+  let value = await getDataFeed(oracle, feed_name);
+  if (oracle === "F4KHJUCLJKY4JV7M5F754LAJX4EB7M4N") {
+    name = name.split("_")[0];
+    value = `$${value.toFixed(2)}`;
+  }
+
+  return { name, value };
+}
+
+const cacheForAssetMetadata = {};
 export async function getAssetMetadata(asset) {
   if (asset === "base") {
     return {

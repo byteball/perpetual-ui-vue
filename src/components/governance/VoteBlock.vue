@@ -15,6 +15,7 @@ const props = defineProps([
   "votesByName",
   "type",
   "preparedMeta",
+  "allowedControl",
 ]);
 
 const emit = defineEmits(["reqVote"]);
@@ -64,9 +65,7 @@ function voteFromTable(value) {
           class="ml-1"
         ></TooltipComponent>
       </div>
-      <div
-        class="text-center sm:text-left text-base sm:text-lg font-medium sm:font-bold"
-      >
+      <div class="text-left text-base sm:text-lg font-medium sm:font-bold">
         Current value:
         {{ currentValue }}{{ suffix }}
       </div>
@@ -74,13 +73,15 @@ function voteFromTable(value) {
     <div class="card bg-base-300 shadow-xl mt-2.5">
       <div class="card-body gap-0 p-3 sm:p-8">
         <div class="text-center">
-          <div v-if="votesByName?.length" class="mb-4">
+          <div v-if="votesByName?.length">
+            <div class="mb-2 font-bold">Votes for changing the value</div>
             <div class="w-full overflow-auto">
               <VotingTable
                 :votes="votesByName"
                 :type="type"
                 :suffix="suffix"
                 :decimals="preparedMeta.symbolAndDecimals.decimals"
+                :allowed-control="allowedControl"
                 @vote-from-table="voteFromTable"
               />
             </div>
@@ -90,7 +91,10 @@ function voteFromTable(value) {
               (vp: {{ userVote.vp }})
             </div>
           </div>
-          <div class="text-center sm:text-left">
+          <div v-else class="text-center">
+            At the moment there are no votes for changing the value
+          </div>
+          <div class="text-center sm:text-left mt-4" v-if="allowedControl">
             <a
               class="link text-sky-500 link-hover"
               @click="$emit('reqVote', name, type, suffix)"

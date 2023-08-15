@@ -45,7 +45,8 @@ const router = createRouter({
       component: () => import("../views/CreateView.vue"),
     },
   ],
-  scrollBehavior() {
+  scrollBehavior(to, from, savedPosition) {
+    if (to.name === from.name) return savedPosition;
     return { top: 0, behavior: "smooth" };
   },
 });

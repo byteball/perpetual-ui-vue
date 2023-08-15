@@ -1,42 +1,74 @@
 <script setup>
+import { onMounted, ref } from "vue";
+import { getOracleData } from "@/services/DAGApi";
 import { generateAndFollowLinkForVoteAddPriceAA } from "@/utils/generateLink";
 import LinkIcon from "@/components/icons/LinkIcon.vue";
 
-defineProps(["priceAa", "stakingAa", "definition", "priceAasMeta"]);
+const props = defineProps([
+  "priceAa",
+  "stakingAa",
+  "definition",
+  "priceAasMeta",
+  "allowedControl",
+]);
+
+const selectedOracleData = ref({});
+
+onMounted(async () => {
+  selectedOracleData.value = await getOracleData(props.priceAa);
+});
 </script>
 
 <template>
-  <div class="text-sm font-medium inline-block mb-2">
-    Price AA:
-    <div class="text-xs sm:text-sm font-light block sm:inline-block">
-      {{ priceAa }}
-    </div>
+  <div class="font-medium mb-4 overflow-hidden sm:overflow-auto text-ellipsis">
+    {{ priceAa }}
   </div>
   <div class="block sm:flex justify-between">
-    <div class="font-medium text-sm inline-block mb-2">
+    <div class="font-medium text-sm inline-block mb-1">
       Oracle:
       <div class="font-light text-xs sm:text-sm block sm:inline-block">
         {{ definition.oracle }}
       </div>
     </div>
-    <div class="font-medium text-sm inline-block mb-2">
+    <div class="font-medium text-sm inline-block mb-1">
       Multiplier:
       <div class="font-light text-sm inline-block">
         {{ definition.multiplier || 1 }}
       </div>
     </div>
   </div>
-  <div class="font-medium text-sm inline-block mb-2">
-    Feed name:
+  <div class="font-medium text-sm mb-1">
+    Currency:
     <div class="font-light text-sm inline-block">
-      {{ definition.feed_name }}
+      {{ selectedOracleData.name }}
+    </div>
+  </div>
+  <div class="font-medium text-sm mb-4">
+    Current value:
+    <div class="font-light text-sm inline-block">
+      {{ selectedOracleData.value }}
     </div>
   </div>
   <div class="block sm:flex justify-between">
     <div class="text-sm font-medium block sm:inline-block">
       Status:
       <div class="text-sm font-light inline-block">
-        <p v-if="priceAasMeta.vpAddPriceBCommit">waiting commit</p>
+        <p
+          v-if="
+            priceAasMeta.vpAddPriceBCommit &&
+            priceAasMeta.leaderAddPriceAA.value === 'yes'
+          "
+        >
+          waiting commit
+        </p>
+        <p
+          v-else-if="
+            priceAasMeta.vpAddPriceBCommit &&
+            priceAasMeta.leaderAddPriceAA.value === 'no'
+          "
+        >
+          finished
+        </p>
         <p v-else>not finished</p>
       </div>
     </div>
@@ -47,8 +79,11 @@ defineProps(["priceAa", "stakingAa", "definition", "priceAasMeta"]);
       </div>
     </div>
   </div>
-  <div class="card-actions justify-start mt-4 text-center sm:text-left">
-    <div v-if="!priceAasMeta.vpAddPriceBCommit">
+  <div
+    class="card-actions justify-start mt-4 text-center sm:text-left"
+    v-if="allowedControl"
+  >
+    <div v-if="!priceAasMeta.vpAddPriceBCommit" class="w-full">
       <button
         class="btn btn-sm gap-2 mr-4"
         @click="
@@ -72,7 +107,13 @@ defineProps(["priceAa", "stakingAa", "definition", "priceAasMeta"]);
         Vote for yes
       </button>
     </div>
-    <div v-if="priceAasMeta.vpAddPriceBCommit">
+    <div
+      v-if="
+        priceAasMeta.vpAddPriceBCommit &&
+        priceAasMeta.leaderAddPriceAA.value === 'yes'
+      "
+      class="w-full"
+    >
       <button
         class="btn btn-sm gap-2 mr-4"
         @click="
@@ -90,6 +131,23 @@ defineProps(["priceAa", "stakingAa", "definition", "priceAasMeta"]);
       >
         <LinkIcon />
         Commit result
+      </button>
+    </div>
+    <div
+      v-if="
+        priceAasMeta.vpAddPriceBCommit &&
+        priceAasMeta.leaderAddPriceAA.value === 'no'
+      "
+      class="w-full"
+    >
+      <button
+        class="btn btn-sm gap-2 mt-4 sm:mt-0"
+        @click="
+          generateAndFollowLinkForVoteAddPriceAA(priceAa, 'yes', stakingAa)
+        "
+      >
+        <LinkIcon />
+        Vote for yes
       </button>
     </div>
   </div>

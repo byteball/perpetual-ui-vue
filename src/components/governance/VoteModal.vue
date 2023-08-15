@@ -8,6 +8,7 @@ import {
 import { isValidNumber } from "@/utils/validates";
 import GovernanceAssetField from "@/components/governance/GovernanceAssetField.vue";
 import VoteInput from "@/components/inputs/VoteInput.vue";
+import TextInput from "@/components/inputs/TextInput.vue";
 
 const props = defineProps(["params"]);
 const emit = defineEmits(["vote"]);
@@ -98,18 +99,11 @@ function sendVotingEmit() {
               params.type === 'percent' ||
               params.type === 'number'
             "
-            class="input input-bordered join-item w-full"
             v-model="inputValue"
             :type="props.params.type"
+            :label="params.suffix"
           />
-          <input
-            v-else
-            class="input input-bordered join-item w-full"
-            v-model="inputValue"
-          />
-          <span v-if="params.suffix" class="join-item">{{
-            params.suffix
-          }}</span>
+          <TextInput v-else v-model="inputValue" :label="params.suffix" />
         </label>
       </div>
       <div>
@@ -123,7 +117,7 @@ function sendVotingEmit() {
           title="New VP"
           :value="vp.newVP"
           :leader="leader"
-          class="mt-2"
+          :class="{ '!mt-1': !isNewValue }"
         />
       </div>
     </div>

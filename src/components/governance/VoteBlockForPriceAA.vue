@@ -1,11 +1,12 @@
 <script setup>
-import { computed } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { storeToRefs } from "pinia";
 import { fullExplorerUrlForAddress } from "@/config";
 import { getVPFromNormalized } from "@/utils/getVP";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import { useAddressStore } from "@/stores/addressStore";
 import VotingTable from "@/components/governance/VotingTable.vue";
+import { getOracleData } from "@/services/DAGApi";
 
 const props = defineProps([
   "title",
@@ -13,6 +14,7 @@ const props = defineProps([
   "type",
   "assetMeta",
   "votesByName",
+  "allowedControl",
 ]);
 const emit = defineEmits(["reqVote"]);
 const currentValue = props.assetMeta[props.name] || 0;
@@ -21,6 +23,8 @@ const store = useAaInfoStore();
 const { metaByActiveAddress, timestamp } = storeToRefs(store);
 const addressStore = useAddressStore();
 const { address } = storeToRefs(addressStore);
+
+const selectedOracleData = ref({});
 
 const userVote = computed(() => {
   if (!metaByActiveAddress.value) return;
@@ -48,28 +52,42 @@ const userVote = computed(() => {
 function voteFromTable(value) {
   emit("reqVote", props.name, props.type, value);
 }
+
+onMounted(async () => {
+  if (props.name === "price_aa") {
+    selectedOracleData.value = await getOracleData(currentValue);
+  }
+});
 </script>
 
 <template>
-  <div class="text-sm mt-4">
+  <div class="text-sm mt-4 w-full">
     <div class="font-bold text-lg">{{ title }}</div>
     <div class="mt-2">
       Current value:
       <a
         v-if="type === 'address'"
-        class="link underline block sm:inline-block text-xs sm:text-sm"
+        class="link text-sky-500 link-hover block sm:inline-block text-xs sm:text-sm"
         target="_blank"
         :href="fullExplorerUrlForAddress + currentValue"
         >{{ currentValue }}</a
       >
       <span v-else>{{ currentValue }}</span>
     </div>
+    <div v-if="name === 'price_aa'">
+      <div class="mt-1">Currency: {{ selectedOracleData.name }}</div>
+      <div class="mt-1">Oracle value: {{ selectedOracleData.value }}</div>
+    </div>
     <div class="mt-2">
       <div v-if="votesByName?.length" class="mb-4">
+        <div class="mt-4 mb-1 text-sm sm:text-base text-center font-bold">
+          Votes for changing the value
+        </div>
         <div class="overflow-auto">
           <VotingTable
             :votes="votesByName"
             :decimals="assetMeta.assetMetaData.decimals"
+            :allowed-control="allowedControl"
             @vote-from-table="voteFromTable"
           />
         </div>
@@ -81,7 +99,7 @@ function voteFromTable(value) {
           (vp: {{ userVote.vp }})
         </div>
       </div>
-      <div class="text-center sm:text-left">
+      <div class="text-center sm:text-left" v-if="allowedControl">
         <a
           class="link text-sky-500 link-hover"
           @click="$emit('reqVote', name, type)"

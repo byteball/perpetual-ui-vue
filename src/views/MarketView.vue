@@ -13,8 +13,8 @@ import { useUserBalance } from "@/composables/useUserBalance";
 import { generateLink } from "@/utils/generateLink";
 import { getExchangeResultByState } from "@/utils/getExchangeResultByState";
 import NumberInput from "@/components/inputs/NumberInput.vue";
-import AddressController from "@/components/AddressController.vue";
 import Loading from "@/components/icons/LoadingIcon.vue";
+import TextInput from "@/components/inputs/TextInput.vue";
 
 const store = useAaInfoStore();
 const { aas, meta, status } = storeToRefs(store);
@@ -252,7 +252,6 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
 </style>
 <template>
   <div class="container w-full sm:w-[512px] m-auto mt-8 mb-36 p-6 sm:p-8">
-    <AddressController />
     <div class="p-2 mb-6">
       <div class="text-lg font-semibold leading-7">Market</div>
       <p class="mt-2 leading-6">
@@ -267,18 +266,22 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
           <Loading />
         </div>
         <div class="form-control" v-if="assets.assetList.length">
-          <div class="input-group">
+          <div class="join">
             <NumberInput
+              class="join-item"
               v-model="asset1Amount"
-              class="input input-bordered w-full disabled-card-input"
               :decimals="assets.nameAndDecimalsByAsset[asset1]?.decimals"
               :disabled="!asset1"
             />
-            <label for="asset1Modal" class="btn btn-primary">{{
-              asset1
-                ? assets.nameAndDecimalsByAsset[asset1].name
-                : "Select asset"
-            }}</label>
+            <label
+              for="asset1Modal"
+              class="btn btn-primary border-gray-600 join-item"
+              >{{
+                asset1
+                  ? assets.nameAndDecimalsByAsset[asset1].name
+                  : "Select asset"
+              }}</label
+            >
           </div>
           <div class="mt-4 flex justify-center">
             <button @click="swapPair()" class="btn btn-circle swap-btn">
@@ -298,18 +301,17 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
               </svg>
             </button>
           </div>
-          <div class="input-group mt-4">
-            <input
-              type="text"
+          <div class="join mt-4 !border-gray-600">
+            <TextInput
+              class="join-item"
               placeholder="0"
-              class="input input-bordered w-full disabled-card-input"
               :disabled="!asset2"
               v-model.number="asset2Amount"
               readonly
             />
             <label
               for="asset2Modal"
-              class="btn btn-primary"
+              class="btn btn-primary border-gray-600 join-item"
               :class="{ '!btn-disabled': !asset1 }"
               >{{
                 asset2

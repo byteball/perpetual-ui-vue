@@ -3,8 +3,10 @@ import { onMounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useRoute, useRouter } from "vue-router";
 import dayjs from "dayjs";
+import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/vue";
+import { ChevronRightIcon } from "@heroicons/vue/20/solid";
+import { fullExplorerUrlForAddress } from "@/config";
 import duration from "dayjs/plugin/duration";
-
 import { generateLink } from "@/utils/generateLink";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import { getPresaleAssetsFromMeta } from "@/utils/getAssetsFromMeta";
@@ -12,13 +14,15 @@ import {
   executeAAGetter,
   getAssetMetadata,
   getAssetMetadataByArray,
+  getOracleData,
 } from "@/services/DAGApi";
 import NumberInput from "@/components/inputs/NumberInput.vue";
-import { getParam } from "@/utils/governanceUtils";
-import AddressController from "@/components/AddressController.vue";
+import { getParam, getPreparedMeta } from "@/utils/governanceUtils";
 import { useAddressStore } from "@/stores/addressStore";
 import ClaimCard from "@/components/presale/ClaimCard.vue";
 import Loading from "@/components/icons/LoadingIcon.vue";
+import LabelForPoolsComponent from "@/components/LabelForPoolsComponent.vue";
+import GovernanceAssetField from "@/components/governance/GovernanceAssetField.vue";
 
 dayjs.extend(duration);
 
@@ -33,12 +37,14 @@ const { address } = storeToRefs(addressStore);
 const selectedReserveAsset = ref("");
 const selectedPresaleAsset = ref("");
 const selectedAA = ref("");
+const metaBySelectedAsset = ref({});
 const selectedAsset0 = ref("");
 const selectedPresaleIsFinished = ref("");
 const selectedPresaleFinishDate = ref("");
 const selectedPresaleTargetAmount = ref("");
 const selectedPresaleCurrentAmount = ref("");
 const selectedPresaleAddressAmount = ref(0);
+const selectedOracleData = ref({});
 
 const targetPrice = ref("");
 const receiveAmount = ref("");
@@ -54,6 +60,7 @@ const modalForPresale = ref();
 const toastMessage = ref("");
 
 const presaleList = ref([]);
+const preparedDataByAA = ref({});
 
 const setTab = (tabName) => {
   activeTab.value = tabName;
@@ -121,7 +128,7 @@ const preparePresaleList = async () => {
     const metadataByAsset = await getAssetMetadataByArray(presaleAssets);
 
     for (const presaleAsset in metadataByAsset) {
-      const presaleAssetData = metadataByAsset[presaleAssets];
+      const presaleAssetData = metadataByAsset[presaleAsset];
 
       if (!assetsMetadata.value[presaleAsset]) {
         assetsMetadata.value[presaleAsset] = presaleAssetData;
@@ -139,8 +146,9 @@ const preparePresaleList = async () => {
       const targetPresaleAmount = tokenShareThreshold * reserve;
 
       const isPresaleFinished =
-        targetPresaleAmount <= currentPresaleAmount ||
-        finishDate.diff(dayjs()) < 0;
+        currentPresaleAmount &&
+        (targetPresaleAmount <= currentPresaleAmount ||
+          finishDate.diff(dayjs()) < 0);
 
       if (isPresaleFinished) continue;
 
@@ -159,6 +167,10 @@ const preparePresaleList = async () => {
         finishDate: finishDate.format("MMMM D, YYYY HH:mm"),
       });
 
+      preparedDataByAA.value[aa] = await getPreparedMeta(
+        meta.value[aa],
+        address.value
+      );
       aAsPairs.value[`${reserveAsset}_${presaleAsset}`] = aa;
     }
   }
@@ -209,10 +221,12 @@ const updateAddressPresaleAmount = () => {
   }
 };
 
-const fillPresaleData = (presale) => {
+const fillPresaleData = async (presale) => {
   selectedPresaleAsset.value = presale.presaleAsset;
   selectedReserveAsset.value = presale.reserveAsset;
   selectedAA.value = presale.aa;
+  metaBySelectedAsset.value =
+    meta.value[presale.aa][`asset_${presale.presaleAsset}`];
   selectedAsset0.value = presale.asset0;
   selectedPresaleIsFinished.value = presale.isPresaleFinished;
   selectedPresaleFinishDate.value = presale.finishDate;
@@ -229,6 +243,10 @@ const fillPresaleData = (presale) => {
   if (selectedPresaleIsFinished.value) {
     activeTab.value = "claim";
   }
+
+  selectedOracleData.value = await getOracleData(
+    meta.value[presale.aa][`asset_${presale.presaleAsset}`].price_aa
+  );
 
   if (address.value && selectedAA.value) {
     updateAddressPresaleAmount();
@@ -313,8 +331,6 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
       </div>
     </div>
 
-    <AddressController />
-
     <ClaimCard v-if="address" />
 
     <div class="p-2 mb-6">
@@ -333,16 +349,13 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
         <div v-else>
           <div v-if="presaleList.length">
             <div class="form-control">
-              <label
-                for="presaleModal"
-                class="btn btn-primary !whitespace-pre-wrap leading-4"
-              >
+              <LabelForPoolsComponent for="presaleModal">
                 {{
                   selectedAA
                     ? `${assetsMetadata[selectedPresaleAsset].name} in pool \n ${assetsMetadata[selectedAsset0].name} / ${assetsMetadata[selectedReserveAsset].name}`
                     : `Please select presale`
                 }}
-              </label>
+              </LabelForPoolsComponent>
             </div>
           </div>
           <div v-else>
@@ -350,16 +363,124 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
           </div>
           <div v-if="selectedAA">
             <div>
-              <div class="mt-4">
-                <div>Finish date: {{ selectedPresaleFinishDate }}</div>
-                <div class="mt-2">
+              <div class="mt-2">
+                <Disclosure v-slot="{ open }">
+                  <DisclosureButton
+                    class="py-2 text-gray-500 flex items-center"
+                  >
+                    <span>Show pool details</span>
+                    <ChevronRightIcon
+                      :class="open && 'rotate-90 transform'"
+                      class="w-5"
+                    />
+                  </DisclosureButton>
+                  <transition
+                    enter-active-class="transition duration-100 ease-out"
+                    enter-from-class="transform scale-95 opacity-0"
+                    enter-to-class="transform scale-100 opacity-100"
+                    leave-active-class="transition duration-75 ease-out"
+                    leave-from-class="transform scale-100 opacity-100"
+                    leave-to-class="transform scale-95 opacity-0"
+                  >
+                    <DisclosurePanel class="text-slate-300 pb-2 pl-2">
+                      <GovernanceAssetField
+                        title="Swap fee"
+                        :value="`${
+                          getParam(
+                            'swap_fee',
+                            preparedDataByAA[selectedAA].rawMeta
+                          ) * 100
+                        }%`"
+                      />
+                      <GovernanceAssetField
+                        class="text-xs sm:text-sm"
+                        title="Staking aa"
+                        :value="preparedDataByAA[selectedAA].rawMeta.staking_aa"
+                        :value-link="
+                          fullExplorerUrlForAddress +
+                          preparedDataByAA[selectedAA].rawMeta.staking_aa
+                        "
+                      />
+                      <GovernanceAssetField
+                        title="Arb profit tax"
+                        :value="`${getParam(
+                          'arb_profit_tax',
+                          preparedDataByAA[selectedAA].rawMeta
+                        )}%`"
+                      />
+                      <GovernanceAssetField
+                        title="Adjustment period"
+                        :value="`${
+                          getParam(
+                            'adjustment_period',
+                            preparedDataByAA[selectedAA].rawMeta
+                          ) /
+                          24 /
+                          3600
+                        } days`"
+                      />
+                      <GovernanceAssetField
+                        title="Presale period"
+                        :value="`${
+                          getParam(
+                            'presale_period',
+                            preparedDataByAA[selectedAA].rawMeta
+                          ) /
+                          24 /
+                          3600
+                        } days`"
+                      />
+                      <GovernanceAssetField
+                        title="Auction price halving period"
+                        :value="`${
+                          getParam(
+                            'auction_price_halving_period',
+                            preparedDataByAA[selectedAA].rawMeta
+                          ) /
+                          24 /
+                          3600
+                        } days
+                        `"
+                      />
+                      <GovernanceAssetField
+                        title="Token share threshold"
+                        :value="`${
+                          getParam(
+                            'token_share_threshold',
+                            preparedDataByAA[selectedAA].rawMeta
+                          ) * 100
+                        }%`"
+                      />
+                      <GovernanceAssetField
+                        title="Min s0 share"
+                        :value="`${
+                          getParam(
+                            'min_s0_share',
+                            preparedDataByAA[selectedAA].rawMeta
+                          ) * 100
+                        }%`"
+                      />
+                    </DisclosurePanel>
+                  </transition>
+                </Disclosure>
+                <div class="mt-0.5">
+                  Currency: {{ selectedOracleData.name }}
+                </div>
+                <div class="mt-0.5">
+                  Current value: {{ selectedOracleData.value }}
+                </div>
+                <div class="mt-3">
+                  Finish date: {{ selectedPresaleFinishDate }}
+                </div>
+                <div>
                   Sold:
                   {{
                     `${selectedPresaleCurrentAmount} / ${selectedPresaleTargetAmount}`
                   }}
+                  {{ assetsMetadata[selectedPresaleAsset].name }}
                 </div>
               </div>
-              <div class="tabs tabs-boxed mt-8">
+              <div class="tabs tabs-boxed mt-8 mb-1">
                 <a
                   class="tab tab-lifted"
                   :class="{ 'tab-active': activeTab === 'buy' }"
@@ -367,15 +488,14 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
                 >
                   Buy
                 </a>
-                <!--                <a-->
-                <!--                  class="tab tab-lifted"-->
-                <!--                  :class="{ 'tab-active': activeTab === 'withdraw' }"-->
-                <!--                  @click="setTab('withdraw')"-->
-                <!--                >-->
-                <!--                  Withdraw-->
-                <!--                </a>-->
+                <a
+                  class="tab tab-lifted tab-disabled"
+                  :class="{ 'tab-active': activeTab === 'withdraw' }"
+                >
+                  Withdraw
+                </a>
               </div>
-              <div class="mt-4">
+              <div>
                 <label class="label">
                   <span class="label-text">Amount</span>
                 </label>
@@ -383,9 +503,8 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
                   <NumberInput
                     v-model="amount"
                     :decimals="assetsMetadata[selectedReserveAsset].decimals"
-                    class="input input-bordered w-full"
+                    :label="assetsMetadata[selectedReserveAsset].name"
                   />
-                  <span>{{ assetsMetadata[selectedReserveAsset].name }}</span>
                 </div>
               </div>
               <div v-if="amount" class="mt-4">

@@ -8,6 +8,7 @@ import { getAssetMetadata, getMetaForPerpAAs } from "@/services/DAGApi";
 import { generateLink } from "@/utils/generateLink";
 import { parseDataForFactoryRequest } from "@/utils/parseDataForFactoryRequest";
 import IntegerInput from "@/components/inputs/IntegerInput.vue";
+import TextInput from "@/components/inputs/TextInput.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -180,7 +181,7 @@ onMounted(() => {
       <div class="alert shadow-lg">
         <div class="flex items-center">
           <svg
-            class="animate-spin h-5 w-5 ml-2 mr-3"
+            class="animate-spin w-8 ml-2 mr-3"
             viewBox="0 0 24 24"
             fill="none"
           >
@@ -198,7 +199,10 @@ onMounted(() => {
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
             ></path>
           </svg>
-          <span>Waiting for transaction confirmation</span>
+          <span class="text-left"
+            >Waiting for transaction confirmation. Please don't close this
+            page</span
+          >
         </div>
       </div>
     </div>
@@ -209,22 +213,15 @@ onMounted(() => {
             <label class="label">
               <span class="label-text">Asset</span>
             </label>
-            <input
-              type="text"
-              v-model="asset"
-              class="input input-bordered"
-              readonly
-            />
+            <TextInput v-model="asset" readonly />
           </div>
           <div class="form-control">
             <label class="label">
               <span class="label-text">Symbol</span>
             </label>
-            <input
-              type="text"
+            <TextInput
               v-model="symbol"
               @input="() => (symbol = symbol.toUpperCase())"
-              class="input input-bordered"
             />
             <div class="p-1 text-red-500">
               {{ isSymbolExists ? "This symbol is already in use" : "" }}
@@ -234,7 +231,7 @@ onMounted(() => {
             <label class="label">
               <span class="label-text">Decimals</span>
             </label>
-            <IntegerInput v-model="decimals" class="input input-bordered" />
+            <IntegerInput v-model="decimals" />
           </div>
           <div class="form-control">
             <label class="label">
@@ -264,7 +261,7 @@ onMounted(() => {
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
-            class="stroke-info w-14 ml-2 mr-2"
+            class="stroke-info w-12 ml-2 mr-2"
           >
             <path
               stroke-linecap="round"
@@ -274,12 +271,12 @@ onMounted(() => {
               d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
             ></path>
           </svg>
-          <span>
-            Done. After confirming the registration of the aa symbol, it will be
-            available in the market
+          <span class="text-left">
+            Done. After confirming the registration of the symbol for AA, it
+            will be available on the market
           </span>
         </div>
-        <div class="mt-4 text-center">
+        <div class="mt-6 text-center">
           <button
             class="btn btn-sm btn-primary"
             @click="() => router.push('/')"
