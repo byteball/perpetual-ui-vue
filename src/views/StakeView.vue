@@ -158,7 +158,7 @@ async function initPools() {
 
   async function getAndSetPoolData(aa) {
     const result = await getPreparedMeta(meta.value[aa], address.value);
-    if (!result.symbolAndDecimals) return;
+    if (!result.asset0SymbolAndDecimals) return;
     preparedMetaByAA.value[aa] = result;
 
     if (address.value) {
@@ -166,7 +166,7 @@ async function initPools() {
         meta.value[aa]?.stakingVars[`user_${address.value}_a0`]?.balance || 0;
     }
 
-    poolSymbolAndDecimalByAA.value[aa] = result.symbolAndDecimals;
+    poolSymbolAndDecimalByAA.value[aa] = result.asset0SymbolAndDecimals;
     _pools.push(aa);
 
     if (!result.reserveAsset) {

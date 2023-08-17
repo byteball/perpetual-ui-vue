@@ -48,7 +48,7 @@ const currentVP = computed(() => {
   const metaByAA = meta.value[perpetualAA.value];
   const normalizedVp =
     metaByAA.stakingVars[`user_${address.value}_a0`]?.normalized_vp;
-  const decimals = preparedMeta.value.symbolAndDecimals.decimals;
+  const decimals = preparedMeta.value.asset0SymbolAndDecimals.decimals;
 
   return Number(
     (
@@ -165,7 +165,7 @@ function showModalForVote(title, name, type, suffix, value, priceAsset) {
     votesByName,
     userVote: userVote(name, priceAsset),
     userVP,
-    decimals: preparedMeta.value.symbolAndDecimals.decimals,
+    decimals: preparedMeta.value.asset0SymbolAndDecimals.decimals,
     priceAsset,
   };
   modalForVoteIsOpen.value = true;
@@ -256,10 +256,16 @@ watch(
         <div>
           <div class="text-lg font-bold">
             {{ preparedMeta.reserveAsset.name }}/{{
-              preparedMeta.symbolAndDecimals.name
+              preparedMeta.asset0SymbolAndDecimals.name
             }}
           </div>
-          <div v-if="address">Your VP: {{ currentVP }}</div>
+          <div v-if="address" class="mt-2">
+            <div>Your VP: {{ currentVP }}</div>
+            <div>
+              Your stake balance: {{ preparedMeta.stakeBalance }}
+              {{ preparedMeta.asset0SymbolAndDecimals.name }}
+            </div>
+          </div>
           <div v-if="!currentVP" class="alert mt-6 bg-base-300">
             <svg
               xmlns="http://www.w3.org/2000/svg"

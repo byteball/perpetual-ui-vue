@@ -37,7 +37,7 @@ const userVote = computed(() => {
 
   if (vote) {
     const df = props.preparedMeta.rawMeta["decay_factor"];
-    const decimals = props.preparedMeta.symbolAndDecimals.decimals;
+    const decimals = props.preparedMeta.asset0SymbolAndDecimals.decimals;
     const vp =
       getVPFromNormalized(vote.vp, df, timestamp.value) / 10 ** decimals;
 
@@ -80,7 +80,7 @@ function voteFromTable(value) {
                 :votes="votesByName"
                 :type="type"
                 :suffix="suffix"
-                :decimals="preparedMeta.symbolAndDecimals.decimals"
+                :decimals="preparedMeta.asset0SymbolAndDecimals.decimals"
                 :allowed-control="allowedControl"
                 @vote-from-table="voteFromTable"
               />
