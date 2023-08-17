@@ -25,7 +25,7 @@ async function init() {
   }
   const result = await Promise.all(promises);
   result.forEach((v) => {
-    if (!v.symbolAndDecimals) return;
+    if (!v.asset0SymbolAndDecimals) return;
     m[v.rawMeta.aa] = v;
   });
 
@@ -52,14 +52,14 @@ watch(meta, init, { deep: true });
       v-for="(perpetualAAMeta, perpetualAA) in aasWithMeta"
       :key="perpetualAA"
     >
-      <div v-if="perpetualAAMeta.symbolAndDecimals">
+      <div v-if="perpetualAAMeta.asset0SymbolAndDecimals">
         <div class="card bg-base-200 shadow-xl mb-4">
           <div class="card-body p-6 sm:p-8">
             <div>
               <div class="block sm:flex justify-between items-center">
                 <div class="text-lg font-bold">
                   {{ perpetualAAMeta.reserveAsset.name }}/{{
-                    perpetualAAMeta.symbolAndDecimals.name
+                    perpetualAAMeta.asset0SymbolAndDecimals.name
                   }}
                 </div>
                 <div class="mt-3 mb-6 sm:my-0">

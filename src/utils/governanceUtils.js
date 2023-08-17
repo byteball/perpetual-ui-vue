@@ -70,13 +70,23 @@ export async function getPreparedMeta(metaByAA, userAddress = "_") {
     ? metaByAA.stakingVars[`user_${userAddress}_a0`]?.normalized_vp || 0
     : 0;
 
+  const asset0SymbolAndDecimals = await getAssetMetadata(metaByAA.state.asset0);
+  let stakeBalance = userAddress
+    ? metaByAA.stakingVars[`user_${userAddress}_a0`]?.balance || 0
+    : 0;
+
+  if (stakeBalance) {
+    stakeBalance = stakeBalance / 10 ** asset0SymbolAndDecimals.decimals;
+  }
+
   const meta = {
-    symbolAndDecimals: await getAssetMetadata(metaByAA.state.asset0),
+    asset0SymbolAndDecimals,
     priceAAsMeta,
     reserveAsset: await getAssetMetadata(metaByAA.reserve_asset),
     rawMeta: metaByAA,
     vp,
     allowedControl: vp > 0,
+    stakeBalance,
   };
   cacheForPreparedMetaByAsset0AndReserve[key] = meta;
 
