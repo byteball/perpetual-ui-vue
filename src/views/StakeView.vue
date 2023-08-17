@@ -4,6 +4,7 @@ import { storeToRefs } from "pinia";
 import { useRoute, useRouter } from "vue-router";
 import dayjs from "dayjs";
 
+import { DEFAULT_MAX_TERM } from "@/globalConstants";
 import { generateLink } from "@/utils/generateLink";
 import { getVP, getVPFromNormalized } from "@/utils/getVP";
 import { useAaInfoStore } from "@/stores/aaInfo";
@@ -270,11 +271,9 @@ watch(
   [amount, term, votedGroupKey, percentages],
   () => {
     if (!metaByAA.value) return;
-    buttonDisabled.value = false;
 
-    if (!amount.value.value || Number(amount.value.value) === 0) {
-      buttonDisabled.value = true;
-    }
+    buttonDisabled.value =
+      !amount.value.value || Number(amount.value.value) === 0;
 
     if (address.value && amount.value.value > balanceByAsset.value) {
       buttonDisabled.value = true;
@@ -292,6 +291,12 @@ watch(
     if (Number(term.value.value) <= termMeta.value.days) {
       buttonDisabled.value = true;
       term.value.error = `Time must be more than ${termMeta.value.days} days`;
+      return;
+    }
+
+    if (Number(term.value.value) > DEFAULT_MAX_TERM) {
+      buttonDisabled.value = true;
+      term.value.error = `The maximum term should be no more than ${DEFAULT_MAX_TERM} days`;
       return;
     }
 
@@ -449,7 +454,7 @@ watch(
                   <label class="label">
                     <span class="label-text">Term (in days)</span>
                   </label>
-                  <IntegerInput v-model="term.value" :max-value="360" />
+                  <IntegerInput v-model="term.value" />
                   <span
                     v-if="term.error"
                     class="flex tracking-wide text-red-500 text-xs mt-2 ml-2"

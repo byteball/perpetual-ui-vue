@@ -1,7 +1,9 @@
-const COMMON_TS = 1657843200; // Fri Jul 15 2022 00:00:00 GMT+0000
-const year = 31104000;
-const DEFAULT_DECAY_FACTOR = 8;
-const DEFAULT_MAX_TERM = 360;
+import {
+  COMMON_TS,
+  DEFAULT_DECAY_FACTOR,
+  DEFAULT_MAX_TERM,
+  YEAR_IN_SEC,
+} from "@/globalConstants";
 
 export function getVP(
   balance,
@@ -13,7 +15,7 @@ export function getVP(
   const final_voting_power = balance / decay_factor ** (max_term / 360);
   return (
     final_voting_power *
-    decay_factor ** (term / 360 + (timestamp - COMMON_TS) / year)
+    decay_factor ** (term / 360 + (timestamp - COMMON_TS) / YEAR_IN_SEC)
   );
 }
 
@@ -24,5 +26,7 @@ export function getVPFromNormalized(
 ) {
   if (!normalized_vp) return 0;
 
-  return normalized_vp / decay_factor ** ((timestamp - COMMON_TS) / year);
+  return (
+    normalized_vp / decay_factor ** ((timestamp - COMMON_TS) / YEAR_IN_SEC)
+  );
 }
