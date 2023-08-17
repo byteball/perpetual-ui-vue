@@ -271,11 +271,9 @@ watch(
   [amount, term, votedGroupKey, percentages],
   () => {
     if (!metaByAA.value) return;
-    buttonDisabled.value = false;
 
-    if (!amount.value.value || Number(amount.value.value) === 0) {
-      buttonDisabled.value = true;
-    }
+    buttonDisabled.value =
+      !amount.value.value || Number(amount.value.value) === 0;
 
     if (address.value && amount.value.value > balanceByAsset.value) {
       buttonDisabled.value = true;
