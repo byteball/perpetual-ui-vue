@@ -160,7 +160,6 @@ function toggle(e) {
       </div>
       <div class="navbar-end"></div>
     </div>
-    <nav class="menu"></nav>
     <Dialog
       :open="addressModalIsOpen"
       @close="store.closeAddressModal"

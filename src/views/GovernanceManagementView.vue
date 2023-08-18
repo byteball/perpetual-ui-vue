@@ -216,7 +216,7 @@ watch(
 
 <template>
   <div
-    class="container w-full sm:w-[768px] m-auto mt-8 mb-36 p-6 sm:p-8"
+    class="container w-full sm:w-[768px] m-auto mt-2 mb-36 p-6 sm:p-8"
     v-if="ready"
   >
     <div @click="goBack()" class="p-2 mb-6 cursor-pointer">
@@ -360,7 +360,7 @@ watch(
 
         <div :key="'p_' + address || 'address'">
           <div class="text-lg font-bold mt-8 mb-2.5">
-            Tokens issued on this AAs
+            Tokens issued on this AA
           </div>
           <div v-for="(assetMeta, asset) in metaForFinishedAssets" :key="asset">
             <PriceAAFinished

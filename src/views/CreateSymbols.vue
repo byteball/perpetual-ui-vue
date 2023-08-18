@@ -176,7 +176,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="container w-full sm:w-[512px] m-auto mt-8 mb-36 p-6 sm:p-8">
+  <div class="container w-full sm:w-[512px] m-auto mt-2 mb-36 p-6 sm:p-8">
     <div v-if="!exists" class="text-center">
       <div class="alert shadow-lg">
         <div class="flex items-center">

@@ -375,7 +375,7 @@ watch(
 </script>
 
 <template>
-  <div class="container w-full sm:w-[512px] m-auto mt-8 mb-36 p-6 sm:p-8">
+  <div class="container w-full sm:w-[512px] m-auto mt-2 mb-36 p-6 sm:p-8">
     <div class="p-2 mb-6">
       <div class="text-lg font-semibold leading-7">Stake</div>
       <p class="mt-2 leading-6">
