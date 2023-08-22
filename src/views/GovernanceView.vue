@@ -55,7 +55,7 @@ watch(meta, init, { deep: true });
 <template>
   <div
     v-if="sortedAasWithMeta.length"
-    class="container w-full sm:w-[768px] m-auto mt-8 mb-36 p-6 sm:p-8"
+    class="container w-full sm:w-[768px] m-auto mt-2 mb-36 p-6 sm:p-8"
   >
     <div class="p-2 mb-6">
       <div class="text-lg font-semibold leading-7">Governance</div>

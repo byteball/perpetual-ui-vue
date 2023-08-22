@@ -79,7 +79,7 @@ onMounted(async () => {
           </div>
         </div>
         <div class="font-medium text-sm mb-4">
-          Current value:
+          Target value:
           <div class="font-light text-sm inline-block">
             {{ selectedOracleData.value }}
           </div>
@@ -89,7 +89,7 @@ onMounted(async () => {
       <div class="font-medium text-sm mb-2">
         Status:
         <span v-if="assetMeta.assetMetaData" class="font-light text-sm">
-          {{ assetMeta.presale ? "presale" : "asset added" }}
+          {{ assetMeta.presale ? "presale" : "trading" }}
         </span>
         <span v-else class="font-light text-sm">
           voting is completed, but need register symbol

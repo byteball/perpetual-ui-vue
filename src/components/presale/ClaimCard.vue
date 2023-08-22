@@ -8,6 +8,7 @@ import { useAaInfoStore } from "@/stores/aaInfo";
 import { getParam } from "@/utils/governanceUtils";
 import { executeAAGetter, getAssetMetadata } from "@/services/DAGApi";
 import { generateLink } from "@/utils/generateLink";
+import TooltipComponent from "@/components/TooltipComponent.vue";
 
 const addressStore = useAddressStore();
 const store = useAaInfoStore();
@@ -118,6 +119,9 @@ onMounted(async () => {
   <div v-if="addressClaims.length" class="card bg-base-200 shadow-xl mb-4">
     <div class="card-body p-4 sm:p-8">
       <div class="text-sm text-center">
+        <div class="font-bold text-center sm:text-left flex items-center mb-2">
+          Claim your finished presales
+        </div>
         <table class="table w-full">
           <thead>
             <tr>

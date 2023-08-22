@@ -180,7 +180,7 @@ onUnmounted(() => {
 });
 </script>
 <template>
-  <div class="container w-full sm:w-[640px] m-auto mt-8 mb-36 p-6 sm:p-8">
+  <div class="container w-full sm:w-[640px] m-auto mt-2 mb-36 p-6 sm:p-8">
     <div @click="goBack()" class="p-2 mb-6 cursor-pointer">
       <div class="flex items-center">
         <div class="inline-block mr-2">

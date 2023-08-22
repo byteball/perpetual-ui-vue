@@ -12,4 +12,6 @@ export const propertyTips = {
   auction_price_halving_period: "Auction price halving period",
   token_share_threshold: "Token share threshold",
   min_s0_share: "min s0 share",
+  price_aa: "price aa",
+  drift_rate: "drift rate",
 };

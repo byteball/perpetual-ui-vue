@@ -74,7 +74,9 @@ function voteFromTable(value) {
       <div class="card-body gap-0 p-3 sm:p-8">
         <div class="text-center">
           <div v-if="votesByName?.length">
-            <div class="mb-2 font-bold">Votes for changing the value</div>
+            <div class="mb-2 font-bold text-left">
+              Votes for changing the value
+            </div>
             <div class="w-full overflow-auto">
               <VotingTable
                 :votes="votesByName"
@@ -82,10 +84,11 @@ function voteFromTable(value) {
                 :suffix="suffix"
                 :decimals="preparedMeta.asset0SymbolAndDecimals.decimals"
                 :allowed-control="allowedControl"
+                :user-voting-power="userVote.vp"
                 @vote-from-table="voteFromTable"
               />
             </div>
-            <div v-if="userVote?.vp" class="mt-2">
+            <div v-if="userVote?.vp" class="mt-2 text-left">
               You vote for
               <span class="font-bold">{{ userVote.value }}{{ suffix }}</span>
               (vp: {{ userVote.vp }})
@@ -98,7 +101,7 @@ function voteFromTable(value) {
             <a
               class="link text-sky-500 link-hover"
               @click="$emit('reqVote', name, type, suffix)"
-              >suggest another value</a
+              >suggest {{ votesByName?.length ? "another" : "new" }} value</a
             >
           </div>
         </div>

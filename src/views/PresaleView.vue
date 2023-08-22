@@ -343,7 +343,7 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
 }
 </style>
 <template>
-  <div class="container w-full sm:w-[512px] m-auto mt-8 mb-36 p-6 sm:p-8">
+  <div class="container w-full sm:w-[512px] m-auto mt-2 mb-36 p-6 sm:p-8">
     <div v-if="toastMessage" class="toast toast-top toast-end">
       <div class="alert alert-error">
         <span>{{ toastMessage }}</span>
@@ -486,7 +486,7 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
                   Currency: {{ selectedOracleData.name }}
                 </div>
                 <div class="mt-0.5">
-                  Current value: {{ selectedOracleData.value }}
+                  Target value: {{ selectedOracleData.value }}
                 </div>
                 <div class="mt-3">
                   Finish date: {{ selectedPresaleFinishDate }}
