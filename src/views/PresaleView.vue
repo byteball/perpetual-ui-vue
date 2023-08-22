@@ -89,6 +89,23 @@ const showToastMessage = (message) => {
   }, 3000);
 };
 
+const sortPresaleList = () => {
+  presaleList.value = presaleList.value.sort((a, b) => {
+    const aPresaleAsset = assetsMetadata.value[a.presaleAsset].name;
+    const bPresaleAsset = assetsMetadata.value[b.presaleAsset].name;
+
+    if (aPresaleAsset > bPresaleAsset) {
+      return 1;
+    }
+
+    if (aPresaleAsset < bPresaleAsset) {
+      return -1;
+    }
+
+    return 0;
+  });
+};
+
 const preparePresaleList = async () => {
   const promisesForPrepare = [];
   presaleList.value = [];
@@ -202,6 +219,8 @@ const preparePresaleList = async () => {
 
     fillPresaleData(routePresale);
   }
+
+  sortPresaleList();
 };
 
 const updateAddressPresaleAmount = () => {
