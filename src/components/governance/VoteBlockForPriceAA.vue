@@ -7,6 +7,7 @@ import { useAaInfoStore } from "@/stores/aaInfo";
 import { useAddressStore } from "@/stores/addressStore";
 import VotingTable from "@/components/governance/VotingTable.vue";
 import { getOracleData } from "@/services/DAGApi";
+import TooltipComponent from "@/components/TooltipComponent.vue";
 
 const props = defineProps([
   "title",
@@ -62,7 +63,11 @@ onMounted(async () => {
 
 <template>
   <div class="text-sm mt-4 w-full">
-    <div class="font-bold text-lg">{{ title }}</div>
+    <div class="font-bold text-lg flex items-center">
+      {{ title }}
+      <TooltipComponent class="inline-block ml-1" :field-name="name">
+      </TooltipComponent>
+    </div>
     <div class="mt-2">
       Current value:
       <a
@@ -76,7 +81,7 @@ onMounted(async () => {
     </div>
     <div v-if="name === 'price_aa'">
       <div class="mt-1">Currency: {{ selectedOracleData.name }}</div>
-      <div class="mt-1">Oracle value: {{ selectedOracleData.value }}</div>
+      <div class="mt-1">Target value: {{ selectedOracleData.value }}</div>
     </div>
     <div class="mt-2">
       <div v-if="votesByName?.length" class="mb-4">
@@ -85,6 +90,7 @@ onMounted(async () => {
         </div>
         <div class="overflow-auto">
           <VotingTable
+            :type="type"
             :votes="votesByName"
             :decimals="assetMeta.assetMetaData.decimals"
             :allowed-control="allowedControl"

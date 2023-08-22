@@ -1,7 +1,15 @@
 <script setup>
 import { rawToFormatVotingValue } from "@/utils/convertValue";
+import { fullExplorerUrlForAddress } from "@/config";
 
-defineProps(["votes", "type", "suffix", "decimals", "allowedControl"]);
+defineProps([
+  "votes",
+  "type",
+  "suffix",
+  "decimals",
+  "allowedControl",
+  "userVotingPower",
+]);
 defineEmits(["voteFromTable"]);
 </script>
 
@@ -17,10 +25,31 @@ defineEmits(["voteFromTable"]);
     <tbody>
       <tr v-for="(v, index) in votes" :key="v.value">
         <td>
-          {{ rawToFormatVotingValue(type, v.value) }}{{ suffix || "" }}
-          {{ index === 0 ? "(leader)" : "" }}
+          <a
+            v-if="type === 'address'"
+            class="link text-sky-500 link-hover block sm:inline-block text-xs sm:text-sm"
+            target="_blank"
+            :href="fullExplorerUrlForAddress + v.value"
+          >
+            {{ v.value }}
+            {{ index === 0 ? "(leader)" : "" }}
+          </a>
+          <span v-else>
+            {{ rawToFormatVotingValue(type, v.value) }}{{ suffix || "" }}
+            {{ index === 0 ? "(leader)" : "" }}
+          </span>
         </td>
-        <td>{{ Number((v.amount / 10 ** decimals).toFixed(decimals)) }}</td>
+        <td>
+          {{ Number((v.amount / 10 ** decimals).toFixed(decimals)) }}
+
+          {{
+            Number(userVotingPower) &&
+            Number((v.amount / 10 ** decimals).toFixed(decimals)) ===
+              Number(userVotingPower)
+              ? "(you)"
+              : ""
+          }}
+        </td>
         <td v-if="allowedControl">
           <a
             class="link text-sky-500 link-hover"
