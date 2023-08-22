@@ -151,6 +151,23 @@ const userStakeBalance = computed(() => {
   return balance;
 });
 
+function sortPoolsByName(_pools) {
+  return _pools.sort((a, b) => {
+    const aPoolName = `${poolReserveNameByAA.value[a]}/${poolSymbolAndDecimalByAA.value[a].name}`;
+    const bPoolName = `${poolReserveNameByAA.value[b]}/${poolSymbolAndDecimalByAA.value[b].name}`;
+
+    if (aPoolName > bPoolName) {
+      return 1;
+    }
+
+    if (aPoolName < bPoolName) {
+      return -1;
+    }
+
+    return 0;
+  });
+}
+
 async function initPools() {
   if (status.value !== "initialized") return;
 
@@ -181,9 +198,10 @@ async function initPools() {
   for (let aa in meta.value) {
     promises.push(getAndSetPoolData(aa));
   }
+
   await Promise.all(promises);
 
-  pools.value = _pools;
+  pools.value = sortPoolsByName(_pools);
 }
 
 watch(balanceByAsset, setAmountByUserBalance);
