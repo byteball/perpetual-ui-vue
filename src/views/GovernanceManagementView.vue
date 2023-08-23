@@ -42,6 +42,8 @@ const modalForRegisterSymbolIsOpen = ref(false);
 
 const allowedControl = ref(false);
 
+const activeTab = ref("trading");
+
 const currentVP = computed(() => {
   if (!address.value) return 0;
 
@@ -61,6 +63,10 @@ const currentVP = computed(() => {
     ).toFixed(decimals)
   );
 });
+
+const setTab = (tabName) => {
+  activeTab.value = tabName;
+};
 
 async function init() {
   if (!aas.value.length) return;
@@ -213,7 +219,11 @@ watch(
   }
 );
 </script>
-
+<style>
+.tabs {
+  flex-wrap: nowrap;
+}
+</style>
 <template>
   <div
     class="container w-full sm:w-[768px] m-auto mt-2 mb-36 p-6 sm:p-8"
@@ -365,38 +375,67 @@ watch(
         </div>
 
         <div :key="'p_' + address || 'address'">
-          <div class="text-lg font-bold mt-8 mb-2.5">
-            Tokens issued on this AA
+          <div class="text-lg font-bold mt-8">Tokens issued on this AA</div>
+          <div class="tabs tabs-boxed mt-4 mb-2">
+            <a
+              class="tab"
+              :class="{ 'tab-active': activeTab === 'trading' }"
+              @click="setTab('trading')"
+            >
+              Trading
+            </a>
+            <a
+              class="tab"
+              :class="{ 'tab-active': activeTab === 'presale' }"
+              @click="setTab('presale')"
+            >
+              Presale
+            </a>
+            <a
+              class="tab"
+              :class="{ 'tab-active': activeTab === 'vote' }"
+              @click="setTab('vote')"
+            >
+              Vote
+            </a>
           </div>
-          <div v-for="(assetMeta, asset) in metaForFinishedAssets" :key="asset">
-            <PriceAAFinished
-              :perpetual-aa="perpetualAA"
-              :asset-meta="assetMeta"
-              :asset="asset"
-              :staking-aa="preparedMeta.rawMeta.staking_aa"
-              :price-aa="assetMeta.price_aa"
-              :price-aa-definition="priceAAsDefinition[assetMeta.price_aa]"
-              :votes="votes"
-              :allowed-control="allowedControl"
-              @reqRegister="reqRegister"
-              @reqVote="reqVote"
-            />
+          <div v-if="activeTab === 'trading' || activeTab === 'presale'">
+            <div
+              v-for="(assetMeta, asset) in metaForFinishedAssets"
+              :key="asset"
+            >
+              <PriceAAFinished
+                :perpetual-aa="perpetualAA"
+                :asset-meta="assetMeta"
+                :asset="asset"
+                :staking-aa="preparedMeta.rawMeta.staking_aa"
+                :price-aa="assetMeta.price_aa"
+                :price-aa-definition="priceAAsDefinition[assetMeta.price_aa]"
+                :votes="votes"
+                :allowed-control="allowedControl"
+                :active-tab="activeTab"
+                @reqRegister="reqRegister"
+                @reqVote="reqVote"
+              />
+            </div>
           </div>
-          <div
-            v-for="(priceAAsMeta, priceAA) in preparedMeta.priceAAsMeta
-              .notFinished"
-            :key="priceAA"
-          >
-            <div class="card bg-base-300 shadow-xl mb-8">
-              <div class="card-body gap-0 p-3 sm:p-8">
-                <div>
-                  <PriceAANotFinished
-                    :price-aa="priceAA"
-                    :staking-aa="preparedMeta.rawMeta.staking_aa"
-                    :definition="priceAAsDefinition[priceAA]"
-                    :price-aas-meta="priceAAsMeta"
-                    :allowed-control="allowedControl"
-                  />
+          <div v-if="activeTab === 'vote'">
+            <div
+              v-for="(priceAAsMeta, priceAA) in preparedMeta.priceAAsMeta
+                .notFinished"
+              :key="priceAA"
+            >
+              <div class="card bg-base-300 shadow-xl mb-8">
+                <div class="card-body gap-0 p-3 sm:p-8">
+                  <div>
+                    <PriceAANotFinished
+                      :price-aa="priceAA"
+                      :staking-aa="preparedMeta.rawMeta.staking_aa"
+                      :definition="priceAAsDefinition[priceAA]"
+                      :price-aas-meta="priceAAsMeta"
+                      :allowed-control="allowedControl"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
