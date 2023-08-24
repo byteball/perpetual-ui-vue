@@ -111,30 +111,28 @@ onMounted(async () => {
           <LinkIcon />
           Register a symbol
         </button>
-        <div v-if="allowedControl">
-          <button
-            v-if="assetMeta.metaByPriceAA.result === 'no'"
-            class="btn btn-sm gap-2 mt-4"
-            @click="
-              generateAndFollowLinkForVoteAddPriceAA(priceAa, 'yes', stakingAa)
-            "
-          >
-            <LinkIcon />
-            Vote for add
-          </button>
-          <RouterLink
-            v-if="
-              assetMeta.assetMetaData?.name &&
-              assetMeta.metaByPriceAA.result === 'yes' &&
-              assetMeta.presale
-            "
-            class="btn btn-sm gap-2 mt-4"
-            :to="`/presale/${asset}`"
-          >
-            <LinkIcon />
-            Buy on presale
-          </RouterLink>
-        </div>
+        <button
+          v-if="allowedControl && assetMeta.metaByPriceAA.result === 'no'"
+          class="btn btn-sm gap-2 mt-4"
+          @click="
+            generateAndFollowLinkForVoteAddPriceAA(priceAa, 'yes', stakingAa)
+          "
+        >
+          <LinkIcon />
+          Vote for add
+        </button>
+        <RouterLink
+          v-if="
+            assetMeta.assetMetaData?.name &&
+            assetMeta.metaByPriceAA.result === 'yes' &&
+            assetMeta.presale
+          "
+          class="btn btn-sm gap-2 mt-4"
+          :to="`/presale/${asset}`"
+        >
+          <LinkIcon />
+          Buy on presale
+        </RouterLink>
       </div>
     </div>
   </div>
