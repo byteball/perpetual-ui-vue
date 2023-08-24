@@ -66,6 +66,7 @@ const currentVP = computed(() => {
 
 const setTab = (tabName) => {
   activeTab.value = tabName;
+  router.replace({ hash: `#${tabName}` });
 };
 
 async function init() {
@@ -114,6 +115,10 @@ async function init() {
   }
 
   metaForFinishedAssets.value = mForFinishedAssets;
+
+  if (route.hash) {
+    setTab(route.hash.replace("#", ""));
+  }
 
   ready.value = true;
 }
