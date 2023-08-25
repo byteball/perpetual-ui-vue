@@ -30,9 +30,7 @@ function reqVote(name, type, value) {
 }
 
 onMounted(async () => {
-  if (props.assetMeta.presale) {
-    selectedOracleData.value = await getOracleData(props.priceAa);
-  }
+  selectedOracleData.value = await getOracleData(props.priceAa);
 });
 </script>
 
@@ -44,7 +42,8 @@ onMounted(async () => {
     <div class="card-body gap-0 p-3 sm:p-8">
       <div v-if="assetMeta.assetMetaData?.name">
         <div class="font-medium mb-4">
-          {{ assetMeta.assetMetaData.name }}
+          {{ assetMeta.assetMetaData.name }} tracking
+          {{ selectedOracleData.name }}
         </div>
         <div class="font-medium text-sm mb-2">
           Decimals:
@@ -146,7 +145,8 @@ onMounted(async () => {
     <div class="card-body gap-0 p-3 sm:p-8">
       <div v-if="assetMeta.assetMetaData?.name">
         <div class="font-medium mb-4">
-          {{ assetMeta.assetMetaData.name }}
+          {{ assetMeta.assetMetaData.name }} tracking
+          {{ selectedOracleData.name }}
         </div>
         <div class="font-medium text-sm mb-2">
           Decimals:
