@@ -9,8 +9,8 @@ import Loading from "@/components/icons/LoadingIcon.vue";
 import { getPreparedMeta } from "@/utils/governanceUtils";
 import { Dialog } from "@headlessui/vue";
 import ManageStakeModal from "@/components/stake/ManageStakeModal.vue";
+import LinkIcon from "@/components/icons/LinkIcon.vue";
 
-const router = useRouter();
 const route = useRoute();
 
 const store = useAaInfoStore();
@@ -24,9 +24,6 @@ const poolReserveNameByAA = ref({});
 const stakeBalanceByPool = ref({});
 const manageModalParams = ref({});
 
-const selectedAA = ref("");
-
-const metaByAA = ref(null);
 const preparedMetaByAA = ref({});
 
 const modalForManage = ref(false);
@@ -109,32 +106,6 @@ onMounted(() => {
 watch([aas, status], initPools);
 watch(() => address.value, initPools);
 
-watch(
-  () => {
-    const aa = route.params.aa;
-    const ml = Object.keys(meta.value).length;
-
-    return `${aa}_${ml > 0}`;
-  },
-  () => {
-    const aa = route.params.aa;
-    if (aa && meta.value[aa]) {
-      selectedAA.value = aa;
-      metaByAA.value = { ...meta.value[aa], aa };
-      return;
-    }
-
-    selectedAA.value = "";
-    metaByAA.value = null;
-  },
-  { immediate: true }
-);
-
-watch(selectedAA, () => {
-  if (!selectedAA.value) return;
-  router.push(`/stake/${selectedAA.value}`);
-});
-
 const showManageStakeModal = (poolAA) => {
   manageModalParams.value = {
     poolReserveAssetName: poolReserveNameByAA.value[poolAA],
@@ -173,10 +144,16 @@ const showManageStakeModal = (poolAA) => {
             </thead>
             <tbody>
               <tr v-for="poolAA in pools" :key="poolAA">
-                <td>
+                <td class="flex items-center">
                   {{
                     `${poolReserveNameByAA[poolAA]}/${poolSymbolAndDecimalByAA[poolAA].name}`
                   }}
+                  <RouterLink
+                    class="ml-1 text-sky-500"
+                    :to="`/governance/management/${poolAA}`"
+                  >
+                    <LinkIcon />
+                  </RouterLink>
                 </td>
                 <td>
                   {{ getUserStakeBalance(poolAA) }}

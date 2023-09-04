@@ -3,7 +3,6 @@ import { DialogPanel } from "@headlessui/vue";
 import dayjs from "dayjs";
 import NumberInput from "@/components/inputs/NumberInput.vue";
 import IntegerInput from "@/components/inputs/IntegerInput.vue";
-import GovernanceAsset from "@/components/governance/GovernanceAsset.vue";
 import { computed, ref, watch } from "vue";
 import { DEFAULT_MAX_TERM } from "@/globalConstants";
 import { generateLink } from "@/utils/generateLink";
@@ -250,20 +249,13 @@ watch(
 
 <template>
   <DialogPanel class="w-full max-w-lg rounded bg-base-200 p-8">
-    <div class="text-center sm:text-left flex items-center">
+    <div class="text-center text-2xl font-bold">
       {{
         `Manage ${props.params.poolReserveAssetName}/${props.params.poolSymbolAndDecimal.name} stake`
       }}
     </div>
     <div class="form-control">
       <div v-if="props.params.metaByAA && props.params.poolSymbolAndDecimal">
-        <div class="mt-4 mb-4">
-          <GovernanceAsset :perpetual-aa-meta="props.params.preparedMeta" />
-          <div v-if="address">
-            Your stake: {{ props.params.userStakeBalance }}
-            {{ props.params.poolSymbolAndDecimal.name }}
-          </div>
-        </div>
         <div>
           <div class="tabs tabs-boxed mt-8 mb-1">
             <a
@@ -284,10 +276,10 @@ watch(
 
           <div v-if="activeTab === 'stake'">
             <div class="form-control">
-              <label class="label">
-                <span class="label-text">Amount</span>
-              </label>
               <div>
+                <label class="label">
+                  <span class="label-text">Amount</span>
+                </label>
                 <NumberInput
                   v-model="amount.value"
                   :label="props.params.poolSymbolAndDecimal.name"
@@ -325,11 +317,11 @@ watch(
           </div>
           <div v-if="activeTab === 'withdraw'">
             <div class="form-control">
-              <label class="label">
-                <span class="label-text">Amount</span>
-              </label>
               <div v-if="termMeta.ended || !address">
                 <div>
+                  <label class="label">
+                    <span class="label-text">Amount</span>
+                  </label>
                   <NumberInput
                     v-model="amount.value"
                     :decimals="props.params.poolSymbolAndDecimal.decimals"
