@@ -1,7 +1,6 @@
 <script setup>
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
-import { useRoute, useRouter } from "vue-router";
 
 import { useAaInfoStore } from "@/stores/aaInfo";
 import { useAddressStore } from "@/stores/addressStore";
@@ -10,8 +9,6 @@ import { getPreparedMeta } from "@/utils/governanceUtils";
 import { Dialog } from "@headlessui/vue";
 import ManageStakeModal from "@/components/stake/ManageStakeModal.vue";
 import LinkIcon from "@/components/icons/LinkIcon.vue";
-
-const route = useRoute();
 
 const store = useAaInfoStore();
 const addressStore = useAddressStore();
@@ -27,6 +24,7 @@ const manageModalParams = ref({});
 const preparedMetaByAA = ref({});
 
 const modalForManage = ref(false);
+const poolsListFilter = ref(false);
 
 const getUserStakeBalance = (aa) => {
   if (
@@ -100,6 +98,27 @@ async function initPools() {
   pools.value = sortPoolsByName(_pools);
 }
 
+const changePoolFilter = (filter) => {
+  if (filter === "all") {
+    poolsListFilter.value = false;
+    return;
+  }
+
+  poolsListFilter.value = true;
+};
+
+const poolList = computed(() => {
+  const list = pools.value;
+
+  if (!poolsListFilter.value) {
+    return list;
+  }
+
+  return list.filter((pool) => {
+    return !!getUserStakeBalance(pool);
+  });
+});
+
 onMounted(() => {
   initPools();
 });
@@ -128,12 +147,28 @@ const showManageStakeModal = (poolAA) => {
         share.
       </p>
     </div>
+    <div v-if="address" class="mb-2">
+      <button
+        class="btn btn-sm"
+        :class="{ 'btn-active': !poolsListFilter }"
+        @click="changePoolFilter('all')"
+      >
+        All
+      </button>
+      <button
+        class="btn btn-sm ml-1"
+        :class="{ 'btn-active': poolsListFilter }"
+        @click="changePoolFilter('my')"
+      >
+        My pools
+      </button>
+    </div>
     <div class="card bg-base-200 shadow-xl">
       <div class="card-body p-6 sm:p-8">
-        <div v-if="!pools.length" class="text-center">
+        <div v-if="!poolList.length" class="text-center">
           <Loading />
         </div>
-        <div v-if="pools.length">
+        <div v-if="poolList.length">
           <table class="table w-full">
             <thead>
               <tr>
@@ -143,7 +178,7 @@ const showManageStakeModal = (poolAA) => {
               </tr>
             </thead>
             <tbody>
-              <tr v-for="poolAA in pools" :key="poolAA">
+              <tr v-for="poolAA in poolList" :key="poolAA">
                 <td class="flex items-center">
                   {{
                     `${poolReserveNameByAA[poolAA]}/${poolSymbolAndDecimalByAA[poolAA].name}`
