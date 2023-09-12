@@ -79,12 +79,10 @@ export async function getPreparedMeta(metaByAA, userAddress = "_") {
     stakeBalance = stakeBalance / 10 ** asset0SymbolAndDecimals.decimals;
   }
 
-  console.log("metaByAA", metaByAA);
-
   const reservePriceAA = metaByAA.reserve_price_aa;
   const reservePriceValue = +(
     (await executeAAGetter(reservePriceAA, "get_reserve_price")) *
-    10 ** asset0SymbolAndDecimals.decimals
+    10 ** (asset0SymbolAndDecimals?.decimals || 0)
   ).toFixed(2);
 
   const meta = {
