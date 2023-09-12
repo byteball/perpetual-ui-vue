@@ -67,6 +67,9 @@ const currentVP = computed(() => {
 });
 
 const setTab = (tabName) => {
+  if (!Object.keys(metaForFinishedAssets.value).length && tabName !== "vote") {
+    return;
+  }
   activeTab.value = tabName;
   router.replace({ hash: `#${tabName}` });
 };
@@ -122,6 +125,9 @@ async function init() {
     setTab(route.hash.replace("#", ""));
   }
 
+  if (!Object.keys(metaForFinishedAssets.value).length) {
+    setTab("vote");
+  }
   ready.value = true;
 }
 
@@ -397,19 +403,28 @@ watch(
           />
         </div>
 
-        <div :key="'p_' + address || 'address'">
+        <div
+          :key="'p_' + address || 'address'"
+          v-if="Object.keys(priceAAsDefinition).length"
+        >
           <div class="text-lg font-bold mt-8">Tokens issued on this AA</div>
           <div class="tabs tabs-boxed mt-4 mb-2">
             <a
               class="tab"
-              :class="{ 'tab-active': activeTab === 'trading' }"
+              :class="{
+                'tab-active': activeTab === 'trading',
+                'tab-disabled': !Object.keys(metaForFinishedAssets).length,
+              }"
               @click="setTab('trading')"
             >
               Trading
             </a>
             <a
               class="tab"
-              :class="{ 'tab-active': activeTab === 'presale' }"
+              :class="{
+                'tab-active': activeTab === 'presale',
+                'tab-disabled': !Object.keys(metaForFinishedAssets).length,
+              }"
               @click="setTab('presale')"
             >
               Presale
