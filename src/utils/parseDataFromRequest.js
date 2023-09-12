@@ -1,4 +1,4 @@
-export function parseDataForFactoryRequest(request) {
+export function parseDataFromRequest(request) {
   const message = request.unit.messages.find((m) => {
     return m.app === "data";
   });

@@ -2,30 +2,22 @@
 import { ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { DialogPanel } from "@headlessui/vue";
-import { utils } from "obyte";
 import { useAddressStore } from "@/stores/addressStore";
 import TextInput from "@/components/inputs/TextInput.vue";
+import { isValidAddress } from "@/utils/validates";
 
 const store = useAddressStore();
 const { address } = storeToRefs(store);
 
 const addressInput = ref("");
 const changeMode = ref(false);
-const isValidAddress = ref(false);
 
 function setAddress() {
-  if (!addressInput.value || !isValidAddress.value) return;
+  if (!addressInput.value || !isValidAddress(addressInput.value)) return;
 
   store.setAddress(addressInput.value);
   store.closeAddressModal();
 }
-
-watch(
-  () => addressInput.value,
-  () => {
-    isValidAddress.value = utils.isValidAddress(addressInput.value);
-  }
-);
 
 watch(
   () => address.value,
@@ -67,7 +59,7 @@ watch(
         <div class="text-center mt-4">
           <button
             class="btn btn-primary"
-            :class="{ '!btn-disabled': !isValidAddress }"
+            :class="{ '!btn-disabled': !isValidAddress(addressInput) }"
             @click="setAddress"
           >
             Save address

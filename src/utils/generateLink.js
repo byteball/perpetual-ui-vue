@@ -19,6 +19,12 @@ export const generateDefinitionLink = (definition) => {
   )}`;
 };
 
+export function followLink(link) {
+  const a = document.createElement("a");
+  a.href = link;
+  a.click();
+}
+
 export function generateAndFollowLinkForVoteAddPriceAA(
   priceAA,
   vote,
@@ -38,9 +44,7 @@ export function generateAndFollowLinkForVoteAddPriceAA(
     true
   );
 
-  const a = document.createElement("a");
-  a.href = link;
-  a.click();
+  followLink(link);
 }
 export function generateAndFollowLinkForVoteInGovernance(
   name,
@@ -57,8 +61,5 @@ export function generateAndFollowLinkForVoteInGovernance(
     data.asset = priceAsset;
   }
   const link = generateLink(10000, data, null, stakingAA, "base", true);
-
-  const a = document.createElement("a");
-  a.href = link;
-  a.click();
+  followLink(link);
 }

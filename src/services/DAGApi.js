@@ -1,4 +1,11 @@
 import client from "./Obyte.js";
+import CacheService from "@/services/CacheService";
+import Client from "@/services/Obyte";
+
+const definitionCache = new CacheService();
+const dataFeedCache = new CacheService();
+const assetMetadataCache = new CacheService();
+const assetBySymbolCache = new CacheService();
 
 export async function getAasCreatedByFactory() {
   const result = await client.api.getAaResponses({
@@ -16,17 +23,16 @@ export async function getAasCreatedByFactory() {
   return aasList;
 }
 
-const cacheForDefinition = {};
 export async function getDefinition(aa) {
-  if (cacheForDefinition[aa]) {
-    return { aa, definition: cacheForDefinition[aa] };
+  if (definitionCache.exists(aa)) {
+    return { aa, definition: definitionCache.getValue(aa) };
   }
 
   let definition;
 
   try {
     definition = await client.api.getDefinition(aa);
-    cacheForDefinition[aa] = definition;
+    definitionCache.setValue(aa, definition);
   } catch (e) {
     console.log(e);
     return { aa, definition: null };
@@ -91,10 +97,9 @@ export async function getJoint(unit) {
   }
 }
 
-const cacheForDataFeed = {};
 export async function getDataFeed(oracle, feedName) {
   const key = `${oracle}_${feedName}`;
-  if (cacheForDataFeed[key]) return cacheForDataFeed[key];
+  if (dataFeedCache.exists(key)) return dataFeedCache.getValue(key);
 
   const params = {
     oracles: [oracle],
@@ -103,7 +108,7 @@ export async function getDataFeed(oracle, feedName) {
 
   try {
     const result = await client.api.getDataFeed(params);
-    cacheForDataFeed[key] = result;
+    dataFeedCache.setValue(key, result);
     return result;
   } catch (e) {
     return null;
@@ -123,7 +128,6 @@ export async function getOracleData(priceAA) {
   return { name, value };
 }
 
-const cacheForAssetMetadata = {};
 export async function getAssetMetadata(asset) {
   if (asset === "base") {
     return {
@@ -132,8 +136,8 @@ export async function getAssetMetadata(asset) {
       asset,
     };
   }
-  if (cacheForAssetMetadata[asset]) {
-    return cacheForAssetMetadata[asset];
+  if (assetMetadataCache.exists(asset)) {
+    return assetMetadataCache.getValue(asset);
   }
   try {
     const registryUnit = await client.api.getAssetMetadata(asset);
@@ -144,7 +148,7 @@ export async function getAssetMetadata(asset) {
       (item) => item.app === "data"
     );
 
-    cacheForAssetMetadata[asset] = metadata.payload;
+    assetMetadataCache.setValue(asset, metadata.payload);
     return { ...metadata.payload, asset };
   } catch (e) {
     return null;
@@ -167,7 +171,19 @@ export async function getAssetMetadataByArray(assets) {
   return metadataByAsset;
 }
 
-export async function executeAAGetter(aa, getter) {
+export async function getAssetBySymbol(symbol) {
+  if (assetBySymbolCache.exists(symbol)) {
+    return assetBySymbolCache.getValue(symbol);
+  }
+
+  const registry = Client.api.getOfficialTokenRegistryAddress();
+  const asset = await Client.api.getAssetBySymbol(registry, symbol);
+  assetBySymbolCache.setValue(symbol, asset);
+
+  return asset;
+}
+
+export async function executeAAGetter(aa, getter, returnError) {
   const params = {
     address: aa,
     getter,
@@ -177,6 +193,7 @@ export async function executeAAGetter(aa, getter) {
   try {
     return (await client.api.executeGetter(params))?.result;
   } catch (e) {
+    if (returnError) return { error: e };
     return null;
   }
 }

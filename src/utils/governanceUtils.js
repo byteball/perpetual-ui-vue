@@ -1,4 +1,4 @@
-import { getAssetMetadata } from "@/services/DAGApi";
+import { executeAAGetter, getAssetMetadata } from "@/services/DAGApi";
 import { perpDefaults } from "@/config";
 import { getVPFromNormalized } from "@/utils/getVP";
 
@@ -79,6 +79,14 @@ export async function getPreparedMeta(metaByAA, userAddress = "_") {
     stakeBalance = stakeBalance / 10 ** asset0SymbolAndDecimals.decimals;
   }
 
+  console.log("metaByAA", metaByAA);
+
+  const reservePriceAA = metaByAA.reserve_price_aa;
+  const reservePriceValue = +(
+    (await executeAAGetter(reservePriceAA, "get_reserve_price")) *
+    10 ** asset0SymbolAndDecimals.decimals
+  ).toFixed(2);
+
   const meta = {
     asset0SymbolAndDecimals,
     priceAAsMeta,
@@ -87,6 +95,8 @@ export async function getPreparedMeta(metaByAA, userAddress = "_") {
     vp,
     allowedControl: vp > 0,
     stakeBalance,
+    reservePriceAA,
+    reservePriceValue,
   };
   cacheForPreparedMetaByAsset0AndReserve[key] = meta;
 
