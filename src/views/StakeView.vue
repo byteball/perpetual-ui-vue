@@ -16,6 +16,7 @@ const { aas, meta, status } = storeToRefs(store);
 const { address } = storeToRefs(addressStore);
 
 const pools = ref([]);
+const poolsInited = ref(false);
 const poolSymbolAndDecimalByAA = ref({});
 const poolReserveNameByAA = ref({});
 const stakeBalanceByPool = ref({});
@@ -96,6 +97,7 @@ async function initPools() {
   await Promise.all(promises);
 
   pools.value = sortPoolsByName(_pools);
+  poolsInited.value = true;
 }
 
 const changePoolFilter = (filter) => {
@@ -165,11 +167,14 @@ const showManageStakeModal = (poolAA) => {
     </div>
     <div class="card bg-base-200 shadow-xl">
       <div class="card-body p-6 sm:p-8">
-        <div v-if="!poolList.length" class="text-center">
+        <div v-if="!poolsInited" class="text-center">
           <Loading />
         </div>
-        <div v-if="poolList.length">
-          <table class="table w-full">
+        <div v-else>
+          <div v-if="!poolList.length" class="text-center">
+            While it's empty here
+          </div>
+          <table v-else class="table w-full">
             <thead>
               <tr>
                 <th>Pool</th>
