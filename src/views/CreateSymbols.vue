@@ -6,7 +6,7 @@ import emitter from "@/services/emitter";
 import Client from "@/services/Obyte";
 import { getAssetMetadata, getMetaForPerpAAs } from "@/services/DAGApi";
 import { generateLink } from "@/utils/generateLink";
-import { parseDataForFactoryRequest } from "@/utils/parseDataForFactoryRequest";
+import { parseDataFromRequest } from "@/utils/parseDataFromRequest";
 import IntegerInput from "@/components/inputs/IntegerInput.vue";
 import TextInput from "@/components/inputs/TextInput.vue";
 
@@ -57,7 +57,6 @@ const suggestValueForSymbolField = async (reserveSymbol) => {
 
 watch(exists, async () => {
   const currentPerpetualMeta = await getMetaForPerpAAs([route.params.aa]);
-  console.log("currentPerpetualMeta", currentPerpetualMeta);
   const reserveAsset = currentPerpetualMeta[route.params.aa].reserve_asset;
   const asset0 = currentPerpetualMeta[route.params.aa].state.asset0;
 
@@ -92,7 +91,7 @@ watch(exists, async () => {
 });
 
 emitter.on(`aa_request_${import.meta.env.VITE_REGISTRY_AA}`, async (data) => {
-  const payload = parseDataForFactoryRequest(data);
+  const payload = parseDataFromRequest(data);
 
   if (payload.asset === asset.value && route.query.step === "1") {
     const currentPerpetualMeta = await getMetaForPerpAAs([route.params.aa]);

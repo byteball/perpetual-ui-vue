@@ -16,6 +16,8 @@ import VoteModal from "@/components/governance/VoteModal.vue";
 import PriceAAFinished from "@/components/governance/PriceAAFinished.vue";
 import RegisterSymbolModal from "@/components/RegisterSymbolModal.vue";
 import Loading from "@/components/icons/LoadingIcon.vue";
+import { fullExplorerUrlForAddress } from "@/config";
+import TooltipComponent from "@/components/TooltipComponent.vue";
 
 const store = useAaInfoStore();
 const { setActiveAddress } = store;
@@ -258,6 +260,22 @@ watch(
             {{ preparedMeta.reserveAsset.name }}/{{
               preparedMeta.asset0SymbolAndDecimals.name
             }}
+          </div>
+          <div class="text-sm mt-1">
+            Reserve price:
+            <a
+              :href="fullExplorerUrlForAddress + preparedMeta.reservePriceAA"
+              target="_blank"
+              class="link text-sky-500 link-hover"
+              >{{ preparedMeta.reservePriceAA }}</a
+            >&nbsp;
+            <span class="inline-flex">
+              (${{ preparedMeta.reservePriceValue }}&nbsp;
+              <TooltipComponent
+                field-name="reserve_price_value"
+              ></TooltipComponent
+              >)
+            </span>
           </div>
           <div v-if="address" class="mt-2">
             <div>Your VP: {{ currentVP }}</div>

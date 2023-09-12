@@ -1,3 +1,17 @@
+const base_aa = import.meta.env.VITE_BASE_AA;
+const factory_aa = import.meta.env.VITE_FACTORY_AA;
+const reserve_price_usd = import.meta.env.VITE_RESERVE_PRICE_USD;
+const reserve_price_oswap = import.meta.env.VITE_RESERVE_PRICE_OSWAP;
+const registry_aa = import.meta.env.VITE_REGISTRY_AA;
+
+export const ADDRESSES = {
+  base_aa,
+  factory_aa,
+  reserve_price_usd,
+  reserve_price_oswap,
+  registry_aa,
+};
+
 export const network = import.meta.env.VITE_NETWORK || "mainnet";
 
 export const explorerUrl =

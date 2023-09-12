@@ -14,4 +14,5 @@ export const propertyTips = {
   min_s0_share: "min s0 share",
   price_aa: "price aa",
   drift_rate: "drift rate",
+  reserve_price_value: "Current value of reserve price",
 };

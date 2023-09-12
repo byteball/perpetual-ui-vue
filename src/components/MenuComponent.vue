@@ -14,7 +14,6 @@ const { address, addressModalIsOpen } = storeToRefs(store);
 const isOpen = ref(false);
 
 function hide() {
-  console.log("click");
   isOpen.value = false;
   document.removeEventListener("click", hide);
 }

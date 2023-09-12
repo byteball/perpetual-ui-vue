@@ -10,7 +10,7 @@ const dataTip = ref("");
 onMounted(() => {
   dataTip.value = propertyTips[props.fieldName] || "";
   if (!dataTip.value) {
-    console.log("data tip error, field name: " + props.fieldName);
+    console.error("data tip error, field name: " + props.fieldName);
   }
 });
 </script>
