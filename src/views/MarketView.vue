@@ -97,11 +97,14 @@ function setAsset2(asset) {
 }
 
 function getAmountByAsset(amount, asset) {
-  return asset === "base"
-    ? Number(amount) * 10 ** 9 + 1000
-    : Number(
-        amount * 10 ** assets.value.nameAndDecimalsByAsset[asset].decimals
-      );
+  const a =
+    asset === "base"
+      ? Number(amount) * 10 ** 9 + 1000
+      : Number(
+          amount * 10 ** assets.value.nameAndDecimalsByAsset[asset].decimals
+        );
+
+  return Math.floor(a);
 }
 
 function getDecimalsAmountByAsset(amount, asset) {
@@ -195,6 +198,11 @@ function calcAndSetDataForMetaAndLink() {
     address.value &&
     balanceByAsset.value < getAmountByAsset(asset1Amount.value, asset1.value)
   ) {
+    console.log(
+      "q",
+      balanceByAsset.value,
+      getAmountByAsset(asset1Amount.value, asset1.value)
+    );
     const amount = getDecimalsAmountByAsset(balanceByAsset.value, asset1.value);
     const symbol = assets.value.nameAndDecimalsByAsset[asset1.value].name;
     resultError.value = `You don't have enough funds. Your balance: ${amount} ${symbol}`;
