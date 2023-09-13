@@ -74,7 +74,7 @@ async function openWallet() {
 
   const address = getAddressByDefinition(definition);
   const def = await getDefinition(address);
-  if (def) {
+  if (def.definition) {
     emit("setReservePriceAa", address);
     return;
   }
