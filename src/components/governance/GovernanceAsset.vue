@@ -4,6 +4,7 @@ import { ChevronRightIcon } from "@heroicons/vue/20/solid";
 import { fullExplorerUrlForAddress } from "@/config";
 import { getParam } from "@/utils/governanceUtils";
 import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/vue";
+import TooltipComponent from "@/components/TooltipComponent.vue";
 
 defineProps(["perpetualAaMeta"]);
 </script>
@@ -29,6 +30,22 @@ defineProps(["perpetualAaMeta"]);
         leave-to-class="transform scale-95 opacity-0"
       >
         <DisclosurePanel class="text-slate-300 pb-2 pl-2">
+          <div class="mt-2">
+            Reserve price:
+            <a
+              :href="fullExplorerUrlForAddress + perpetualAaMeta.reservePriceAA"
+              target="_blank"
+              class="link text-sky-500 link-hover font-light text-sm"
+              >{{ perpetualAaMeta.reservePriceAA }}</a
+            >&nbsp;
+            <span class="inline-flex text-sm">
+              (${{ perpetualAaMeta.reservePriceValue }}&nbsp;
+              <TooltipComponent
+                field-name="reserve_price_value"
+              ></TooltipComponent
+              >)
+            </span>
+          </div>
           <GovernanceAssetField
             title="Staking aa"
             :value="perpetualAaMeta.rawMeta.staking_aa"

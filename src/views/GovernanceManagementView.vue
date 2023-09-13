@@ -323,7 +323,7 @@ watch(
               >To manage this aa you need to
               <RouterLink
                 class="link text-sky-500 link-hover font-light"
-                :to="`/stake/${perpetualAA}`"
+                :to="'/stake'"
                 >stake</RouterLink
               >
               <template v-if="!address">

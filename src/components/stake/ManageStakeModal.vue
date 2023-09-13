@@ -215,9 +215,11 @@ watch(
     term.value.error = "";
     const data = getData();
 
-    link.value = generateLink(
+    const a =
       Number(amount.value.value) *
-        10 ** props.params.poolSymbolAndDecimal.decimals,
+      10 ** props.params.poolSymbolAndDecimal.decimals;
+    link.value = generateLink(
+      Math.floor(a),
       data,
       null,
       props.params.metaByAA.staking_aa,
