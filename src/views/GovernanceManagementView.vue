@@ -46,6 +46,25 @@ const allowedControl = ref(false);
 
 const activeTab = ref("trading");
 
+const metaForFinishedAssetsForRendering = computed(() => {
+  const result = {};
+  for (let asset in metaForFinishedAssets.value) {
+    const assetMeta = metaForFinishedAssets.value[asset];
+
+    if (activeTab.value === "presale" && assetMeta.presale) {
+      result[asset] = assetMeta;
+    } else if (
+      activeTab.value === "trading" &&
+      assetMeta.assetMetaData &&
+      !assetMeta.presale
+    ) {
+      result[asset] = assetMeta;
+    }
+  }
+
+  return result;
+});
+
 const currentVP = computed(() => {
   if (!address.value) return 0;
 
@@ -438,23 +457,33 @@ watch(
             </a>
           </div>
           <div v-if="activeTab === 'trading' || activeTab === 'presale'">
+            <div>
+              <div
+                v-for="(assetMeta, asset) in metaForFinishedAssetsForRendering"
+                :key="asset"
+              >
+                <PriceAAFinished
+                  :perpetual-aa="perpetualAA"
+                  :asset-meta="assetMeta"
+                  :asset="asset"
+                  :staking-aa="preparedMeta.rawMeta.staking_aa"
+                  :price-aa="assetMeta.price_aa"
+                  :price-aa-definition="priceAAsDefinition[assetMeta.price_aa]"
+                  :votes="votes"
+                  :allowed-control="allowedControl"
+                  :active-tab="activeTab"
+                  @reqRegister="reqRegister"
+                  @reqVote="reqVote"
+                />
+              </div>
+            </div>
             <div
-              v-for="(assetMeta, asset) in metaForFinishedAssets"
-              :key="asset"
+              v-if="!Object.keys(metaForFinishedAssetsForRendering).length"
+              class="card bg-base-300 shadow-xl mb-8"
             >
-              <PriceAAFinished
-                :perpetual-aa="perpetualAA"
-                :asset-meta="assetMeta"
-                :asset="asset"
-                :staking-aa="preparedMeta.rawMeta.staking_aa"
-                :price-aa="assetMeta.price_aa"
-                :price-aa-definition="priceAAsDefinition[assetMeta.price_aa]"
-                :votes="votes"
-                :allowed-control="allowedControl"
-                :active-tab="activeTab"
-                @reqRegister="reqRegister"
-                @reqVote="reqVote"
-              />
+              <div class="card-body gap-0 p-3 sm:p-8 text-center">
+                While it's empty here
+              </div>
             </div>
           </div>
           <div v-if="activeTab === 'vote'">
@@ -475,6 +504,14 @@ watch(
                     />
                   </div>
                 </div>
+              </div>
+            </div>
+            <div
+              v-if="!Object.keys(preparedMeta.priceAAsMeta.notFinished).length"
+              class="card bg-base-300 shadow-xl mb-8"
+            >
+              <div class="card-body gap-0 p-3 sm:p-8 text-center">
+                While it's empty here
               </div>
             </div>
           </div>
