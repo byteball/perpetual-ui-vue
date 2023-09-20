@@ -144,7 +144,7 @@ watch([aas, status], initPools);
 watch(() => address.value, initPools);
 
 const showManageStakeModal = (poolAA) => {
-  router.push(`/stake/${poolAA}`);
+  router.replace(`/stake/${poolAA}`);
 
   manageModalParams.value = {
     poolReserveAssetName: poolReserveNameByAA.value[poolAA],
