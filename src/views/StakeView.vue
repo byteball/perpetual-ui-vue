@@ -122,7 +122,7 @@ const changePoolFilter = (filter) => {
 
 const closeManageStakeModal = () => {
   modalForManage.value = false;
-  router.push(`/stake`);
+  router.replace(`/stake`);
 };
 
 const poolList = computed(() => {
