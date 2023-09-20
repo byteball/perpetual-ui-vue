@@ -9,6 +9,10 @@ import { getPreparedMeta } from "@/utils/governanceUtils";
 import { Dialog } from "@headlessui/vue";
 import ManageStakeModal from "@/components/stake/ManageStakeModal.vue";
 import LinkIcon from "@/components/icons/LinkIcon.vue";
+import { useRoute, useRouter } from "vue-router";
+
+const route = useRoute();
+const router = useRouter();
 
 const store = useAaInfoStore();
 const addressStore = useAddressStore();
@@ -98,6 +102,13 @@ async function initPools() {
 
   pools.value = sortPoolsByName(_pools);
   poolsInited.value = true;
+
+  if (
+    route.params.stake &&
+    pools.value.find((pool) => pool === route.params.stake)
+  ) {
+    showManageStakeModal(route.params.stake);
+  }
 }
 
 const changePoolFilter = (filter) => {
@@ -107,6 +118,11 @@ const changePoolFilter = (filter) => {
   }
 
   poolsListFilter.value = true;
+};
+
+const closeManageStakeModal = () => {
+  modalForManage.value = false;
+  router.push(`/stake`);
 };
 
 const poolList = computed(() => {
@@ -128,6 +144,8 @@ watch([aas, status], initPools);
 watch(() => address.value, initPools);
 
 const showManageStakeModal = (poolAA) => {
+  router.push(`/stake/${poolAA}`);
+
   manageModalParams.value = {
     poolReserveAssetName: poolReserveNameByAA.value[poolAA],
     poolSymbolAndDecimal: poolSymbolAndDecimalByAA.value[poolAA],
@@ -217,7 +235,7 @@ const showManageStakeModal = (poolAA) => {
 
   <Dialog
     :open="modalForManage"
-    @close="modalForManage = false"
+    @close="closeManageStakeModal()"
     class="relative z-50"
   >
     <div class="fixed inset-0 bg-black/[.8]" aria-hidden="true" />
