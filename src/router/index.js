@@ -10,7 +10,7 @@ const router = createRouter({
       component: MarketView,
     },
     {
-      path: "/stake",
+      path: "/stake/:stake(.*)?",
       name: "stake",
       component: () => import("../views/StakeView.vue"),
     },
