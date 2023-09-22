@@ -2,7 +2,11 @@
 import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import AutoComplete from "@tarekraafat/autocomplete.js";
 
-const props = defineProps(["getSrcForAutoComplete", "modelValue"]);
+const props = defineProps([
+  "getSrcForAutoComplete",
+  "modelValue",
+  "labelAttribute",
+]);
 const emit = defineEmits(["selected", "update:modelValue"]);
 
 const inputRef = ref();
@@ -92,6 +96,9 @@ onUnmounted(() => {
 </script>
 
 <template>
+  <label v-if="labelAttribute" class="label">
+    <span class="label-text">{{ labelAttribute }}</span>
+  </label>
   <input
     type="text"
     ref="inputRef"

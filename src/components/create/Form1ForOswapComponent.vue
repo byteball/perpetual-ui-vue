@@ -190,13 +190,19 @@ onUnmounted(() => {
       <div class="mb-2">
         Asset: {{ metadataByAsset[metadata.x_asset].name }}
       </div>
-      <TextInput v-model="xOracleAddress" placeholder="Oracle address" />
-      <AutocompleteComponent
-        :get-src-for-auto-complete="getFeedNameListX"
-        v-model="xDataFeed"
-        placeholder="Feed name"
-        class="mt-4"
-      />
+      <div>
+        <TextInput
+          v-model="xOracleAddress"
+          :labelAttribute="'Oracle address'"
+        />
+      </div>
+      <div class="mt-2">
+        <AutocompleteComponent
+          :get-src-for-auto-complete="getFeedNameListX"
+          v-model="xDataFeed"
+          :label-attribute="'Feed name'"
+        />
+      </div>
       <div v-if="xErrorMessage" class="mt-2 mb-2 text-red-500">
         {{ xErrorMessage }}
       </div>
@@ -206,13 +212,19 @@ onUnmounted(() => {
       <div class="mb-2">
         Asset: {{ metadataByAsset[metadata.y_asset].name }}
       </div>
-      <TextInput v-model="yOracleAddress" placeholder="Oracle address" />
-      <AutocompleteComponent
-        :get-src-for-auto-complete="getFeedNameListY"
-        v-model="yDataFeed"
-        placeholder="Feed name"
-        class="mt-4"
-      />
+      <div>
+        <TextInput
+          v-model="yOracleAddress"
+          :labelAttribute="'Oracle address'"
+        />
+      </div>
+      <div class="mt-2">
+        <AutocompleteComponent
+          :get-src-for-auto-complete="getFeedNameListY"
+          v-model="yDataFeed"
+          :label-attribute="'Feed name'"
+        />
+      </div>
       <div v-if="yErrorMessage" class="mt-2 mb-2 text-red-500">
         {{ yErrorMessage }}
       </div>

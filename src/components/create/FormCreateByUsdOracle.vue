@@ -122,13 +122,16 @@ onUnmounted(() => {
   </div>
   <div v-else>
     <div class="mb-6">Well, now we need to select oracle and its feed name</div>
-    <TextInput v-model="oracleAddress" placeholder="Oracle address" />
-    <AutocompleteComponent
-      :get-src-for-auto-complete="getFeedNameList"
-      v-model="dataFeed"
-      placeholder="Feed name"
-      class="mt-4"
-    />
+    <div>
+      <TextInput v-model="oracleAddress" :labelAttribute="'Oracle address'" />
+    </div>
+    <div class="mt-2">
+      <AutocompleteComponent
+        :get-src-for-auto-complete="getFeedNameList"
+        v-model="dataFeed"
+        :label-attribute="'Feed name'"
+      />
+    </div>
     <div v-if="errorMessage" class="mt-2 mb-2 text-red-500">
       {{ errorMessage }}
     </div>
