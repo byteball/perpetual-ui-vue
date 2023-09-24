@@ -31,6 +31,8 @@ const xAddressIsValid = ref(false);
 const yAddressIsValid = ref(false);
 const xErrorMessage = ref("");
 const yErrorMessage = ref("");
+const xCurrentValue = ref(null);
+const yCurrentValue = ref(null);
 
 const watchAA = ref("");
 const awaiting = ref(false);
@@ -112,22 +114,6 @@ watch(
   }
 );
 
-async function checkOracleData() {
-  let result = await getDataFeed(xOracleAddress.value, xDataFeed.value);
-  if (!result) {
-    xErrorMessage.value = "Data feed not found";
-    return;
-  }
-
-  result = await getDataFeed(yOracleAddress.value, yDataFeed.value);
-  if (!result) {
-    yErrorMessage.value = "Data feed not found";
-    return;
-  }
-
-  openWallet();
-}
-
 watch(
   xOracleAddress,
   () => {
@@ -148,12 +134,30 @@ watch(
   }
 );
 
-watch([xOracleAddress, xDataFeed], () => {
+watch([xOracleAddress, xDataFeed], async () => {
   xErrorMessage.value = "";
+  xCurrentValue.value = null;
+
+  const result = await getDataFeed(xOracleAddress.value, xDataFeed.value);
+  if (!result) {
+    xErrorMessage.value = "Data feed not found";
+    return;
+  }
+
+  xCurrentValue.value = result;
 });
 
-watch([yOracleAddress, yDataFeed], () => {
+watch([yOracleAddress, yDataFeed], async () => {
   yErrorMessage.value = "";
+  yCurrentValue.value = null;
+
+  const result = await getDataFeed(yOracleAddress.value, yDataFeed.value);
+  if (!result) {
+    yErrorMessage.value = "Data feed not found";
+    return;
+  }
+
+  yCurrentValue.value = result;
 });
 
 function goBack() {
@@ -206,6 +210,9 @@ onUnmounted(() => {
       <div v-if="xErrorMessage" class="mt-2 mb-2 text-red-500">
         {{ xErrorMessage }}
       </div>
+      <div v-if="!xErrorMessage" class="mt-2">
+        Current value: {{ xCurrentValue ? `$${xCurrentValue}` : "not found" }}
+      </div>
     </div>
     <div class="divider"></div>
     <div>
@@ -228,15 +235,18 @@ onUnmounted(() => {
       <div v-if="yErrorMessage" class="mt-2 mb-2 text-red-500">
         {{ yErrorMessage }}
       </div>
+      <div v-if="!yErrorMessage" class="mt-2">
+        Current value:
+        {{ yCurrentValue !== null ? `$${yCurrentValue}` : "not found" }}
+      </div>
     </div>
     <div class="text-center">
       <button
         class="btn btn-primary mt-4"
         :class="{
-          '!btn-disabled':
-            !xOracleAddress || !yOracleAddress || !xDataFeed || !yDataFeed,
+          '!btn-disabled': xCurrentValue == null || yCurrentValue == null,
         }"
-        @click="checkOracleData"
+        @click="openWallet"
       >
         Create reserve price aa
       </button>
