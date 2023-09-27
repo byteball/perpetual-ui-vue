@@ -31,6 +31,8 @@ const xAddressIsValid = ref(false);
 const yAddressIsValid = ref(false);
 const xErrorMessage = ref("");
 const yErrorMessage = ref("");
+const xCurrentValue = ref(null);
+const yCurrentValue = ref(null);
 
 const watchAA = ref("");
 const awaiting = ref(false);
@@ -112,22 +114,6 @@ watch(
   }
 );
 
-async function checkOracleData() {
-  let result = await getDataFeed(xOracleAddress.value, xDataFeed.value);
-  if (!result) {
-    xErrorMessage.value = "Data feed not found";
-    return;
-  }
-
-  result = await getDataFeed(yOracleAddress.value, yDataFeed.value);
-  if (!result) {
-    yErrorMessage.value = "Data feed not found";
-    return;
-  }
-
-  openWallet();
-}
-
 watch(
   xOracleAddress,
   () => {
@@ -148,12 +134,30 @@ watch(
   }
 );
 
-watch([xOracleAddress, xDataFeed], () => {
+watch([xOracleAddress, xDataFeed], async () => {
   xErrorMessage.value = "";
+  xCurrentValue.value = null;
+
+  const result = await getDataFeed(xOracleAddress.value, xDataFeed.value);
+  if (!result) {
+    xErrorMessage.value = "Data feed not found";
+    return;
+  }
+
+  xCurrentValue.value = result;
 });
 
-watch([yOracleAddress, yDataFeed], () => {
+watch([yOracleAddress, yDataFeed], async () => {
   yErrorMessage.value = "";
+  yCurrentValue.value = null;
+
+  const result = await getDataFeed(yOracleAddress.value, yDataFeed.value);
+  if (!result) {
+    yErrorMessage.value = "Data feed not found";
+    return;
+  }
+
+  yCurrentValue.value = result;
 });
 
 function goBack() {
@@ -190,15 +194,24 @@ onUnmounted(() => {
       <div class="mb-2">
         Asset: {{ metadataByAsset[metadata.x_asset].name }}
       </div>
-      <TextInput v-model="xOracleAddress" placeholder="Oracle address" />
-      <AutocompleteComponent
-        :get-src-for-auto-complete="getFeedNameListX"
-        v-model="xDataFeed"
-        placeholder="Feed name"
-        class="mt-4"
-      />
+      <div>
+        <TextInput
+          v-model="xOracleAddress"
+          :labelAttribute="'Oracle address'"
+        />
+      </div>
+      <div class="mt-2">
+        <AutocompleteComponent
+          :get-src-for-auto-complete="getFeedNameListX"
+          v-model="xDataFeed"
+          :label-attribute="'Feed name'"
+        />
+      </div>
       <div v-if="xErrorMessage" class="mt-2 mb-2 text-red-500">
         {{ xErrorMessage }}
+      </div>
+      <div v-if="!xErrorMessage" class="mt-2">
+        Current value: {{ xCurrentValue ? `$${xCurrentValue}` : "not found" }}
       </div>
     </div>
     <div class="divider"></div>
@@ -206,25 +219,34 @@ onUnmounted(() => {
       <div class="mb-2">
         Asset: {{ metadataByAsset[metadata.y_asset].name }}
       </div>
-      <TextInput v-model="yOracleAddress" placeholder="Oracle address" />
-      <AutocompleteComponent
-        :get-src-for-auto-complete="getFeedNameListY"
-        v-model="yDataFeed"
-        placeholder="Feed name"
-        class="mt-4"
-      />
+      <div>
+        <TextInput
+          v-model="yOracleAddress"
+          :labelAttribute="'Oracle address'"
+        />
+      </div>
+      <div class="mt-2">
+        <AutocompleteComponent
+          :get-src-for-auto-complete="getFeedNameListY"
+          v-model="yDataFeed"
+          :label-attribute="'Feed name'"
+        />
+      </div>
       <div v-if="yErrorMessage" class="mt-2 mb-2 text-red-500">
         {{ yErrorMessage }}
+      </div>
+      <div v-if="!yErrorMessage" class="mt-2">
+        Current value:
+        {{ yCurrentValue !== null ? `$${yCurrentValue}` : "not found" }}
       </div>
     </div>
     <div class="text-center">
       <button
         class="btn btn-primary mt-4"
         :class="{
-          '!btn-disabled':
-            !xOracleAddress || !yOracleAddress || !xDataFeed || !yDataFeed,
+          '!btn-disabled': xCurrentValue == null || yCurrentValue == null,
         }"
-        @click="checkOracleData"
+        @click="openWallet"
       >
         Create reserve price aa
       </button>

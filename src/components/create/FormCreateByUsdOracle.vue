@@ -23,6 +23,7 @@ const oracleAddress = ref("F4KHJUCLJKY4JV7M5F754LAJX4EB7M4N");
 const dataFeed = ref("");
 const addressIsValid = ref(false);
 const errorMessage = ref("");
+const currentValue = ref(null);
 
 const watchAA = ref("");
 const awaiting = ref(false);
@@ -78,15 +79,6 @@ async function getFeedNameList() {
   return feedNamesByOracle[oracleAddress.value] || [];
 }
 
-async function checkOracleData() {
-  const result = await getDataFeed(oracleAddress.value, dataFeed.value);
-  if (result) {
-    openWallet();
-    return;
-  }
-  errorMessage.value = "Data feed not found";
-}
-
 watch(
   oracleAddress,
   () => {
@@ -97,8 +89,17 @@ watch(
   }
 );
 
-watch([oracleAddress, dataFeed], () => {
+watch([oracleAddress, dataFeed], async () => {
   errorMessage.value = "";
+  currentValue.value = null;
+
+  const result = await getDataFeed(oracleAddress.value, dataFeed.value);
+  if (!result) {
+    errorMessage.value = "Data feed not found";
+    return;
+  }
+
+  currentValue.value = result;
 });
 
 onUnmounted(() => {
@@ -122,21 +123,28 @@ onUnmounted(() => {
   </div>
   <div v-else>
     <div class="mb-6">Well, now we need to select oracle and its feed name</div>
-    <TextInput v-model="oracleAddress" placeholder="Oracle address" />
-    <AutocompleteComponent
-      :get-src-for-auto-complete="getFeedNameList"
-      v-model="dataFeed"
-      placeholder="Feed name"
-      class="mt-4"
-    />
+    <div>
+      <TextInput v-model="oracleAddress" :labelAttribute="'Oracle address'" />
+    </div>
+    <div class="mt-2">
+      <AutocompleteComponent
+        :get-src-for-auto-complete="getFeedNameList"
+        v-model="dataFeed"
+        :label-attribute="'Feed name'"
+      />
+    </div>
     <div v-if="errorMessage" class="mt-2 mb-2 text-red-500">
       {{ errorMessage }}
+    </div>
+    <div v-if="!errorMessage" class="mt-2">
+      Current value:
+      {{ currentValue != null ? `$${currentValue}` : "not found" }}
     </div>
     <div class="text-center">
       <button
         class="btn btn-primary mt-4"
-        :class="{ '!btn-disabled': !oracleAddress || !dataFeed }"
-        @click="checkOracleData"
+        :class="{ '!btn-disabled': currentValue == null }"
+        @click="openWallet"
       >
         Create reserve price aa
       </button>

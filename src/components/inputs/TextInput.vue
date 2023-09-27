@@ -7,6 +7,7 @@ const props = defineProps([
   "staticValue",
   "label",
   "placeholder",
+  "labelAttribute",
 ]);
 const attrs = useAttrs();
 
@@ -34,6 +35,9 @@ onMounted(() => {
 
 <template>
   <div class="relative w-full">
+    <label v-if="labelAttribute" class="label">
+      <span class="label-text">{{ labelAttribute }}</span>
+    </label>
     <input
       type="text"
       :class="classesList"
