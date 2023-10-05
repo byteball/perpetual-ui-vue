@@ -1,16 +1,42 @@
-import { getAssetMetadataByArray } from "@/services/DAGApi";
+import { executeAAGetter, getAssetMetadataByArray } from "@/services/DAGApi";
 import { fullExplorerUrlForAsset, fullExplorerUrlForUnit } from "@/config";
+import { getParam } from "@/utils/governanceUtils";
+import dayjs from "dayjs";
 
-export function getNotDefaultAssetsFromMeta(meta, onlyNotPresale) {
-  const keys = Object.keys(meta);
+const isPresaleFinished = (metaByAA, presaleAsset) => {
+  const presalePeriod = getParam("presale_period", metaByAA);
+  const tokenShareThreshold = getParam("token_share_threshold", metaByAA);
+  const reserve = metaByAA.state.reserve;
+
+  const presaleAssetData = metaByAA[`asset_${presaleAsset}`];
+  const currentPresaleAmount = metaByAA[`asset_${presaleAsset}`].presale_amount;
+
+  const finishDate = dayjs(
+    (presaleAssetData.creation_ts + presalePeriod) * 1000
+  );
+
+  const targetPresaleAmount = tokenShareThreshold * reserve;
+
+  return (
+    targetPresaleAmount <= currentPresaleAmount ||
+    !presaleAssetData?.presale ||
+    finishDate.diff(dayjs()) < 0
+  );
+};
+
+export function getNotDefaultAssetsFromMeta(metaByAA, onlyNotPresale) {
+  const keys = Object.keys(metaByAA);
   const assets = [];
 
   keys.forEach((key) => {
-    if (
-      key.startsWith("asset_") &&
-      (!onlyNotPresale || (onlyNotPresale && !meta[key].presale))
-    ) {
-      assets.push(key.substring(6));
+    if (key.startsWith("asset_")) {
+      const asset = key.substring(6);
+      if (
+        !onlyNotPresale ||
+        (onlyNotPresale && isPresaleFinished(metaByAA, asset))
+      ) {
+        assets.push(asset);
+      }
     }
   });
 
@@ -76,7 +102,7 @@ export function getAssetInfoFromMeta(asset, aa, meta) {
   return info || null;
 }
 
-export async function getAssetsOnlyWithSymbolsAndDecimals(assets) {
+export async function getAssetsOnlyWithSymbolsAndDecimals(assets, meta) {
   const nameAndDecimalsByAsset = {};
   const assetList = [];
   const assetsByAA = {};
@@ -106,9 +132,12 @@ export async function getAssetsOnlyWithSymbolsAndDecimals(assets) {
       continue;
     }
 
+    const values = await getPairValue(meta[k], newAssets);
+
     assetsByAA[k] = {
       reserve,
       assets: newAssets,
+      values,
     };
   }
 
@@ -117,6 +146,32 @@ export async function getAssetsOnlyWithSymbolsAndDecimals(assets) {
     assetsByAA,
     nameAndDecimalsByAsset,
   };
+}
+
+async function getPairValue(metaByAA, assets) {
+  const prices = await Promise.all(
+    assets.map((asset, index) => {
+      const priceAA = !index
+        ? metaByAA.reserve_price_aa
+        : metaByAA[`asset_${asset}`].price_aa;
+      const getter = !index ? "get_reserve_price" : "get_target_price";
+
+      return executeAAGetter(priceAA, getter);
+    })
+  );
+
+  return assets.map((asset, index) => {
+    const volume = !index
+      ? metaByAA.state.reserve
+      : metaByAA[`asset_${asset}`].supply;
+
+    const value = volume * prices[index];
+
+    return {
+      asset,
+      value,
+    };
+  });
 }
 
 export function getUrlForReserveAsset(asset) {

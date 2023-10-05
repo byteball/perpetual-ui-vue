@@ -52,18 +52,53 @@ const resultError = ref("");
 async function initSelectedAA() {
   if (status.value !== "initialized") return;
   const a = getAssetsFromMeta(meta.value, true);
-  assets.value = await getAssetsOnlyWithSymbolsAndDecimals(a);
+  assets.value = await getAssetsOnlyWithSymbolsAndDecimals(a, meta.value);
+  setHighestPair();
+}
+
+function setHighestPair() {
+  let highestReserveAsset = "";
+  let highestPairedAsset = "";
+
+  const aas = Object.keys(assets.value.assetsByAA);
+
+  let highestVolume = 0;
+  aas.map((aa) => {
+    assets.value.assetsByAA[aa].values.map((value) => {
+      if (highestVolume < value.value) {
+        highestVolume = value.value;
+        highestReserveAsset = assets.value.assetsByAA[aa].reserve;
+        highestPairedAsset = value.asset;
+      }
+    });
+  });
+
+  console.log("HiGHR", highestReserveAsset);
+  console.log("HiGHp", highestPairedAsset);
+
+  setAsset1(highestReserveAsset);
+  setAsset2(highestPairedAsset);
 }
 
 function asset1Handler() {
+  console.log("pairedAssets.value1", pairedAssets.value);
+
   pairedAssets.value = getPairedAssetsByAsset(
     asset1.value,
     assets.value.assetsByAA
   );
+
+  console.log("pairedAssets.value2", pairedAssets.value);
 }
 
 function asset2Handler() {
+  console.log("asset2.value", asset2.value);
+  console.log("pairedAssets.value3", pairedAssets.value);
+
   metaByActiveAA.value = meta.value[pairedAssets.value[asset2.value]];
+
+  console.log("META BY ACTIVE", metaByActiveAA.value);
+
   if (asset1.value) {
     calcAndSetDataForMetaAndLink();
   }
@@ -83,7 +118,13 @@ function setAmount1ByBalance() {
 }
 
 function setAsset1(asset) {
+  console.log(asset);
+  console.log(asset1.value);
+
   asset1.value = asset;
+
+  console.log(asset1.value);
+
   asset2.value = "";
   asset1Amount.value = "";
   asset2Amount.value = "";
