@@ -129,15 +129,20 @@ export async function getAssetsOnlyWithSymbolsAndDecimals(assets, meta) {
     }
 
     if (!newAssets.length) {
+      const index = assetList.indexOf(reserve);
+      if (index > -1) {
+        assetList.splice(index, 1);
+      }
+
       continue;
     }
 
-    const values = await getPairValue(meta[k], newAssets);
+    const volumes = await getPairsVolume(meta[k], newAssets);
 
     assetsByAA[k] = {
       reserve,
       assets: newAssets,
-      values,
+      volumes,
     };
   }
 
@@ -148,7 +153,7 @@ export async function getAssetsOnlyWithSymbolsAndDecimals(assets, meta) {
   };
 }
 
-async function getPairValue(metaByAA, assets) {
+async function getPairsVolume(metaByAA, assets) {
   const prices = await Promise.all(
     assets.map((asset, index) => {
       const priceAA = !index
@@ -161,15 +166,15 @@ async function getPairValue(metaByAA, assets) {
   );
 
   return assets.map((asset, index) => {
-    const volume = !index
+    const supply = !index
       ? metaByAA.state.reserve
       : metaByAA[`asset_${asset}`].supply;
 
-    const value = volume * prices[index];
+    const volume = supply * prices[index];
 
     return {
       asset,
-      value,
+      volume,
     };
   });
 }
