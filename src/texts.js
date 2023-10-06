@@ -15,4 +15,7 @@ export const propertyTips = {
   price_aa: "price aa",
   drift_rate: "drift rate",
   reserve_price_value: "Current value of reserve price",
+  reserve_price: "Reserve price",
+  staking_aa: "Staking aa",
+  new_vp: "...",
 };

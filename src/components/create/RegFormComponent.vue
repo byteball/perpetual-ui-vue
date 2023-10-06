@@ -29,7 +29,7 @@ const { meta } = storeToRefs(store);
 
 const router = useRouter();
 
-const swapFee = ref("3");
+const swapFee = ref("0.3");
 const arbProfitTax = ref("90");
 const adjustmentPeriod = ref("3");
 const presalePeriod = ref("14");

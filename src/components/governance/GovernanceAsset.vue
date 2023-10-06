@@ -13,6 +13,7 @@ defineProps(["perpetualAaMeta"]);
   <div class="mt-4">
     <GovernanceAssetField
       title="Swap fee"
+      name="swap_fee"
       :value="`${getParam('swap_fee', perpetualAaMeta.rawMeta) * 100}%`"
     />
 
@@ -30,24 +31,25 @@ defineProps(["perpetualAaMeta"]);
         leave-to-class="transform scale-95 opacity-0"
       >
         <DisclosurePanel class="text-slate-300 pb-2 pl-2">
-          <div class="mt-2">
-            Reserve price:
+          <div class="mt-2 inline-flex items-center">
+            Reserve price<TooltipComponent
+              field-name="reserve_price"
+              class="ml-1"
+            />:
             <a
               :href="fullExplorerUrlForAddress + perpetualAaMeta.reservePriceAA"
               target="_blank"
-              class="link text-sky-500 link-hover font-light text-sm"
+              class="link text-sky-500 link-hover font-light text-sm ml-1"
               >{{ perpetualAaMeta.reservePriceAA }}</a
             >&nbsp;
             <span class="inline-flex text-sm">
               (${{ perpetualAaMeta.reservePriceValue }}&nbsp;
-              <TooltipComponent
-                field-name="reserve_price_value"
-              ></TooltipComponent
-              >)
+              <TooltipComponent field-name="reserve_price_value" />)
             </span>
           </div>
           <GovernanceAssetField
             title="Staking aa"
+            name="staking_aa"
             :value="perpetualAaMeta.rawMeta.staking_aa"
             :value-link="
               fullExplorerUrlForAddress + perpetualAaMeta.rawMeta.staking_aa
@@ -55,16 +57,19 @@ defineProps(["perpetualAaMeta"]);
           />
           <GovernanceAssetField
             title="Arb profit tax"
+            name="arb_profit_tax"
             :value="`${getParam('arb_profit_tax', perpetualAaMeta.rawMeta)}%`"
           />
           <GovernanceAssetField
             title="Adjustment period"
+            name="adjustment_period"
             :value="`${
               getParam('adjustment_period', perpetualAaMeta.rawMeta) / 24 / 3600
             } days`"
           />
           <GovernanceAssetField
             title="Presale period"
+            name="presale_period"
             :value="`
           ${
             getParam('presale_period', perpetualAaMeta.rawMeta) / 24 / 3600
@@ -72,6 +77,7 @@ defineProps(["perpetualAaMeta"]);
           />
           <GovernanceAssetField
             title="Auction price halving period"
+            name="auction_price_halving_period"
             :value="`
           ${
             getParam('auction_price_halving_period', perpetualAaMeta.rawMeta) /
@@ -82,12 +88,14 @@ defineProps(["perpetualAaMeta"]);
           />
           <GovernanceAssetField
             title="Token share threshold"
+            name="token_share_threshold"
             :value="`${
               getParam('token_share_threshold', perpetualAaMeta.rawMeta) * 100
             }%`"
           />
           <GovernanceAssetField
             title="Min s0 share"
+            name="min_s0_share"
             :value="`${
               getParam('min_s0_share', perpetualAaMeta.rawMeta) * 100
             }%`"

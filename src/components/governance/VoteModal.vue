@@ -115,6 +115,7 @@ function sendVotingEmit() {
         />
         <GovernanceAssetField
           title="New VP"
+          name="new_vp"
           :value="vp.newVP"
           :leader="leader"
           :class="{ '!mt-1': !isNewValue }"

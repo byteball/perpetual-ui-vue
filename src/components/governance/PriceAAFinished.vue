@@ -4,6 +4,7 @@ import { getOracleData } from "@/services/DAGApi";
 import { generateAndFollowLinkForVoteAddPriceAA } from "@/utils/generateLink";
 import LinkIcon from "@/components/icons/LinkIcon.vue";
 import VoteBlockForPriceAA from "@/components/governance/VoteBlockForPriceAA.vue";
+import { fullExplorerUrlForAddress } from "@/config";
 
 const props = defineProps([
   "perpetualAa",
@@ -76,6 +77,17 @@ onMounted(async () => {
       </div>
 
       <div v-if="assetMeta.presale">
+        <div class="font-medium text-sm mb-1">
+          Price aa:
+          <div class="font-light text-sm inline-block">
+            <a
+              :href="fullExplorerUrlForAddress + priceAa"
+              target="_blank"
+              class="link text-sky-500 link-hover"
+              >{{ priceAa }}</a
+            >
+          </div>
+        </div>
         <div class="font-medium text-sm mb-1">
           Currency:
           <div class="font-light text-sm inline-block">

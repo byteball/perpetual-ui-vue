@@ -302,6 +302,12 @@ watch(
             }}
           </div>
           <div class="text-sm mt-1">
+            Reserve asset: {{ preparedMeta.reserveAsset.name }}
+          </div>
+          <div class="text-sm mt-1">
+            Governance asset: {{ preparedMeta.asset0SymbolAndDecimals.name }}
+          </div>
+          <div class="text-sm mt-1">
             Reserve price:
             <a
               :href="fullExplorerUrlForAddress + preparedMeta.reservePriceAA"
