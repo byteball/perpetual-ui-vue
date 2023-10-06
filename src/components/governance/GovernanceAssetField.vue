@@ -1,4 +1,6 @@
 <script setup>
+import TooltipComponent from "@/components/TooltipComponent.vue";
+
 defineProps([
   "title",
   "value",
@@ -6,12 +8,15 @@ defineProps([
   "subValue",
   "subValueLink",
   "leader",
+  "name",
 ]);
 </script>
 
 <template>
   <div class="mt-2">
-    <span>{{ title }}: </span>
+    <span class="inline-flex items-center mr-1"
+      >{{ title }} <TooltipComponent :field-name="name" class="ml-1" />:
+    </span>
     <a
       v-if="valueLink"
       class="link text-sky-500 link-hover font-light text-sm"

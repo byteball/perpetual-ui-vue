@@ -57,7 +57,7 @@ const generateClaimLink = (presaleAsset, reserveAsset, aa) => {
     claim: 1,
   };
 
-  return generateLink(10000, data, null, aa, reserveAsset, true);
+  return generateLink(10000, data, null, aa, "base", true);
 };
 
 const getPrice = async (aa, presaleAsset) => {

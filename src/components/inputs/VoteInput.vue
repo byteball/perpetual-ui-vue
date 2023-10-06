@@ -3,28 +3,58 @@ import { computed, ref, watch } from "vue";
 import { vMaska } from "maska";
 import { classesList } from "@/components/inputs/classesList";
 
-const props = defineProps({ type: String, modelValue: String, label: String });
+const props = defineProps({
+  type: String,
+  modelValue: String,
+  label: String,
+});
+
+let decimals = 0;
+let placeholder = "10";
+if (props.type === "percent") {
+  decimals = 2;
+  placeholder = "0.03";
+}
+
+const options = computed(() => {
+  return {
+    preProcess: (val) => {
+      val = val
+        .replace(/,/g, ".")
+        .replace(/[^0-9.]/, "")
+        .replace(/\.\./g, ".");
+
+      if (val.match(/\./g)?.length > 1) {
+        const s = val.split(".");
+        const f = s.shift();
+        val = f + "." + s.join("");
+      }
+
+      if (val.startsWith("00")) {
+        val = val.replace(/^0+/, "0");
+      }
+
+      if (/^0[1-9]/.test(val)) {
+        val = val.replace(/^0+/, "");
+      }
+      return val;
+    },
+  };
+});
+
+const mask = computed(() => {
+  let s = "0";
+  if (decimals) {
+    s += "." + "9".repeat(Number(decimals));
+  }
+  return s;
+});
 
 const value = ref("");
 const labelBlock = ref();
 const paddingRight = computed(() => {
   if (!props.label || !labelBlock.value) return "16px";
   return labelBlock.value.offsetWidth + "px";
-});
-
-const options = computed(() => {
-  return {
-    preProcess: (val) => {
-      return val.replace(/,/g, ".").replace(/[^0-9.]/, "");
-    },
-    postProcess: (val) => {
-      if (props.type === "percent" && val > 100) {
-        return 100;
-      }
-
-      return val;
-    },
-  };
 });
 
 watch(
@@ -40,11 +70,11 @@ watch(
   <div class="relative w-full">
     <input
       v-maska:[options]
-      placeholder="value"
-      data-maska="0"
-      data-maska-tokens="0:\d:multiple"
+      :data-maska="mask"
+      :placeholder="placeholder"
+      data-maska-tokens="0:\d:multiple|9:\d:optional"
       type="text"
-      :class="classesList + ' join-item'"
+      :class="classesList"
       :style="{ paddingRight }"
       v-model="value"
       @input="$emit('update:modelValue', $event.target.value)"
@@ -57,5 +87,3 @@ watch(
     </div>
   </div>
 </template>
-
-<style scoped></style>
