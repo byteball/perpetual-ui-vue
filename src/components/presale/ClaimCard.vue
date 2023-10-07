@@ -8,7 +8,6 @@ import { useAaInfoStore } from "@/stores/aaInfo";
 import { getParam } from "@/utils/governanceUtils";
 import { executeAAGetter, getAssetMetadata } from "@/services/DAGApi";
 import { generateLink } from "@/utils/generateLink";
-import TooltipComponent from "@/components/TooltipComponent.vue";
 
 const addressStore = useAddressStore();
 const store = useAaInfoStore();

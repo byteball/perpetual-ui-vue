@@ -23,8 +23,10 @@ function goPrevStep() {
     <Teleport to="#back_button"
       ><BackButtonComponent @click="$emit('goBack')"
     /></Teleport>
-    <div class="mb-6 mt-4">
-      Now you need to choose the basis for reserve price
+    <div class="mb-6 mt-4 left">
+      <div>
+        Well, now we need to create AA to get the asset price in dollars
+      </div>
     </div>
     <div class="text-center">
       <div>
