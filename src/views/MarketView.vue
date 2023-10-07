@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import {
@@ -52,7 +52,32 @@ const resultError = ref("");
 async function initSelectedAA() {
   if (status.value !== "initialized") return;
   const a = getAssetsFromMeta(meta.value, true);
-  assets.value = await getAssetsOnlyWithSymbolsAndDecimals(a);
+  assets.value = await getAssetsOnlyWithSymbolsAndDecimals(a, meta.value);
+  await setHighestPair();
+}
+
+async function setHighestPair() {
+  let largestReserveAsset = "";
+  let largestPairedAsset = "";
+
+  const aas = Object.keys(assets.value.assetsByAA);
+
+  let highestVolume = 0;
+  aas.map((aa) => {
+    assets.value.assetsByAA[aa].volumes.map((pairVolume) => {
+      if (highestVolume < pairVolume.volume) {
+        highestVolume = pairVolume.volume;
+        largestReserveAsset = assets.value.assetsByAA[aa].reserve;
+        largestPairedAsset = pairVolume.asset;
+      }
+    });
+  });
+
+  setAsset1(largestReserveAsset);
+
+  await nextTick();
+
+  setAsset2(largestPairedAsset);
 }
 
 function asset1Handler() {
@@ -64,6 +89,7 @@ function asset1Handler() {
 
 function asset2Handler() {
   metaByActiveAA.value = meta.value[pairedAssets.value[asset2.value]];
+
   if (asset1.value) {
     calcAndSetDataForMetaAndLink();
   }
