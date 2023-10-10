@@ -6,6 +6,7 @@ import { useAddressStore } from "@/stores/addressStore";
 import { getPreparedMeta } from "@/utils/governanceUtils";
 import GovernanceAsset from "@/components/governance/GovernanceAsset.vue";
 import Loading from "@/components/icons/LoadingIcon.vue";
+import { executeAAGetter } from "@/services/DAGApi";
 
 const store = useAaInfoStore();
 const addressStore = useAddressStore();
@@ -13,6 +14,7 @@ const { aas, meta } = storeToRefs(store);
 const { address } = storeToRefs(addressStore);
 
 const aasWithMeta = ref({});
+const aasVolumes = ref({});
 
 async function init() {
   if (!aas.value.length) return;
@@ -30,22 +32,31 @@ async function init() {
   });
 
   aasWithMeta.value = m;
+
+  await getAAsVolumes();
 }
+
+const getAAsVolumes = async () => {
+  const promises = [];
+  Object.keys(aasWithMeta.value).map((aa) => {
+    const reservePriceAA = aasWithMeta.value[aa].rawMeta.reserve_price_aa;
+
+    promises.push(executeAAGetter(reservePriceAA, "get_reserve_price"));
+  });
+
+  const prices = await Promise.all(promises);
+  Object.keys(aasWithMeta.value).map((aa, index) => {
+    aasVolumes.value[aa] =
+      aasWithMeta.value[aa].rawMeta.state.reserve * prices[index];
+  });
+};
 
 const sortedAasWithMeta = computed(() => {
   return Object.entries(aasWithMeta.value).sort((a, b) => {
-    const aPoolName = `${a[1].reserveAsset.name}/${a[1].asset0SymbolAndDecimals.name}`;
-    const bPoolName = `${b[1].reserveAsset.name}/${b[1].asset0SymbolAndDecimals.name}`;
+    const aPoolVolume = aasVolumes.value[a[0]];
+    const bPoolVolume = aasVolumes.value[b[0]];
 
-    if (aPoolName > bPoolName) {
-      return 1;
-    }
-
-    if (aPoolName < bPoolName) {
-      return -1;
-    }
-
-    return 0;
+    return bPoolVolume - aPoolVolume;
   });
 });
 
