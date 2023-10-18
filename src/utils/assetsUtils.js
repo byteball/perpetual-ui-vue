@@ -129,11 +129,6 @@ export async function getAssetsOnlyWithSymbolsAndDecimals(assets, meta) {
     }
 
     if (!newAssets.length) {
-      const index = assetList.indexOf(reserve);
-      if (index > -1) {
-        assetList.splice(index, 1);
-      }
-
       continue;
     }
 
