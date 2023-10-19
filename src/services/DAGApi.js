@@ -41,6 +41,14 @@ export async function getDefinition(aa) {
   return { aa, definition };
 }
 
+export async function getAaStateVars(aa, prefix) {
+  const params = { address: aa };
+  if (prefix) {
+    params.prefix = prefix;
+  }
+  return client.api.getAaStateVars(params);
+}
+
 async function getMeta(aa) {
   let meta = {};
   try {
@@ -180,7 +188,7 @@ export async function getAssetBySymbol(symbol) {
   const asset = await Client.api.getAssetBySymbol(registry, symbol);
   assetBySymbolCache.setValue(symbol, asset);
 
-  return asset;
+  return asset || null;
 }
 
 export async function executeAAGetter(aa, getter, returnError) {

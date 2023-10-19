@@ -1,11 +1,14 @@
 <script setup>
 import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import AutoComplete from "@tarekraafat/autocomplete.js";
+import TooltipComponent from "@/components/TooltipComponent.vue";
 
 const props = defineProps([
   "getSrcForAutoComplete",
   "modelValue",
   "labelAttribute",
+  "placeholder",
+  "tooltipName",
 ]);
 const emit = defineEmits(["selected", "update:modelValue"]);
 
@@ -96,13 +99,19 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <label v-if="labelAttribute" class="label">
-    <span class="label-text">{{ labelAttribute }}</span>
-  </label>
+  <template v-if="labelAttribute">
+    <div class="flex items-center">
+      <label class="label">
+        <span class="label-text">{{ labelAttribute }}</span>
+      </label>
+      <TooltipComponent v-if="tooltipName" :field-name="tooltipName" />
+    </div>
+  </template>
   <input
     type="text"
     ref="inputRef"
     v-model="inputValue"
+    :placeholder="placeholder || ''"
     @input="$emit('update:modelValue', $event.target.value)"
     class="!input !input-bordered !w-full !text-slate-200 !bg-base-200 !border-gray-600"
   />

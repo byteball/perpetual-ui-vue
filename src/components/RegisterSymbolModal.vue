@@ -8,6 +8,8 @@ import Client from "@/services/Obyte";
 import debounce from "lodash.debounce";
 import TextInput from "@/components/inputs/TextInput.vue";
 import NumberInput from "@/components/inputs/NumberInput.vue";
+import { getAssetBySymbol } from "@/services/DAGApi";
+import { getMetadataForSymbolByDataFeed } from "@/services/SymbolAPI";
 
 const store = useAaInfoStore();
 
@@ -19,7 +21,7 @@ const registryAA = ref("");
 
 const symbol = ref("");
 const symbolFieldError = ref("");
-const decimals = ref("9");
+const decimals = ref("");
 const buttonEnabled = ref(false);
 const link = ref("");
 
@@ -33,7 +35,7 @@ watch(
       return;
     }
 
-    const isSymbolTaken = await Client.api.getAssetBySymbol(
+    const isSymbolTaken = await getAssetBySymbol(
       registryAA.value,
       symbol.value
     );
@@ -89,12 +91,24 @@ const suggestValueForSymbolField = async (feedName) => {
   symbol.value = newSymbolSuggestion;
 };
 
+async function setDecimals(feedName) {
+  const metadata = await getMetadataForSymbolByDataFeed(feedName);
+  if (!metadata) {
+    return (decimals.value = "9");
+  }
+
+  decimals.value = String(metadata.decimals);
+}
+
 onMounted(async () => {
   const priceAA = meta.value[props.perpAa][`asset_${props.asset}`].price_aa;
 
   const priceAADefinition = await Client.api.getDefinition(priceAA);
-
-  await suggestValueForSymbolField(priceAADefinition[1].params.feed_name);
+  const feedName = priceAADefinition[1].params.feed_name;
+  await Promise.all([
+    suggestValueForSymbolField(feedName),
+    setDecimals(feedName),
+  ]);
 });
 </script>
 

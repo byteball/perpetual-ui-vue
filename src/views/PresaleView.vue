@@ -11,7 +11,6 @@ import { generateLink } from "@/utils/generateLink";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import { getPresaleAssetsFromMeta } from "@/utils/getAssetsFromMeta";
 import {
-  executeAAGetter,
   getAssetMetadata,
   getAssetMetadataByArray,
   getOracleData,
@@ -23,6 +22,7 @@ import ClaimCard from "@/components/presale/ClaimCard.vue";
 import Loading from "@/components/icons/LoadingIcon.vue";
 import LabelForPoolsComponent from "@/components/LabelForPoolsComponent.vue";
 import GovernanceAssetField from "@/components/governance/GovernanceAssetField.vue";
+import { getTargetPriceByPresaleAsset } from "@/services/PerpAPI";
 
 dayjs.extend(duration);
 
@@ -45,9 +45,9 @@ const selectedPresaleTargetAmount = ref("");
 const selectedPresaleCurrentAmount = ref("");
 const selectedPresaleAddressAmount = ref(0);
 const selectedOracleData = ref({});
+const selectedTargetPrice = ref(0);
 
-const targetPrice = ref("");
-const receiveAmount = ref("");
+const receiveAmount = ref(0);
 
 const amount = ref("");
 const link = ref("");
@@ -169,9 +169,6 @@ const preparePresaleList = async () => {
 
       if (isPresaleFinished) continue;
 
-      const priceAA = meta.value[aa][`asset_${presaleAsset}`].price_aa;
-      const targetPrice = await executeAAGetter(priceAA, "get_target_price");
-
       presaleList.value.push({
         aa,
         asset0,
@@ -180,7 +177,6 @@ const preparePresaleList = async () => {
         isPresaleFinished,
         targetPresaleAmount,
         currentPresaleAmount,
-        targetPrice,
         finishDate: finishDate.format("MMMM D, YYYY HH:mm"),
       });
 
@@ -257,7 +253,6 @@ const fillPresaleData = async (presale) => {
     ? presale.currentPresaleAmount /
       10 ** assetsMetadata.value[selectedReserveAsset.value].decimals
     : 0;
-  targetPrice.value = presale.targetPrice;
 
   if (selectedPresaleIsFinished.value) {
     activeTab.value = "claim";
@@ -265,6 +260,11 @@ const fillPresaleData = async (presale) => {
 
   selectedOracleData.value = await getOracleData(
     meta.value[presale.aa][`asset_${presale.presaleAsset}`].price_aa
+  );
+
+  selectedTargetPrice.value = await getTargetPriceByPresaleAsset(
+    presale.aa,
+    presale.presaleAsset
   );
 
   if (address.value && selectedAA.value) {
@@ -287,11 +287,12 @@ watch(meta, preparePresaleList);
 const calculateReceiveAmount = () => {
   const reserveDecimals =
     10 ** assetsMetadata.value[selectedReserveAsset.value].decimals;
+  const targetPrice = selectedTargetPrice.value;
+
+  const rawAmount = (Number(amount.value) * reserveDecimals) / targetPrice;
 
   receiveAmount.value =
-    (Number(amount.value) * reserveDecimals) /
-    targetPrice.value /
-    10 ** assetsMetadata.value[selectedPresaleAsset.value].decimals;
+    rawAmount / 10 ** assetsMetadata.value[selectedPresaleAsset.value].decimals;
 };
 
 watch([amount, selectedPresaleAsset], calculateReceiveAmount);
@@ -404,6 +405,7 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
                     <DisclosurePanel class="text-slate-300 pb-2 pl-2">
                       <GovernanceAssetField
                         title="Swap fee"
+                        name="swap_fee"
                         :value="`${
                           getParam(
                             'swap_fee',
@@ -414,6 +416,7 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
                       <GovernanceAssetField
                         class="text-xs sm:text-sm"
                         title="Staking aa"
+                        name="staking_aa"
                         :value="preparedDataByAA[selectedAA].rawMeta.staking_aa"
                         :value-link="
                           fullExplorerUrlForAddress +
@@ -422,6 +425,7 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
                       />
                       <GovernanceAssetField
                         title="Arb profit tax"
+                        name="arb_profit_tax"
                         :value="`${getParam(
                           'arb_profit_tax',
                           preparedDataByAA[selectedAA].rawMeta
@@ -429,6 +433,7 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
                       />
                       <GovernanceAssetField
                         title="Adjustment period"
+                        name="adjustment_period"
                         :value="`${
                           getParam(
                             'adjustment_period',
@@ -440,6 +445,7 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
                       />
                       <GovernanceAssetField
                         title="Presale period"
+                        name="presale_period"
                         :value="`${
                           getParam(
                             'presale_period',
@@ -451,6 +457,7 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
                       />
                       <GovernanceAssetField
                         title="Auction price halving period"
+                        name="auction_price_halving_period"
                         :value="`${
                           getParam(
                             'auction_price_halving_period',
@@ -463,6 +470,7 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
                       />
                       <GovernanceAssetField
                         title="Token share threshold"
+                        name="token_share_threshold"
                         :value="`${
                           getParam(
                             'token_share_threshold',
@@ -472,6 +480,7 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
                       />
                       <GovernanceAssetField
                         title="Min s0 share"
+                        name="min_s0_share"
                         :value="`${
                           getParam(
                             'min_s0_share',
@@ -496,7 +505,7 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
                   {{
                     `${selectedPresaleCurrentAmount} / ${selectedPresaleTargetAmount}`
                   }}
-                  {{ assetsMetadata[selectedPresaleAsset].name }}
+                  {{ assetsMetadata[selectedReserveAsset].name }}
                 </div>
               </div>
               <div class="tabs tabs-boxed mt-8 mb-1">

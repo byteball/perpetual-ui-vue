@@ -1,6 +1,7 @@
 import { encodeData } from "./encodeData";
 
 export const generateLink = (amount, data, address, AA, asset, is_single) => {
+  amount = Math.floor(amount);
   const sData = encodeData(data);
   return `obyte${
     import.meta.env.VITE_NETWORK === "testnet" ? "-tn" : ""

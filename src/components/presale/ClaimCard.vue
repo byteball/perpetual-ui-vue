@@ -6,8 +6,9 @@ import dayjs from "dayjs";
 import { useAddressStore } from "@/stores/addressStore";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import { getParam } from "@/utils/governanceUtils";
-import { executeAAGetter, getAssetMetadata } from "@/services/DAGApi";
+import { getAssetMetadata } from "@/services/DAGApi";
 import { generateLink } from "@/utils/generateLink";
+import { getTargetPriceByPresaleAsset } from "@/services/PerpAPI";
 
 const addressStore = useAddressStore();
 const store = useAaInfoStore();
@@ -59,15 +60,6 @@ const generateClaimLink = (presaleAsset, reserveAsset, aa) => {
   return generateLink(10000, data, null, aa, "base", true);
 };
 
-const getPrice = async (aa, presaleAsset) => {
-  if (meta.value[aa][`asset_${presaleAsset}`].initial_price) {
-    return meta.value[aa][`asset_${presaleAsset}`].initial_price;
-  }
-
-  const priceAA = meta.value[aa][`asset_${presaleAsset}`].price_aa;
-  return executeAAGetter(priceAA, "get_target_price");
-};
-
 const prepareClaimPresaleByAddress = async () => {
   addressClaims.value = [];
 
@@ -87,18 +79,18 @@ const prepareClaimPresaleByAddress = async () => {
 
       await getAssetsMetadata(presaleAsset, reserveAsset);
 
-      const price = await getPrice(aa, presaleAsset);
+      const targetPrice = await getTargetPriceByPresaleAsset(aa, presaleAsset);
+      const decimals = assetsMetadata.value[presaleAsset].decimals;
+      const rawAmount =
+        meta.value[aa][aaAddressContribution] / 10 ** decimals / targetPrice;
 
-      const amount =
-        meta.value[aa][aaAddressContribution] /
-        price /
-        10 ** assetsMetadata.value[presaleAsset].decimals;
+      const amount = rawAmount.toFixed(decimals);
 
       addressClaims.value.push({
         aa,
         presaleAsset,
         reserveAsset,
-        amount: amount.toFixed(assetsMetadata.value[presaleAsset].decimals),
+        amount,
         link: generateClaimLink(presaleAsset, reserveAsset, aa),
       });
     }

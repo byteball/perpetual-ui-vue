@@ -131,7 +131,7 @@ onMounted(async () => {
           />
           <Form1ForBasicAsset
             v-else
-            :reserve-asset="reserveAsset"
+            :reserve-asset-symbol="reserveAssetInput"
             @set-reserve-price-aa="setReservePriceAA"
             @go-back="goBack"
           />
@@ -155,25 +155,3 @@ onMounted(async () => {
     </div>
   </div>
 </template>
-
-<style>
-.autoComplete_wrapper > ul > li mark {
-  color: #641ae6 !important;
-}
-
-.autoComplete_wrapper > ul {
-  position: absolute;
-  background-color: #2a303c;
-  border: 1px solid #424955;
-}
-
-.autoComplete_wrapper > ul > li {
-  background-color: #2a303c;
-  border-radius: 0;
-  color: #a6adba !important;
-}
-
-.autoComplete_wrapper > input::placeholder {
-  color: #a6adba !important;
-}
-</style>

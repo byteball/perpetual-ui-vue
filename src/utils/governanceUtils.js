@@ -79,22 +79,29 @@ export async function getPreparedMeta(metaByAA, userAddress = "_") {
     stakeBalance = stakeBalance / 10 ** asset0SymbolAndDecimals.decimals;
   }
 
+  const reserveAsset = await getAssetMetadata(metaByAA.reserve_asset);
+
   const reservePriceAA = metaByAA.reserve_price_aa;
   const reservePriceValue = +(
     (await executeAAGetter(reservePriceAA, "get_reserve_price")) *
-    10 ** (asset0SymbolAndDecimals?.decimals || 0)
-  ).toFixed(2);
+    10 ** (reserveAsset?.decimals || 0)
+  );
+
+  const reserve = metaByAA.state.reserve / 10 ** reserveAsset.decimals;
+  const reserveInUsd = reserve * reservePriceValue;
 
   const meta = {
     asset0SymbolAndDecimals,
     priceAAsMeta,
-    reserveAsset: await getAssetMetadata(metaByAA.reserve_asset),
+    reserveAsset,
     rawMeta: metaByAA,
     vp,
     allowedControl: vp > 0,
     stakeBalance,
     reservePriceAA,
     reservePriceValue,
+    reserve,
+    reserveInUsd,
   };
   cacheForPreparedMetaByAsset0AndReserve[key] = meta;
 

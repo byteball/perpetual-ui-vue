@@ -1,29 +1,19 @@
 <script setup>
-import { onUnmounted, ref, watch } from "vue";
+import { onUnmounted, ref } from "vue";
 import { ADDRESSES } from "@/config";
-import { isValidAddress } from "@/utils/validates";
 import { followLink, generateDefinitionLink } from "@/utils/generateLink";
 import { getAddressByDefinition } from "@/utils/addressUtils";
-import {
-  getAssetMetadata,
-  getDataFeed,
-  getDefinition,
-} from "@/services/DAGApi";
-import feedNamesByOracle from "@/feedNamesByOracle";
-import TextInput from "@/components/inputs/TextInput.vue";
-import AutocompleteComponent from "@/components/AutocompleteComponent.vue";
+import { getDefinition } from "@/services/DAGApi";
 import emitter from "@/services/emitter";
 import LoadingIcon from "@/components/icons/LoadingIcon.vue";
 import BackButtonComponent from "@/components/BackButtonComponent.vue";
+import OracleComponent from "@/components/OracleComponent.vue";
 
-const props = defineProps(["reserveAsset"]);
+defineProps(["reserveAssetSymbol"]);
 const emit = defineEmits(["setReservePriceAa", "prevStep"]);
 
-const oracleAddress = ref("F4KHJUCLJKY4JV7M5F754LAJX4EB7M4N");
-const dataFeed = ref("");
-const addressIsValid = ref(false);
+const oracleResult = ref({});
 const errorMessage = ref("");
-const currentValue = ref(null);
 
 const watchAA = ref("");
 const awaiting = ref(false);
@@ -47,11 +37,12 @@ emitter.on(
 );
 
 async function openWallet() {
-  const assetMetadata = await getAssetMetadata(props.reserveAsset);
+  if (!Object.keys(oracleResult.value).length) return;
+  const { oracleAddress, dataFeed, symbolMetadata } = oracleResult.value;
   const data = {
-    oracle: oracleAddress.value,
-    feed_name: dataFeed.value,
-    decimals: assetMetadata.decimals,
+    oracle: oracleAddress,
+    feed_name: dataFeed,
+    decimals: symbolMetadata?.decimals || 0,
   };
 
   const definition = [
@@ -74,33 +65,25 @@ async function openWallet() {
   followLink(link);
 }
 
-async function getFeedNameList() {
-  if (!addressIsValid.value) return [];
-  return feedNamesByOracle[oracleAddress.value] || [];
+function setEmptyData() {
+  oracleResult.value = {};
+  errorMessage.value = "";
 }
 
-watch(
-  oracleAddress,
-  () => {
-    addressIsValid.value = isValidAddress(oracleAddress.value);
-  },
-  {
-    immediate: true,
-  }
-);
-
-watch([oracleAddress, dataFeed], async () => {
-  errorMessage.value = "";
-  currentValue.value = null;
-
-  const result = await getDataFeed(oracleAddress.value, dataFeed.value);
-  if (!result) {
-    errorMessage.value = "Data feed not found";
-    return;
+function setError(error) {
+  setEmptyData();
+  errorMessage.value = error;
+}
+function oracleDataUpdated(result) {
+  setEmptyData();
+  if (result.error) {
+    return setError(result.error);
   }
 
-  currentValue.value = result;
-});
+  if (result.oracleAddress) {
+    oracleResult.value = result;
+  }
+}
 
 onUnmounted(() => {
   emitter.off(`aa_definition_${ADDRESSES.reserve_price_usd}`, handleDefinition);
@@ -123,27 +106,25 @@ onUnmounted(() => {
   </div>
   <div v-else>
     <div class="mb-6">Well, now we need to select oracle and its feed name</div>
-    <div>
-      <TextInput v-model="oracleAddress" :labelAttribute="'Oracle address'" />
-    </div>
-    <div class="mt-2">
-      <AutocompleteComponent
-        :get-src-for-auto-complete="getFeedNameList"
-        v-model="dataFeed"
-        :label-attribute="'Feed name'"
-      />
-    </div>
+    <OracleComponent
+      @data-updated="oracleDataUpdated"
+      :symbol="reserveAssetSymbol"
+    />
     <div v-if="errorMessage" class="mt-2 mb-2 text-red-500">
       {{ errorMessage }}
     </div>
-    <div v-if="!errorMessage" class="mt-2">
+    <div v-if="!errorMessage && oracleResult.oracleAddress" class="mt-2">
       Current value:
-      {{ currentValue != null ? `$${currentValue}` : "not found" }}
+      {{
+        oracleResult.value != null
+          ? `$${+oracleResult.value.toFixed(2)}`
+          : "not found"
+      }}
     </div>
     <div class="text-center">
       <button
         class="btn btn-primary mt-4"
-        :class="{ '!btn-disabled': currentValue == null }"
+        :class="{ '!btn-disabled': oracleResult.value == null }"
         @click="openWallet"
       >
         Create reserve price aa

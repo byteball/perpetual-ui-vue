@@ -15,6 +15,7 @@ import { getAssetMetadataByArray } from "@/services/DAGApi";
 import { getAddressByBaseAA } from "@/utils/addressUtils";
 import { ADDRESSES } from "@/config";
 import BackButtonComponent from "@/components/BackButtonComponent.vue";
+import { isValidAddress } from "@/utils/validates";
 
 const props = defineProps([
   "reserveAssetSymbol",
@@ -38,6 +39,7 @@ const tokenShareThreshold = ref("10");
 const minS0Share = ref("1");
 
 const existsError = ref("");
+const addressExistsAA = ref("");
 const poolNameExistsAA = ref("");
 const link = ref("");
 const awaiting = ref(false);
@@ -92,9 +94,17 @@ async function checkAAForAlreadyExisting() {
   });
 
   if (result[0].response.error) {
-    console.log("result", result);
-    existsError.value = result[0].response.error;
-    await getNameForExistsAA(existsError.value.substring(27));
+    const error = result[0].response.error;
+    const address = isValidAddress(error.substring(27))
+      ? error.substring(27)
+      : false;
+
+    existsError.value = address ? error.substring(0, 27) : error;
+
+    if (address) {
+      addressExistsAA.value = address;
+      await getNameForExistsAA(address);
+    }
     return;
   }
 
@@ -224,7 +234,15 @@ watch(
   </div>
 
   <div v-if="existsError" class="my-4 text-red-500">
-    {{ existsError }} {{ poolNameExistsAA }}
+    {{ existsError }}
+    <template v-if="addressExistsAA">
+      <RouterLink
+        :to="`/governance/management/${addressExistsAA}`"
+        class="link underline"
+        >{{ addressExistsAA }}</RouterLink
+      >
+      {{ poolNameExistsAA }}
+    </template>
   </div>
   <div class="form-control mt-6">
     <a
