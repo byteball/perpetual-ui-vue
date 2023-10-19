@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import emitter from "@/services/emitter";
 
@@ -21,15 +21,21 @@ const isSymbolExists = ref(false);
 const decimals = ref(0);
 const description = ref("");
 const buttonEnabled = ref(false);
+const perpetualMeta = ref();
 
-const fillInputsForStep = (assetUnit) => {
+const currentAA = computed(() => route.params.aa);
+
+const fillInputsForStep = async (assetUnit) => {
+  const reserveAssetMetadata = await getAssetMetadata(
+    perpetualMeta.value.reserve_asset
+  );
   asset.value = assetUnit;
   symbol.value = "";
-  decimals.value = 9;
+  decimals.value = reserveAssetMetadata?.decimals || 9;
   description.value = "";
 
   if (route.query.step === "2") {
-    description.value = `Asset0 for perpetual futures AA ${route.params.aa}`;
+    description.value = `Asset0 for perpetual futures AA ${currentAA.value}`;
   }
 };
 
@@ -56,13 +62,16 @@ const suggestValueForSymbolField = async (reserveSymbol) => {
 };
 
 watch(exists, async () => {
-  const currentPerpetualMeta = await getMetaForPerpAAs([route.params.aa]);
-  const reserveAsset = currentPerpetualMeta[route.params.aa].reserve_asset;
-  const asset0 = currentPerpetualMeta[route.params.aa].state.asset0;
+  const { [currentAA.value]: currentPerpetualMeta } = await getMetaForPerpAAs([
+    currentAA.value,
+  ]);
+  const reserveAsset = currentPerpetualMeta.reserve_asset;
+  const asset0 = currentPerpetualMeta.state.asset0;
+  perpetualMeta.value = currentPerpetualMeta;
 
   if (reserveAsset === "base") {
     await router.push({
-      path: `/create/${route.params.aa}`,
+      path: `/create/${currentAA.value}`,
       query: { step: 2 },
     });
     fillInputsForStep(asset0);
@@ -74,7 +83,7 @@ watch(exists, async () => {
 
   if (!reserveAssetMetadata) {
     await router.push({
-      path: `/create/${route.params.aa}`,
+      path: `/create/${currentAA.value}`,
       query: { step: 1 },
     });
     fillInputsForStep(reserveAsset);
@@ -83,7 +92,7 @@ watch(exists, async () => {
   }
 
   await router.push({
-    path: `/create/${route.params.aa}`,
+    path: `/create/${currentAA.value}`,
     query: { step: 2 },
   });
   fillInputsForStep(asset0);
@@ -94,20 +103,23 @@ emitter.on(`aa_request_${import.meta.env.VITE_REGISTRY_AA}`, async (data) => {
   const payload = parseDataFromRequest(data);
 
   if (payload.asset === asset.value && route.query.step === "1") {
-    const currentPerpetualMeta = await getMetaForPerpAAs([route.params.aa]);
+    const { [currentAA.value]: currentPerpetualMeta } = await getMetaForPerpAAs(
+      [currentAA.value]
+    );
+    perpetualMeta.value = currentPerpetualMeta;
 
     await router.push({
-      path: `/create/${route.params.aa}`,
+      path: `/create/${currentAA.value}`,
       query: { step: 2 },
     });
-    fillInputsForStep(currentPerpetualMeta[route.params.aa].state.asset0);
+    fillInputsForStep(currentPerpetualMeta.state.asset0);
 
     return;
   }
 
   if (payload.asset === asset.value && route.query.step === "2") {
     await router.push({
-      path: `/create/${route.params.aa}`,
+      path: `/create/${currentAA.value}`,
       query: { step: 3 },
     });
   }
@@ -116,7 +128,7 @@ emitter.on(`aa_request_${import.meta.env.VITE_REGISTRY_AA}`, async (data) => {
 emitter.on(`aa_response_${import.meta.env.VITE_FACTORY_AA}`, (data) => {
   if (
     data.response.responseVars &&
-    data.response.responseVars.address === route.params.aa
+    data.response.responseVars.address === currentAA.value
   ) {
     exists.value = true;
   }
@@ -167,7 +179,7 @@ watch([asset, symbol, decimals, description], async () => {
 });
 
 onMounted(() => {
-  Client.api.getDefinition(route.params.aa, function (err, result) {
+  Client.api.getDefinition(currentAA.value, function (err, result) {
     if (err) return console.error(err);
     exists.value = !!result;
   });

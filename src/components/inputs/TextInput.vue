@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, ref, useAttrs, watch } from "vue";
 import { classesList } from "@/components/inputs/classesList";
+import TooltipComponent from "@/components/TooltipComponent.vue";
 
 const props = defineProps([
   "modelValue",
@@ -8,6 +9,7 @@ const props = defineProps([
   "label",
   "placeholder",
   "labelAttribute",
+  "tooltipName",
 ]);
 const attrs = useAttrs();
 
@@ -35,9 +37,14 @@ onMounted(() => {
 
 <template>
   <div class="relative w-full">
-    <label v-if="labelAttribute" class="label">
-      <span class="label-text">{{ labelAttribute }}</span>
-    </label>
+    <template v-if="labelAttribute">
+      <div class="flex items-center">
+        <label class="label">
+          <span class="label-text">{{ labelAttribute }}</span>
+        </label>
+        <TooltipComponent v-if="tooltipName" :field-name="tooltipName" />
+      </div>
+    </template>
     <input
       type="text"
       :class="classesList"

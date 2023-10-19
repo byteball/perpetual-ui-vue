@@ -53,6 +53,7 @@ async function initSelectedAA() {
   if (status.value !== "initialized") return;
   const a = getAssetsFromMeta(meta.value, true);
   assets.value = await getAssetsOnlyWithSymbolsAndDecimals(a, meta.value);
+  console.log("qqq", assets.value);
   await setHighestPair();
 }
 
@@ -224,11 +225,6 @@ function calcAndSetDataForMetaAndLink() {
     address.value &&
     balanceByAsset.value < getAmountByAsset(asset1Amount.value, asset1.value)
   ) {
-    console.log(
-      "q",
-      balanceByAsset.value,
-      getAmountByAsset(asset1Amount.value, asset1.value)
-    );
     const amount = getDecimalsAmountByAsset(balanceByAsset.value, asset1.value);
     const symbol = assets.value.nameAndDecimalsByAsset[asset1.value].name;
     resultError.value = `You don't have enough funds. Your balance: ${amount} ${symbol}`;

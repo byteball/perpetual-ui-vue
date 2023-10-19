@@ -5,11 +5,11 @@ import Client from "@/services/Obyte";
 import { generateDefinitionLink, generateLink } from "@/utils/generateLink";
 import { storeToRefs } from "pinia";
 import { useAaInfoStore } from "@/stores/aaInfo";
-import { getAssetMetadata, getDataFeed } from "@/services/DAGApi";
-import debounce from "lodash.debounce";
-import IntegerInput from "@/components/inputs/IntegerInput.vue";
+import { getAssetMetadata } from "@/services/DAGApi";
 import TooltipComponent from "@/components/TooltipComponent.vue";
-import TextInput from "@/components/inputs/TextInput.vue";
+import NumberInput from "@/components/inputs/NumberInput.vue";
+import OracleComponent from "@/components/OracleComponent.vue";
+import { getTargetPriceForAddPerp } from "@/services/PerpAPI";
 
 let intervalId = 0;
 const step = ref(1);
@@ -19,8 +19,8 @@ const store = useAaInfoStore();
 const { meta } = storeToRefs(store);
 const router = useRouter();
 
-const oracle = ref("F4KHJUCLJKY4JV7M5F754LAJX4EB7M4N");
-const feedName = ref("GBYTE_USD");
+const oracleResult = ref({});
+const errorMessage = ref("");
 const multiplier = ref("1");
 
 const reserveAssetData = ref({});
@@ -36,13 +36,14 @@ const currentRate = ref(undefined);
 const buttonDisabled = ref(true);
 
 function setLinkForPriceAA() {
+  const { oracleAddress, dataFeed } = oracleResult.value;
   linkForPriceAA.value = generateDefinitionLink([
     "autonomous agent",
     {
       base_aa: import.meta.env.VITE_BASE_PRICE_AA,
       params: {
-        oracle: oracle.value,
-        feed_name: feedName.value,
+        oracle: oracleAddress,
+        feed_name: dataFeed,
         multiplier: multiplier.value,
       },
     },
@@ -50,6 +51,7 @@ function setLinkForPriceAA() {
 }
 
 async function checkExistsPriceAA() {
+  const { oracleAddress, dataFeed } = oracleResult.value;
   const result = await Client.api.executeGetter({
     address: "TWV4APP6EM6AFEJNHWTATHAIBQVU4IAS",
     getter: "getAAAddressByDefinition",
@@ -59,8 +61,8 @@ async function checkExistsPriceAA() {
         {
           base_aa: import.meta.env.VITE_BASE_PRICE_AA,
           params: {
-            oracle: oracle.value,
-            feed_name: feedName.value,
+            oracle: oracleAddress,
+            feed_name: dataFeed,
             multiplier: multiplier.value,
           },
         },
@@ -117,23 +119,42 @@ function back() {
   step.value = 2;
 }
 
-watch(
-  [oracle, feedName],
-  debounce(async () => {
-    currentRate.value = await getDataFeed(oracle.value, feedName.value);
-  }, 500),
-  { immediate: true }
-);
+function setEmptyData() {
+  oracleResult.value = {};
+  errorMessage.value = "";
+}
+
+function setError(error) {
+  setEmptyData();
+  errorMessage.value = error;
+}
+function oracleDataUpdated(result) {
+  setEmptyData();
+  if (result.error) {
+    return setError(result.error);
+  }
+
+  if (result.oracleAddress) {
+    console.log(result);
+    oracleResult.value = result;
+    if (result.symbolMetadata?.decimals) {
+      const d = result.symbolMetadata.decimals;
+      multiplier.value = (1 / 10 ** d).toFixed(d);
+      return;
+    }
+    multiplier.value = "1";
+  }
+}
 
 watch(
-  [currentRate, multiplier, meta],
+  [() => oracleResult.value.value, multiplier, meta],
   async () => {
     buttonDisabled.value = true;
-
+    const currentRate = oracleResult.value.value;
     if (
       meta.value[route.params.aa]?.reserve_asset &&
-      currentRate.value !== null &&
-      currentRate.value !== undefined &&
+      currentRate !== null &&
+      currentRate !== undefined &&
       multiplier.value &&
       multiplier.value !== "0"
     ) {
@@ -142,9 +163,14 @@ watch(
       const reserveAsset = meta.value[route.params.aa].reserve_asset;
       reserveAssetData.value = await getAssetMetadata(reserveAsset);
 
-      tokens.value =
-        10 ** reserveAssetData.value.decimals /
-        (multiplier.value * currentRate.value);
+      const target_price = await getTargetPriceForAddPerp(
+        route.params.aa,
+        currentRate * Number(multiplier.value)
+      );
+
+      tokens.value = String(
+        10 ** reserveAssetData.value.decimals / target_price
+      );
     }
   },
   { immediate: true }
@@ -215,24 +241,10 @@ onUnmounted(() => {
       <div class="card bg-base-200 shadow-xl">
         <div class="card-body p-6 sm:p-8">
           <div class="!form-control">
-            <div class="pt-2">
-              <div class="flex items-center">
-                <label class="label">
-                  <span class="label-text">Oracle</span>
-                </label>
-                <TooltipComponent field-name="oracle"> </TooltipComponent>
-              </div>
-              <TextInput v-model="oracle" />
-            </div>
-            <div class="pt-4">
-              <div class="flex items-center">
-                <label class="label">
-                  <span class="label-text">Feed name</span>
-                </label>
-                <TooltipComponent field-name="feed_name"> </TooltipComponent>
-              </div>
-              <TextInput v-model="feedName" />
-            </div>
+            <OracleComponent
+              :big-margin="true"
+              @data-updated="oracleDataUpdated"
+            />
             <div class="pt-4">
               <div class="flex items-center">
                 <label class="label">
@@ -240,14 +252,18 @@ onUnmounted(() => {
                 </label>
                 <TooltipComponent field-name="multiplier"> </TooltipComponent>
               </div>
-              <IntegerInput v-model="multiplier" />
+              <NumberInput v-model="multiplier" :decimals="12" />
 
-              <div v-if="currentRate !== undefined" class="mt-4">
-                <div v-if="currentRate && multiplier">
+              <div v-if="oracleResult.value !== undefined" class="mt-4">
+                <div v-if="oracleResult.value && multiplier">
                   <div class="mt-2">
                     Current value:
-                    <span v-if="oracle === 'F4KHJUCLJKY4JV7M5F754LAJX4EB7M4N'"
-                      >${{ currentRate.toFixed(2) }}</span
+                    <span
+                      v-if="
+                        oracleResult.oracleAddress ===
+                        'F4KHJUCLJKY4JV7M5F754LAJX4EB7M4N'
+                      "
+                      >${{ +oracleResult.value.toFixed(2) }}</span
                     >
                     <span v-else>{{ currentRate }}</span>
                   </div>
@@ -256,11 +272,9 @@ onUnmounted(() => {
                     decimals)
                   </div>
                 </div>
-                <div v-else class="tracking-wide text-red-500">
-                  {{
-                    "Data not found, please check oracle address and feed name"
-                  }}
-                </div>
+              </div>
+              <div v-if="errorMessage" class="tracking-wide text-red-500">
+                {{ errorMessage }}
               </div>
             </div>
           </div>
@@ -337,13 +351,13 @@ onUnmounted(() => {
           <div class="text-sm font-medium inline-block mb-2">
             Oracle:
             <div class="text-sm font-light inline-block">
-              {{ oracle }}
+              {{ oracleResult.oracleAddress }}
             </div>
           </div>
           <div class="text-sm font-medium inline-block mb-2">
             Feed name:
             <div class="text-sm font-light inline-block">
-              {{ feedName }}
+              {{ oracleResult.dataFeed }}
             </div>
           </div>
           <div class="text-sm font-medium inline-block mb-2">

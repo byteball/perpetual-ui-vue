@@ -72,9 +72,11 @@ watch(meta, init, { deep: true });
             <div>
               <div class="block sm:flex justify-between items-center">
                 <div class="text-lg font-bold">
-                  {{ aa[1].reserveAsset.name }}/{{
-                    aa[1].asset0SymbolAndDecimals.name
-                  }}
+                  <RouterLink :to="`/governance/management/${aa[0]}`">
+                    {{ aa[1].reserveAsset.name }}/{{
+                      aa[1].asset0SymbolAndDecimals.name
+                    }}
+                  </RouterLink>
                 </div>
                 <div class="mt-3 mb-6 sm:my-0">
                   <RouterLink

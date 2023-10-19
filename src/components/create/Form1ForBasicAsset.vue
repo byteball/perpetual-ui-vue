@@ -4,7 +4,7 @@ import FormCreateByUsdOracle from "@/components/create/FormCreateByUsdOracle.vue
 import FormCreateByMyAA from "@/components/create/FormCreateByMyAA.vue";
 import BackButtonComponent from "@/components/BackButtonComponent.vue";
 
-defineProps(["reserveAsset"]);
+defineProps(["reserveAssetSymbol"]);
 const emit = defineEmits(["setReservePriceAa", "goBack"]);
 
 const type = ref("");
@@ -42,7 +42,7 @@ function goPrevStep() {
     <FormCreateByUsdOracle
       @set-reserve-price-aa="setReservePriceAA"
       @prev-step="goPrevStep"
-      :reserve-asset="reserveAsset"
+      :reserve-asset-symbol="reserveAssetSymbol"
     />
   </div>
   <div v-else-if="type === 'aa'">

@@ -1,4 +1,4 @@
-const DEFAULT_EXP_TIME = 10 * 60 * 1000; // 10 minutes
+const DEFAULT_EXP_TIME = 60 * 1000; // 1 minutes
 
 class CacheService {
   #cacheByName = {};

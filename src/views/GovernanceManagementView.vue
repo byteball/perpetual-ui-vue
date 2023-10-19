@@ -323,6 +323,13 @@ watch(
               >)
             </span>
           </div>
+          <div class="text-sm mt-1">
+            Reserve: {{ preparedMeta.reserve }}
+            {{ preparedMeta.reserveAsset.name }} (${{
+              +preparedMeta.reserveInUsd.toFixed(2)
+            }})
+          </div>
+
           <div v-if="address" class="mt-2">
             <div>Your VP: {{ currentVP }}</div>
             <div>
@@ -348,7 +355,7 @@ watch(
               >To manage this aa you need to
               <RouterLink
                 class="link text-sky-500 link-hover font-light"
-                :to="'/stake'"
+                :to="`/stake/${perpetualAA}`"
                 >stake</RouterLink
               >
               <template v-if="!address">
