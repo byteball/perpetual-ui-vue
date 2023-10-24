@@ -106,6 +106,7 @@ export async function getAssetsOnlyWithSymbolsAndDecimals(assets, meta) {
   const nameAndDecimalsByAsset = {};
   const assetList = [];
   const assetsByAA = {};
+  const reservePairs = {};
 
   const metadataByAsset = await getAssetMetadataByArray(assets.assetList);
   for (let asset in metadataByAsset) {
@@ -117,6 +118,8 @@ export async function getAssetsOnlyWithSymbolsAndDecimals(assets, meta) {
     const reserve = assets.assetsByAA[k].reserve;
     const newAssets = [];
 
+    reservePairs[reserve] = [];
+
     if (!nameAndDecimalsByAsset[reserve]) {
       continue;
     }
@@ -125,6 +128,7 @@ export async function getAssetsOnlyWithSymbolsAndDecimals(assets, meta) {
     for (let i in _assets) {
       if (nameAndDecimalsByAsset[_assets[i]]) {
         newAssets.push(_assets[i]);
+        reservePairs[reserve].push(_assets[i]);
       }
     }
 
@@ -135,6 +139,15 @@ export async function getAssetsOnlyWithSymbolsAndDecimals(assets, meta) {
       assets: newAssets,
       volumes,
     };
+  }
+
+  for (const [key, value] of Object.entries(reservePairs)) {
+    if (!value.length) {
+      const index = assetList.indexOf(key);
+      if (index > -1) {
+        assetList.splice(index, 1);
+      }
+    }
   }
 
   return {
