@@ -18,6 +18,8 @@ import RegisterSymbolModal from "@/components/RegisterSymbolModal.vue";
 import Loading from "@/components/icons/LoadingIcon.vue";
 import { fullExplorerUrlForAddress } from "@/config";
 import TooltipComponent from "@/components/TooltipComponent.vue";
+import { getReservePrice, getTargetPriceByPriceAas } from "@/services/PerpAPI";
+import PieComponent from "@/components/PieComponent.vue";
 
 const store = useAaInfoStore();
 const { setActiveAddress } = store;
@@ -38,6 +40,7 @@ const registerSymbolAsset = ref("");
 const preparedMeta = ref({});
 const priceAAsDefinition = ref({});
 const metaForFinishedAssets = ref({});
+const dataForPie = ref({});
 
 const modalForVoteIsOpen = ref(false);
 const modalForRegisterSymbolIsOpen = ref(false);
@@ -93,6 +96,52 @@ const setTab = (tabName) => {
   router.replace({ hash: `#${tabName}` });
 };
 
+async function prepareDataForPie() {
+  const data = {};
+  const assets = {};
+  const priceAAs = [];
+  let priceByPriceAA = {};
+
+  const pm = preparedMeta.value;
+  const s0 = pm.rawMeta.state.s0;
+  const asset0SymbolAndDecimals = pm.asset0SymbolAndDecimals;
+  const asset0PriceAA = pm.rawMeta.reserve_price_aa;
+
+  assets[asset0SymbolAndDecimals.name] = {
+    priceAA: asset0PriceAA,
+    supply: s0,
+  };
+  priceByPriceAA[asset0PriceAA] = await getReservePrice(asset0PriceAA);
+
+  for (let asset in metaForFinishedAssets.value) {
+    const { supply, assetMetaData, price_aa } =
+      metaForFinishedAssets.value[asset];
+    if (!supply) continue;
+
+    assets[assetMetaData.name] = {
+      priceAA: price_aa,
+      supply,
+    };
+
+    if (!priceAAs.includes(price_aa)) {
+      priceAAs.push(price_aa);
+    }
+  }
+
+  const r = await getTargetPriceByPriceAas(priceAAs);
+  priceByPriceAA = { ...priceByPriceAA, ...r };
+
+  for (let asset in assets) {
+    const { supply, priceAA } = assets[asset];
+    const price = priceByPriceAA[priceAA];
+    const amount = supply * price;
+    if (!amount) continue;
+    data[asset] = +amount.toFixed(2);
+  }
+
+  return data;
+}
+
 async function init() {
   if (!aas.value.length) return;
 
@@ -147,6 +196,7 @@ async function init() {
   if (!Object.keys(metaForFinishedAssets.value).length) {
     setTab("vote");
   }
+  dataForPie.value = await prepareDataForPie();
   ready.value = true;
 }
 
@@ -367,6 +417,9 @@ watch(
                 >
               </template>
             </span>
+          </div>
+          <div class="mt-4" v-if="Object.keys(dataForPie).length">
+            <PieComponent :data="dataForPie" class="!h-[256px]" />
           </div>
         </div>
         <div>

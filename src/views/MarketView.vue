@@ -53,7 +53,6 @@ async function initSelectedAA() {
   if (status.value !== "initialized") return;
   const a = getAssetsFromMeta(meta.value, true);
   assets.value = await getAssetsOnlyWithSymbolsAndDecimals(a, meta.value);
-  console.log("qqq", assets.value);
   await setHighestPair();
 }
 
