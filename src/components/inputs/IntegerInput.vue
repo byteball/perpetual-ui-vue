@@ -11,7 +11,7 @@ const options = computed(() => {
   return {
     preProcess: (val) => {
       val = val.replace(/,/g, ".").replace(/[^0-9.]/, "");
-      if (val.startsWith("0")) {
+      if (val.startsWith("0") && val !== "0") {
         val = val.replace(/^0+/, "");
       }
 
