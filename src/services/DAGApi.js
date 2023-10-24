@@ -201,6 +201,7 @@ export async function executeAAGetter(aa, getter, returnError) {
   try {
     return (await client.api.executeGetter(params))?.result;
   } catch (e) {
+    console.error(aa, e);
     if (returnError) return { error: e };
     return null;
   }

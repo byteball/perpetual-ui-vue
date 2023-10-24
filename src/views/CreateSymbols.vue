@@ -31,7 +31,7 @@ const fillInputsForStep = async (assetUnit) => {
   );
   asset.value = assetUnit;
   symbol.value = "";
-  decimals.value = reserveAssetMetadata?.decimals || 9;
+  decimals.value = reserveAssetMetadata?.decimals || 0;
   description.value = "";
 
   if (route.query.step === "2") {
@@ -153,10 +153,6 @@ watch([asset, symbol, decimals, description], async () => {
   }
   isSymbolExists.value = false;
 
-  if (decimals.value === "") {
-    return;
-  }
-
   if (!description.value) {
     return;
   }
@@ -166,7 +162,7 @@ watch([asset, symbol, decimals, description], async () => {
     {
       asset: asset.value,
       symbol: symbol.value,
-      decimals: decimals.value,
+      decimals: decimals.value || 0,
       description: description.value,
     },
     null,

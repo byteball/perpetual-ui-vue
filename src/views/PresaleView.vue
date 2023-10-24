@@ -289,6 +289,7 @@ const calculateReceiveAmount = () => {
     10 ** assetsMetadata.value[selectedReserveAsset.value].decimals;
   const targetPrice = selectedTargetPrice.value;
 
+  console.log(reserveDecimals, amount.value, targetPrice);
   const rawAmount = (Number(amount.value) * reserveDecimals) / targetPrice;
 
   receiveAmount.value =

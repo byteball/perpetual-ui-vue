@@ -11,11 +11,10 @@ import TooltipComponent from "@/components/TooltipComponent.vue";
 import VoteInput from "@/components/inputs/VoteInput.vue";
 import { generateLink } from "@/utils/generateLink";
 import Client from "@/services/Obyte";
-import { getAssetMetadataByArray } from "@/services/DAGApi";
+import { getAssetMetadata, getAssetMetadataByArray } from "@/services/DAGApi";
 import { getAddressByBaseAA } from "@/utils/addressUtils";
 import { ADDRESSES } from "@/config";
 import BackButtonComponent from "@/components/BackButtonComponent.vue";
-import { isValidAddress } from "@/utils/validates";
 
 const props = defineProps([
   "reserveAssetSymbol",
@@ -41,6 +40,8 @@ const minS0Share = ref("1");
 const existsError = ref("");
 const addressExistsAA = ref("");
 const poolNameExistsAA = ref("");
+const asset0NotRegistered = ref(false);
+const aaForRegSymbol = ref("");
 const link = ref("");
 const awaiting = ref(false);
 
@@ -95,20 +96,31 @@ async function checkAAForAlreadyExisting() {
 
   if (result[0].response.error) {
     const error = result[0].response.error;
-    const address = isValidAddress(error.substring(27))
-      ? error.substring(27)
-      : false;
-
-    existsError.value = address ? error.substring(0, 27) : error;
-
-    if (address) {
-      addressExistsAA.value = address;
-      await getNameForExistsAA(address);
+    if (!error.startsWith("such an AA already exists")) {
+      existsError.value = error;
+      return;
     }
+
+    const address = error.substring(27);
+    const metaByAA = meta.value[address];
+    const asset0 = metaByAA.state.asset0;
+    const reserveAssetMeta = await getAssetMetadata(asset0);
+
+    if (!reserveAssetMeta) {
+      asset0NotRegistered.value = true;
+      aaForRegSymbol.value = address;
+      existsError.value = "";
+      return;
+    }
+
+    await getNameForExistsAA(address);
+    addressExistsAA.value = address;
+    existsError.value = error.substring(0, 27);
     return;
   }
 
   existsError.value = "";
+  asset0NotRegistered.value = false;
 }
 
 emitter.on(`aa_request_${ADDRESSES.factory_aa}`, async (data) => {
@@ -245,7 +257,14 @@ watch(
     </template>
   </div>
   <div class="form-control mt-6">
+    <RouterLink
+      v-if="!existsError && asset0NotRegistered"
+      :to="`/create/${aaForRegSymbol}`"
+      class="btn btn-primary"
+      >Create</RouterLink
+    >
     <a
+      v-else
       class="btn btn-primary"
       :href="link"
       :class="{
