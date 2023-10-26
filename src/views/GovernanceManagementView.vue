@@ -18,7 +18,7 @@ import RegisterSymbolModal from "@/components/RegisterSymbolModal.vue";
 import Loading from "@/components/icons/LoadingIcon.vue";
 import { fullExplorerUrlForAddress } from "@/config";
 import TooltipComponent from "@/components/TooltipComponent.vue";
-import { getReservePrice, getTargetPriceByPriceAas } from "@/services/PerpAPI";
+import { getPriceByAssets, getReservePrice } from "@/services/PerpAPI";
 import PieComponent from "@/components/PieComponent.vue";
 
 const store = useAaInfoStore();
@@ -97,49 +97,36 @@ const setTab = (tabName) => {
 };
 
 async function prepareDataForPie() {
-  const data = {};
-  const assets = {};
-  const priceAAs = [];
-  let priceByPriceAA = {};
-
+  const priceInUSDBySymbol = {};
   const pm = preparedMeta.value;
-  const s0 = pm.rawMeta.state.s0;
-  const asset0SymbolAndDecimals = pm.asset0SymbolAndDecimals;
-  const asset0PriceAA = pm.rawMeta.reserve_price_aa;
-
-  assets[asset0SymbolAndDecimals.name] = {
-    priceAA: asset0PriceAA,
-    supply: s0,
-  };
-  priceByPriceAA[asset0PriceAA] = await getReservePrice(asset0PriceAA);
+  const { asset: asset0, name: asset0Name } = pm.asset0SymbolAndDecimals;
+  const reservePriceAa = pm.rawMeta.reserve_price_aa;
+  const reservePrice = await getReservePrice(reservePriceAa);
+  const assetList = [asset0];
+  const symbolByAsset = {};
+  const amountByAsset = {};
+  symbolByAsset[asset0] = asset0Name;
+  amountByAsset[asset0] = pm.rawMeta.state.s0;
 
   for (let asset in metaForFinishedAssets.value) {
-    const { supply, assetMetaData, price_aa } =
-      metaForFinishedAssets.value[asset];
+    const { supply, assetMetaData } = metaForFinishedAssets.value[asset];
     if (!supply) continue;
-
-    assets[assetMetaData.name] = {
-      priceAA: price_aa,
-      supply,
-    };
-
-    if (!priceAAs.includes(price_aa)) {
-      priceAAs.push(price_aa);
-    }
+    symbolByAsset[asset] = assetMetaData.name;
+    amountByAsset[asset] = supply;
+    assetList.push(asset);
   }
 
-  const r = await getTargetPriceByPriceAas(priceAAs);
-  priceByPriceAA = { ...priceByPriceAA, ...r };
+  const r = await getPriceByAssets(perpetualAA.value, assetList);
+  for (let asset in r) {
+    const symbol = symbolByAsset[asset];
+    const amount = amountByAsset[asset];
+    const price = r[asset];
 
-  for (let asset in assets) {
-    const { supply, priceAA } = assets[asset];
-    const price = priceByPriceAA[priceAA];
-    const amount = supply * price;
-    if (!amount) continue;
-    data[asset] = +amount.toFixed(2);
+    const priceInUSD = amount * price * reservePrice;
+    priceInUSDBySymbol[symbol] = +priceInUSD.toFixed(2);
   }
 
-  return data;
+  return priceInUSDBySymbol;
 }
 
 async function init() {
