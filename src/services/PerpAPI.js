@@ -12,7 +12,7 @@ export async function getTargetPriceByPriceAa(price_aa) {
   return executeAAGetter(price_aa, "get_target_price");
 }
 
-async function getReservePriceFromPerpAA(aa) {
+export async function getReservePriceFromPerpAA(aa) {
   const definition = (await getDefinition(aa)).definition;
   const reservePriceAA = definition[1].params.reserve_price_aa;
   return getReservePrice(reservePriceAA);

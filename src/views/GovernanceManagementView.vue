@@ -20,6 +20,7 @@ import { fullExplorerUrlForAddress } from "@/config";
 import TooltipComponent from "@/components/TooltipComponent.vue";
 import { getPriceByAssets, getReservePrice } from "@/services/PerpAPI";
 import PieComponent from "@/components/PieComponent.vue";
+import Asset0ForTradingComponent from "@/components/governance/Asset0ForTradingComponent.vue";
 
 const store = useAaInfoStore();
 const { setActiveAddress } = store;
@@ -511,6 +512,13 @@ watch(
           </div>
           <div v-if="activeTab === 'trading' || activeTab === 'presale'">
             <div>
+              <Asset0ForTradingComponent
+                v-if="activeTab === 'trading'"
+                :aa="perpetualAA"
+                :asset0-metadata="preparedMeta.asset0SymbolAndDecimals"
+                :price-aa="preparedMeta.rawMeta.reserve_price_aa"
+                :reserve-price-value="preparedMeta.reservePriceValue"
+              />
               <div
                 v-for="(assetMeta, asset) in metaForFinishedAssetsForRendering"
                 :key="asset"
