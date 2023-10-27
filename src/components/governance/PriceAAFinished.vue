@@ -206,6 +206,7 @@ onMounted(async () => {
             title="Price aa"
             type="address"
             name="price_aa"
+            :perp-aa="perpetualAa"
             :asset-meta="assetMeta"
             :votes-by-name="votes['change_price_aa'][asset]"
             :allowed-control="allowedControl"

@@ -8,8 +8,13 @@ import { useAddressStore } from "@/stores/addressStore";
 import VotingTable from "@/components/governance/VotingTable.vue";
 import { getOracleData } from "@/services/DAGApi";
 import TooltipComponent from "@/components/TooltipComponent.vue";
+import {
+  getPriceByAssets,
+  getReservePriceFromPerpAA,
+} from "@/services/PerpAPI";
 
 const props = defineProps([
+  "perpAa",
   "title",
   "name",
   "type",
@@ -26,6 +31,7 @@ const addressStore = useAddressStore();
 const { address } = storeToRefs(addressStore);
 
 const selectedOracleData = ref({});
+const price = ref(0);
 
 const userVote = computed(() => {
   if (!metaByActiveAddress.value) return;
@@ -56,7 +62,13 @@ function voteFromTable(value) {
 
 onMounted(async () => {
   if (props.name === "price_aa") {
-    selectedOracleData.value = await getOracleData(currentValue);
+    const { asset, decimals } = props.assetMeta.assetMetaData;
+    const oracleData = await getOracleData(currentValue);
+    const reservePrice = await getReservePriceFromPerpAA(props.perpAa);
+    const r = await getPriceByAssets(props.perpAa, [asset]);
+
+    price.value = r[asset] * reservePrice * 10 ** decimals;
+    selectedOracleData.value = oracleData;
   }
 });
 </script>
@@ -81,7 +93,8 @@ onMounted(async () => {
     </div>
     <div v-if="name === 'price_aa'">
       <div class="mt-1">Currency: {{ selectedOracleData.name }}</div>
-      <div class="mt-1">Target value: {{ selectedOracleData.value }}</div>
+      <div class="mt-1">Target price: {{ selectedOracleData.value }}</div>
+      <div class="mt-1">Price ${{ price }}</div>
     </div>
     <div class="mt-2">
       <div v-if="votesByName?.length" class="mb-4">
