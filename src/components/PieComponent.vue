@@ -15,11 +15,17 @@ ChartJS.register(ArcElement, Tooltip, Legend, Colors);
 ChartJS.defaults.color = "#e2e8f0";
 
 const dataRef = computed(() => {
+  const ls = [];
+  const ds = [];
+  props.data.forEach((v) => {
+    ls.push(v.symbol);
+    ds.push(v.price);
+  });
   return {
-    labels: [...Object.keys(props.data)],
+    labels: ls,
     datasets: [
       {
-        data: [...Object.values(props.data)],
+        data: ds,
       },
     ],
   };
@@ -29,16 +35,21 @@ const options = {
   datasets: {
     pie: {
       borderColor: "transparent",
+      rotation: 0,
     },
   },
-  // borderColor: "transparent",
   plugins: {
     tooltip: {
       callbacks: {
         label: function (context) {
+          console.log(context);
           return `$${context.formattedValue}`;
         },
       },
+    },
+    legend: {
+      position: "top",
+      align: "start",
     },
   },
 };
@@ -46,6 +57,7 @@ const options = {
 
 <template>
   <Pie
+    class="w-full"
     v-if="Object.keys(props.data).length"
     :data="dataRef"
     :options="options"

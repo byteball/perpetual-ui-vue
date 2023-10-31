@@ -98,7 +98,6 @@ const setTab = (tabName) => {
 };
 
 async function prepareDataForPie() {
-  const priceInUSDBySymbol = {};
   const pm = preparedMeta.value;
   const { asset: asset0, name: asset0Name } = pm.asset0SymbolAndDecimals;
   const reservePriceAa = pm.rawMeta.reserve_price_aa;
@@ -118,16 +117,24 @@ async function prepareDataForPie() {
   }
 
   const r = await getPriceByAssets(perpetualAA.value, assetList);
+  let asset0Price = 0;
+  let ps = [];
   for (let asset in r) {
     const symbol = symbolByAsset[asset];
     const amount = amountByAsset[asset];
     const price = r[asset];
 
-    const priceInUSD = amount * price * reservePrice;
-    priceInUSDBySymbol[symbol] = +priceInUSD.toFixed(2);
+    let priceInUSD = amount * price * reservePrice;
+    priceInUSD = +priceInUSD.toFixed(2);
+    if (asset === asset0) {
+      asset0Price = priceInUSD;
+    } else {
+      ps.push({ price: priceInUSD, symbol });
+    }
   }
+  ps.sort((a, b) => b.price - a.price);
 
-  return priceInUSDBySymbol;
+  return [{ price: asset0Price, symbol: asset0Name }, ...ps];
 }
 
 async function init() {
