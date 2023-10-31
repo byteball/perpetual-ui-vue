@@ -188,7 +188,7 @@ const showManageStakeModal = (poolAA) => {
         <div v-if="!poolsInited" class="text-center">
           <Loading />
         </div>
-        <div v-else>
+        <div v-else class="overflow-auto">
           <div v-if="!poolList.length" class="text-center">
             While it's empty here
           </div>
