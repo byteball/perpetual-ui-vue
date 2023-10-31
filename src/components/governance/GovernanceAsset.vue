@@ -31,18 +31,18 @@ defineProps(["perpetualAaMeta"]);
         leave-to-class="transform scale-95 opacity-0"
       >
         <DisclosurePanel class="text-slate-300 pb-2 pl-2">
-          <div class="mt-2 inline-flex items-center">
-            Reserve price<TooltipComponent
-              field-name="reserve_price"
-              class="ml-1"
-            />:
+          <div class="mt-2">
+            <span class="inline-flex items-center">
+              Reserve price<TooltipComponent
+                field-name="reserve_price"
+              /> </span
+            >:
             <a
               :href="fullExplorerUrlForAddress + perpetualAaMeta.reservePriceAA"
               target="_blank"
-              class="link text-sky-500 link-hover font-light text-sm ml-1"
+              class="link text-sky-500 link-hover font-light text-sm"
               >{{ perpetualAaMeta.reservePriceAA }}</a
-            >&nbsp;
-            <span class="inline-flex text-sm">
+            >&nbsp;<span class="inline-flex text-sm">
               (${{ perpetualAaMeta.reservePriceValue }}&nbsp;
               <TooltipComponent field-name="reserve_price_value" />)
             </span>
