@@ -1,5 +1,5 @@
 <script setup>
-import { onUnmounted, ref, watch } from "vue";
+import { nextTick, onUnmounted, ref, watch } from "vue";
 import LoadingIcon from "@/components/icons/LoadingIcon.vue";
 import { getAssetMetadataByArray, getDefinition } from "@/services/DAGApi";
 import emitter from "@/services/emitter";
@@ -23,6 +23,9 @@ const yErrorMessage = ref("");
 
 const watchAA = ref("");
 const awaiting = ref(false);
+const loaded = ref(false);
+const oracleXLoaded = ref(false);
+const oracleYLoaded = ref(false);
 
 function handleDefinition(payload) {
   if (payload.address === watchAA.value) {
@@ -42,14 +45,7 @@ emitter.on(
   handleDefinitionSaved
 );
 
-async function openWallet() {
-  if (
-    !Object.keys(xOracleResult.value).length ||
-    !Object.keys(yOracleResult.value).length
-  ) {
-    return;
-  }
-
+async function checkDefinitionAndReturnParamsIfNotExists() {
   const { oracleAddress: xOracleAddress, dataFeed: xDataFeed } =
     xOracleResult.value;
   const { oracleAddress: yOracleAddress, dataFeed: yDataFeed } =
@@ -65,8 +61,6 @@ async function openWallet() {
     y_decimals: yDecimals.value,
   };
 
-  console.log("data", data);
-
   const definition = [
     "autonomous agent",
     {
@@ -79,11 +73,28 @@ async function openWallet() {
   const def = await getDefinition(address);
   if (def.definition) {
     emit("setReservePriceAa", address);
+    return {};
+  }
+
+  return {
+    address,
+    definition,
+  };
+}
+
+async function openWallet() {
+  if (
+    !Object.keys(xOracleResult.value).length ||
+    !Object.keys(yOracleResult.value).length
+  ) {
     return;
   }
 
-  watchAA.value = getAddressByDefinition(definition);
-  const link = generateDefinitionLink(definition);
+  const r = await checkDefinitionAndReturnParamsIfNotExists();
+  if (!r.address) return;
+
+  watchAA.value = r.address;
+  const link = generateDefinitionLink(r.definition);
   followLink(link);
 }
 
@@ -106,6 +117,20 @@ watch(
   }
 );
 
+async function checkAndSetLoadedVar() {
+  await nextTick();
+  if (oracleXLoaded.value && oracleYLoaded.value) {
+    if (
+      Object.keys(xOracleResult.value).length &&
+      Object.keys(yOracleResult.value).length
+    ) {
+      await checkDefinitionAndReturnParamsIfNotExists();
+    }
+
+    loaded.value = true;
+  }
+}
+
 function setXEmptyData() {
   xOracleResult.value = {};
   xErrorMessage.value = "";
@@ -125,23 +150,29 @@ function setYError(error) {
 }
 function xOracleDataUpdated(result) {
   setXEmptyData();
+  oracleXLoaded.value = true;
   if (result.error) {
+    checkAndSetLoadedVar();
     return setXError(result.error);
   }
 
   if (result.oracleAddress) {
     xOracleResult.value = result;
   }
+  checkAndSetLoadedVar();
 }
 function yOracleDataUpdated(result) {
   setYEmptyData();
+  oracleYLoaded.value = true;
   if (result.error) {
+    checkAndSetLoadedVar();
     return setYError(result.error);
   }
 
   if (result.oracleAddress) {
     yOracleResult.value = result;
   }
+  checkAndSetLoadedVar();
 }
 
 function goBack() {
@@ -171,8 +202,15 @@ onUnmounted(() => {
       the next step<LoadingIcon />
     </div>
   </div>
-  <div v-else>
-    <div>Reserve asset: {{ reserveAssetSymbol }}</div>
+  <div v-if="!loaded && isLoaded" class="text-center">
+    <LoadingIcon />
+  </div>
+  <div v-if="isLoaded" v-show="loaded && !awaiting">
+    <div>
+      Price AA for
+      <span class="font-bold">{{ reserveAssetSymbol }}</span> doesn't exist yet,
+      please create it below:
+    </div>
     <div class="divider"></div>
     <div>
       <div class="mb-2">

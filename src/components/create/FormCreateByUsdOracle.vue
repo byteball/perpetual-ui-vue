@@ -1,5 +1,5 @@
 <script setup>
-import { onUnmounted, ref } from "vue";
+import { nextTick, onUnmounted, ref } from "vue";
 import { ADDRESSES } from "@/config";
 import { followLink, generateDefinitionLink } from "@/utils/generateLink";
 import { getAddressByDefinition } from "@/utils/addressUtils";
@@ -17,6 +17,7 @@ const errorMessage = ref("");
 
 const watchAA = ref("");
 const awaiting = ref(false);
+const loaded = ref(false);
 
 function handleDefinition(payload) {
   if (payload.address === watchAA.value) {
@@ -36,8 +37,7 @@ emitter.on(
   handleDefinitionSaved
 );
 
-async function openWallet() {
-  if (!Object.keys(oracleResult.value).length) return;
+async function checkDefinitionAndReturnParamsIfNotExists() {
   const { oracleAddress, dataFeed, symbolMetadata } = oracleResult.value;
   const data = {
     oracle: oracleAddress,
@@ -57,12 +57,33 @@ async function openWallet() {
   const def = await getDefinition(address);
   if (def.definition) {
     emit("setReservePriceAa", address);
-    return;
+    return {};
   }
 
-  watchAA.value = address;
-  const link = generateDefinitionLink(definition);
+  return {
+    address,
+    definition,
+  };
+}
+
+async function openWallet() {
+  if (!Object.keys(oracleResult.value).length) return;
+
+  const r = await checkDefinitionAndReturnParamsIfNotExists();
+  if (!r.address) return;
+
+  watchAA.value = r.address;
+  const link = generateDefinitionLink(r.definition);
   followLink(link);
+}
+
+async function checkAndSetLoadedVar() {
+  await nextTick();
+  if (Object.keys(oracleResult.value).length) {
+    await checkDefinitionAndReturnParamsIfNotExists();
+  }
+
+  loaded.value = true;
 }
 
 function setEmptyData() {
@@ -77,12 +98,14 @@ function setError(error) {
 function oracleDataUpdated(result) {
   setEmptyData();
   if (result.error) {
+    checkAndSetLoadedVar();
     return setError(result.error);
   }
 
   if (result.oracleAddress) {
     oracleResult.value = result;
   }
+  checkAndSetLoadedVar();
 }
 
 onUnmounted(() => {
@@ -104,8 +127,15 @@ onUnmounted(() => {
       the next step<LoadingIcon />
     </div>
   </div>
-  <div v-else>
-    <div class="mb-6">Well, now we need to select oracle and its feed name</div>
+  <div v-if="!loaded" class="text-center">
+    <LoadingIcon />
+  </div>
+  <div v-show="loaded && !awaiting">
+    <div class="mb-6">
+      Price AA for
+      <span class="font-bold">{{ reserveAssetSymbol }}</span> doesn't exist yet,
+      please create it below:
+    </div>
     <OracleComponent
       @data-updated="oracleDataUpdated"
       :symbol="reserveAssetSymbol"

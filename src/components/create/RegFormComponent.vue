@@ -13,7 +13,7 @@ import { generateLink } from "@/utils/generateLink";
 import Client from "@/services/Obyte";
 import { getAssetMetadata, getAssetMetadataByArray } from "@/services/DAGApi";
 import { getAddressByBaseAA } from "@/utils/addressUtils";
-import { ADDRESSES } from "@/config";
+import { ADDRESSES, fullExplorerUrlForAddress } from "@/config";
 import BackButtonComponent from "@/components/BackButtonComponent.vue";
 
 const props = defineProps([
@@ -170,8 +170,17 @@ watch(
       ><BackButtonComponent @click="$emit('goBack')"
     /></Teleport>
     <div class="text-xl">{{ reserveAssetSymbol }}</div>
-    <div class="text-sm mt-2">
-      {{ reservePriceAA }}
+    <div class="mt-2 label-text flex items-center">
+      Reserve price aa
+      <TooltipComponent class="ml-1" field-name="reserve_price_aa" />
+    </div>
+    <div class="mt-0.5">
+      <a
+        class="link text-sky-500 link-hover"
+        target="_blank"
+        :href="fullExplorerUrlForAddress + reservePriceAA"
+        >{{ reservePriceAA }}</a
+      >
     </div>
 
     <div class="form-control mt-6">

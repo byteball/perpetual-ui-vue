@@ -87,6 +87,8 @@ async function setDefaultDataFeed() {
 
     if (r) {
       dataFeed.value = r;
+    } else {
+      return emit("dataUpdated", {});
     }
   }
 }

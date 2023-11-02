@@ -12,10 +12,12 @@ export const propertyTips = {
   auction_price_halving_period: "Auction price halving period",
   token_share_threshold: "Token share threshold",
   min_s0_share: "min s0 share",
-  price_aa: "price aa",
+  price_aa: "An autonomous agent used to obtain the target asset price",
   drift_rate: "drift rate",
   reserve_price_value: "Current price of the reserve asset",
   reserve_price: "Reserve price",
+  reserve_price_aa:
+    "An autonomous agent used to obtain the target price of a reserve asset",
   staking_aa: "Staking aa",
   new_vp: "...",
 };
