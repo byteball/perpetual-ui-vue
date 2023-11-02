@@ -15,7 +15,8 @@ defineProps([
 <template>
   <div class="mt-2">
     <span class="inline-flex items-center mr-1"
-      >{{ title }} <TooltipComponent :field-name="name" class="ml-1" />:
+      >{{ title }}
+      <TooltipComponent v-if="name" :field-name="name" class="ml-1" />:
     </span>
     <a
       v-if="valueLink"

@@ -38,7 +38,7 @@ onMounted(async () => {
     </div>
   </div>
   <div class="font-medium text-sm mb-1">
-    Currency:
+    Currency being tracked:
     <div class="font-light text-sm inline-block">
       {{ selectedOracleData.name }}
     </div>

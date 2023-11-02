@@ -31,6 +31,10 @@ defineProps(["perpetualAaMeta"]);
         leave-to-class="transform scale-95 opacity-0"
       >
         <DisclosurePanel class="text-slate-300 pb-2 pl-2">
+          <GovernanceAssetField
+            title="Reserve asset"
+            :value="perpetualAaMeta.reserveAsset.name"
+          />
           <div class="mt-2">
             <span class="inline-flex items-center">
               Reserve price<TooltipComponent

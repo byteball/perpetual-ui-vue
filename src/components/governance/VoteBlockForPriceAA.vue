@@ -92,7 +92,9 @@ onMounted(async () => {
       <span v-else>{{ currentValue }}</span>
     </div>
     <div v-if="name === 'price_aa'">
-      <div class="mt-1">Currency: {{ selectedOracleData.name }}</div>
+      <div class="mt-1">
+        Currency being tracked: {{ selectedOracleData.name }}
+      </div>
       <div class="mt-1">Target price: {{ selectedOracleData.value }}</div>
       <div class="mt-1">Price ${{ price }}</div>
     </div>

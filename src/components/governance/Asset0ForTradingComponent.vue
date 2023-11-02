@@ -32,10 +32,6 @@ onMounted(async () => {
         </div>
       </div>
       <div class="font-medium text-sm mb-2">
-        Status:
-        <span class="font-light text-sm"> trading </span>
-      </div>
-      <div class="font-medium text-sm mb-2">
         Price:
         <span class="font-light text-sm"> ${{ price }} </span>
       </div>

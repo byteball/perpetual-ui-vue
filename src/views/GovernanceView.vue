@@ -78,7 +78,10 @@ watch(meta, init, { deep: true });
 
     <div v-for="aa in sortedAasWithMeta" :key="aa[0]">
       <div v-if="aa[1].asset0SymbolAndDecimals">
-        <div class="card bg-base-200 shadow-xl mb-4">
+        <div
+          class="card bg-base-200 shadow-xl mb-4"
+          style="transform: translateZ(0)"
+        >
           <div class="card-body p-6 sm:p-8">
             <div>
               <div class="block sm:flex justify-between items-center">

@@ -56,3 +56,7 @@ body {
 .autoComplete_wrapper {
     width: 100%;
 }
+
+.card {
+    transform: translateZ(0);
+}
