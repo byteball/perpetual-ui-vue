@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useRoute, useRouter } from "vue-router";
 import dayjs from "dayjs";
@@ -20,7 +20,6 @@ import { getParam, getPreparedMeta } from "@/utils/governanceUtils";
 import { useAddressStore } from "@/stores/addressStore";
 import ClaimCard from "@/components/presale/ClaimCard.vue";
 import Loading from "@/components/icons/LoadingIcon.vue";
-import LabelForPoolsComponent from "@/components/LabelForPoolsComponent.vue";
 import GovernanceAssetField from "@/components/governance/GovernanceAssetField.vue";
 import { getTargetPriceByPresaleAsset } from "@/services/PerpAPI";
 
@@ -34,6 +33,13 @@ const addressStore = useAddressStore();
 const { aas, meta } = storeToRefs(store);
 const { address } = storeToRefs(addressStore);
 
+const presaleList = ref([]);
+const preparedDataByAA = ref({});
+const currentPresaleIndex = ref(0);
+const currentPresaleData = computed(() => {
+  const i = currentPresaleIndex.value;
+  return presaleList.value[i] || {};
+});
 const selectedReserveAsset = ref("");
 const selectedPresaleAsset = ref("");
 const selectedAA = ref("");
@@ -56,11 +62,7 @@ const assetsMetadata = ref({});
 const reserveAssets = ref({});
 const aAsPairs = ref({});
 const isLoaded = ref(false);
-const modalForPresale = ref();
 const toastMessage = ref("");
-
-const presaleList = ref([]);
-const preparedDataByAA = ref({});
 
 const setTab = (tabName) => {
   activeTab.value = tabName;
@@ -186,6 +188,8 @@ const preparePresaleList = async () => {
       );
       aAsPairs.value[`${reserveAsset}_${presaleAsset}`] = aa;
     }
+
+    await fillPresaleData();
   }
 
   for (const aa of aas.value) {
@@ -236,7 +240,10 @@ const updateAddressPresaleAmount = () => {
   }
 };
 
-const fillPresaleData = async (presale) => {
+const fillPresaleData = async () => {
+  const presale = currentPresaleData.value;
+  if (!Object.keys(presale).length) return;
+
   selectedPresaleAsset.value = presale.presaleAsset;
   selectedReserveAsset.value = presale.reserveAsset;
   selectedAA.value = presale.aa;
@@ -272,24 +279,27 @@ const fillPresaleData = async (presale) => {
   }
 };
 
-const choosePresale = (presale) => {
-  fillPresaleData(presale);
-
-  modalForPresale.value.checked = false;
-};
-
 onMounted(async () => {
   await preparePresaleList();
 });
 
 watch(meta, preparePresaleList);
 
+watch(
+  currentPresaleIndex,
+  () => {
+    fillPresaleData();
+  },
+  {
+    immediate: true,
+  }
+);
+
 const calculateReceiveAmount = () => {
   const reserveDecimals =
     10 ** assetsMetadata.value[selectedReserveAsset.value].decimals;
   const targetPrice = selectedTargetPrice.value;
 
-  console.log(reserveDecimals, amount.value, targetPrice);
   const rawAmount = (Number(amount.value) * reserveDecimals) / targetPrice;
 
   receiveAmount.value =
@@ -370,13 +380,22 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
         <div v-else>
           <div v-if="presaleList.length">
             <div class="form-control">
-              <LabelForPoolsComponent for="presaleModal">
-                {{
-                  selectedAA
-                    ? `${assetsMetadata[selectedPresaleAsset].name} in pool \n ${assetsMetadata[selectedAsset0].name} / ${assetsMetadata[selectedReserveAsset].name}`
-                    : `Please select presale`
-                }}
-              </LabelForPoolsComponent>
+              <select
+                v-model="currentPresaleIndex"
+                class="select select-bordered w-full bg-base-200 border-gray-600"
+              >
+                <option
+                  v-for="(presale, index) in presaleList"
+                  :key="`${presale.presaleAsset}_${presale.reserveAsset}_${presale.asset0}`"
+                  :value="index"
+                >
+                  {{
+                    `${assetsMetadata[presale.presaleAsset].name} in pool ${
+                      assetsMetadata[presale.asset0].name
+                    } / ${assetsMetadata[presale.reserveAsset].name}`
+                  }}
+                </option>
+              </select>
             </div>
           </div>
           <div v-else>
@@ -561,27 +580,4 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
       </div>
     </div>
   </div>
-
-  <input
-    ref="modalForPresale"
-    type="checkbox"
-    id="presaleModal"
-    class="modal-toggle"
-  />
-  <label for="presaleModal" class="modal cursor-pointer">
-    <label class="modal-box relative" for="">
-      <div
-        v-for="presale in presaleList"
-        :key="`${presale.presaleAsset}_${presale.reserveAsset}_${presale.asset0}`"
-        class="my-2 mx-4 cursor-pointer hover:text-gray-600"
-        @click="choosePresale(presale)"
-      >
-        {{
-          `${assetsMetadata[presale.presaleAsset].name} in pool ${
-            assetsMetadata[presale.asset0].name
-          } / ${assetsMetadata[presale.reserveAsset].name}`
-        }}
-      </div>
-    </label>
-  </label>
 </template>
