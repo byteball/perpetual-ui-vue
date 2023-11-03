@@ -15,6 +15,7 @@ const { address } = storeToRefs(addressStore);
 
 const aasWithMeta = ref({});
 const aasVolumes = ref({});
+const isLoaded = ref(false);
 
 async function init() {
   if (!aas.value.length) return;
@@ -34,6 +35,7 @@ async function init() {
   aasWithMeta.value = m;
 
   await getAAsVolumes();
+  isLoaded.value = true;
 }
 
 const getAAsVolumes = async () => {
@@ -52,6 +54,7 @@ const getAAsVolumes = async () => {
 };
 
 const sortedAasWithMeta = computed(() => {
+  if (!isLoaded.value) return [];
   return Object.entries(aasWithMeta.value).sort((a, b) => {
     const aPoolVolume = aasVolumes.value[a[0]];
     const bPoolVolume = aasVolumes.value[b[0]];
@@ -65,7 +68,7 @@ watch(meta, init, { deep: true });
 </script>
 <template>
   <div
-    v-if="sortedAasWithMeta.length"
+    v-if="isLoaded && sortedAasWithMeta.length"
     class="container w-full sm:w-[768px] m-auto mt-2 mb-36 p-6 sm:p-8"
   >
     <div class="p-2 mb-6">
@@ -75,7 +78,6 @@ watch(meta, init, { deep: true });
         share.
       </p>
     </div>
-
     <div v-for="aa in sortedAasWithMeta" :key="aa[0]">
       <div v-if="aa[1].asset0SymbolAndDecimals">
         <div
