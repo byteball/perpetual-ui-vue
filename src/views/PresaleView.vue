@@ -3,9 +3,6 @@ import { computed, onMounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useRoute, useRouter } from "vue-router";
 import dayjs from "dayjs";
-import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/vue";
-import { ChevronRightIcon } from "@heroicons/vue/20/solid";
-import { fullExplorerUrlForAddress } from "@/config";
 import duration from "dayjs/plugin/duration";
 import { generateLink } from "@/utils/generateLink";
 import { useAaInfoStore } from "@/stores/aaInfo";
@@ -20,8 +17,8 @@ import { getParam, getPreparedMeta } from "@/utils/governanceUtils";
 import { useAddressStore } from "@/stores/addressStore";
 import ClaimCard from "@/components/presale/ClaimCard.vue";
 import Loading from "@/components/icons/LoadingIcon.vue";
-import GovernanceAssetField from "@/components/governance/GovernanceAssetField.vue";
 import { getTargetPriceByPresaleAsset } from "@/services/PerpAPI";
+import SpoilerWithPerpMetaComponent from "@/components/SpoilerWithPerpMetaComponent.vue";
 
 dayjs.extend(duration);
 
@@ -355,7 +352,7 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
 }
 </style>
 <template>
-  <div class="container w-full sm:w-[512px] m-auto mt-2 mb-36 p-6 sm:p-8">
+  <div class="container w-full sm:w-[640px] m-auto mt-2 mb-36 p-6 sm:p-8">
     <div v-if="toastMessage" class="toast toast-top toast-end">
       <div class="alert alert-error">
         <span>{{ toastMessage }}</span>
@@ -404,115 +401,11 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
           <div v-if="selectedAA">
             <div>
               <div class="mt-2">
-                <Disclosure v-slot="{ open }">
-                  <DisclosureButton
-                    class="py-2 text-gray-500 flex items-center"
-                  >
-                    <span>Show pool details</span>
-                    <ChevronRightIcon
-                      :class="open && 'rotate-90 transform'"
-                      class="w-5"
-                    />
-                  </DisclosureButton>
-                  <transition
-                    enter-active-class="transition duration-100 ease-out"
-                    enter-from-class="transform scale-95 opacity-0"
-                    enter-to-class="transform scale-100 opacity-100"
-                    leave-active-class="transition duration-75 ease-out"
-                    leave-from-class="transform scale-100 opacity-100"
-                    leave-to-class="transform scale-95 opacity-0"
-                  >
-                    <DisclosurePanel class="text-slate-300 pb-2 pl-2">
-                      <GovernanceAssetField
-                        title="Swap fee"
-                        name="swap_fee"
-                        :value="`${
-                          getParam(
-                            'swap_fee',
-                            preparedDataByAA[selectedAA].rawMeta
-                          ) * 100
-                        }%`"
-                      />
-                      <GovernanceAssetField
-                        class="text-xs sm:text-sm"
-                        title="Staking aa"
-                        name="staking_aa"
-                        :value="preparedDataByAA[selectedAA].rawMeta.staking_aa"
-                        :value-link="
-                          fullExplorerUrlForAddress +
-                          preparedDataByAA[selectedAA].rawMeta.staking_aa
-                        "
-                      />
-                      <GovernanceAssetField
-                        title="Arb profit tax"
-                        name="arb_profit_tax"
-                        :value="`${getParam(
-                          'arb_profit_tax',
-                          preparedDataByAA[selectedAA].rawMeta
-                        )}%`"
-                      />
-                      <GovernanceAssetField
-                        title="Adjustment period"
-                        name="adjustment_period"
-                        :value="`${
-                          getParam(
-                            'adjustment_period',
-                            preparedDataByAA[selectedAA].rawMeta
-                          ) /
-                          24 /
-                          3600
-                        } days`"
-                      />
-                      <GovernanceAssetField
-                        title="Presale period"
-                        name="presale_period"
-                        :value="`${
-                          getParam(
-                            'presale_period',
-                            preparedDataByAA[selectedAA].rawMeta
-                          ) /
-                          24 /
-                          3600
-                        } days`"
-                      />
-                      <GovernanceAssetField
-                        title="Auction price halving period"
-                        name="auction_price_halving_period"
-                        :value="`${
-                          getParam(
-                            'auction_price_halving_period',
-                            preparedDataByAA[selectedAA].rawMeta
-                          ) /
-                          24 /
-                          3600
-                        } days
-                        `"
-                      />
-                      <GovernanceAssetField
-                        title="Token share threshold"
-                        name="token_share_threshold"
-                        :value="`${
-                          getParam(
-                            'token_share_threshold',
-                            preparedDataByAA[selectedAA].rawMeta
-                          ) * 100
-                        }%`"
-                      />
-                      <GovernanceAssetField
-                        title="Min s0 share"
-                        name="min_s0_share"
-                        :value="`${
-                          getParam(
-                            'min_s0_share',
-                            preparedDataByAA[selectedAA].rawMeta
-                          ) * 100
-                        }%`"
-                      />
-                    </DisclosurePanel>
-                  </transition>
-                </Disclosure>
+                <SpoilerWithPerpMetaComponent
+                  :prepared-meta="preparedDataByAA[selectedAA]"
+                />
                 <div class="mt-0.5">
-                  Currency: {{ selectedOracleData.name }}
+                  Currency being tracked: {{ selectedOracleData.name }}
                 </div>
                 <div class="mt-0.5">
                   Target value: {{ selectedOracleData.value }}
