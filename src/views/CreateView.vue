@@ -23,7 +23,7 @@ const reservePriceAA = ref("");
 async function getSrcForAutoComplete(query) {
   const assets = [...Object.keys(assetsWithSymbols.oswapAssets), "GBYTE"];
   const asset = await getAssetBySymbol(query);
-  if (asset) {
+  if (asset && asset !== "base") {
     assets.push(query);
     assetsWithSymbols.otherAssets[query] = asset;
   }
