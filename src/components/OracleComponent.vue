@@ -141,6 +141,6 @@ watch(
 }
 
 .autoComplete_wrapper > input::placeholder {
-  color: #a6adba !important;
+  color: #54585f !important;
 }
 </style>
