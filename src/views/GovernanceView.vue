@@ -5,8 +5,8 @@ import { useAaInfoStore } from "@/stores/aaInfo";
 import { useAddressStore } from "@/stores/addressStore";
 import { getPreparedMeta } from "@/utils/governanceUtils";
 import GovernanceAsset from "@/components/governance/GovernanceAsset.vue";
-import Loading from "@/components/icons/LoadingIcon.vue";
 import { executeAAGetter } from "@/services/DAGApi";
+import LoadingIcon from "@/components/icons/LoadingIcon.vue";
 
 const store = useAaInfoStore();
 const addressStore = useAddressStore();
@@ -67,10 +67,7 @@ onMounted(init);
 watch(meta, init, { deep: true });
 </script>
 <template>
-  <div
-    v-if="isLoaded && sortedAasWithMeta.length"
-    class="container w-full sm:w-[768px] m-auto mt-2 mb-36 p-6 sm:p-8"
-  >
+  <div class="container w-full sm:w-[768px] m-auto mt-2 mb-36 p-6 sm:p-8">
     <div class="p-2 mb-6">
       <div class="text-lg font-semibold leading-7">Governance</div>
       <p class="mt-1 leading-6">
@@ -78,42 +75,49 @@ watch(meta, init, { deep: true });
         share.
       </p>
     </div>
-    <div v-for="aa in sortedAasWithMeta" :key="aa[0]">
-      <div v-if="aa[1].asset0SymbolAndDecimals">
-        <div
-          class="card bg-base-200 shadow-xl mb-4"
-          style="transform: translateZ(0)"
-        >
-          <div class="card-body p-6 sm:p-8">
-            <div>
-              <div class="block sm:flex justify-between items-center">
-                <div class="text-lg font-bold">
-                  <RouterLink :to="`/governance/management/${aa[0]}`">
-                    {{ aa[1].reserveAsset.name }}/{{
-                      aa[1].asset0SymbolAndDecimals.name
-                    }}
-                  </RouterLink>
+    <div v-if="!isLoaded" class="card bg-base-200 shadow-xl mb-4">
+      <div class="card-body p-6 sm:p-8 items-center"><LoadingIcon /></div>
+    </div>
+    <div
+      v-else-if="isLoaded && !sortedAasWithMeta.length"
+      class="card bg-base-200 shadow-xl mb-4"
+    >
+      <div class="card-body p-6 sm:p-8 items-center">
+        Governance AA has not yet been created
+      </div>
+    </div>
+    <template v-else>
+      <div v-for="aa in sortedAasWithMeta" :key="aa[0]">
+        <div v-if="aa[1].asset0SymbolAndDecimals">
+          <div
+            class="card bg-base-200 shadow-xl mb-4"
+            style="transform: translateZ(0)"
+          >
+            <div class="card-body p-6 sm:p-8">
+              <div>
+                <div class="block sm:flex justify-between items-center">
+                  <div class="text-lg font-bold">
+                    <RouterLink :to="`/governance/management/${aa[0]}`">
+                      {{ aa[1].reserveAsset.name }}/{{
+                        aa[1].asset0SymbolAndDecimals.name
+                      }}
+                    </RouterLink>
+                  </div>
+                  <div class="mt-3 mb-6 sm:my-0">
+                    <RouterLink
+                      class="btn btn-sm btn-primary"
+                      :to="`/governance/management/${aa[0]}`"
+                    >
+                      Manage AA
+                    </RouterLink>
+                  </div>
                 </div>
-                <div class="mt-3 mb-6 sm:my-0">
-                  <RouterLink
-                    class="btn btn-sm btn-primary"
-                    :to="`/governance/management/${aa[0]}`"
-                  >
-                    Manage AA
-                  </RouterLink>
-                </div>
+                <GovernanceAsset :perpetual-aa-meta="aa[1]" />
               </div>
-              <GovernanceAsset :perpetual-aa-meta="aa[1]" />
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
-  <div
-    v-else
-    class="container w-full sm:w-[512px] m-auto mt-40 mb-36 p-6 sm:p-8 text-center"
-  >
-    <Loading />
+    </template>
   </div>
 </template>
