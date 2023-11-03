@@ -11,13 +11,13 @@ export const propertyTips = {
   presale_period: "Presale duration in days",
   auction_price_halving_period: "Auction price halving period",
   token_share_threshold: "Token share threshold",
-  min_s0_share: "min s0 share",
-  price_aa: "An autonomous agent used to obtain the target asset price",
+  min_s0_share: "Minimum share of governance asset",
+  price_aa: "An autonomous agent used to obtain the target asset price", // используется в trading блоке в Governance/manage(GM)
   drift_rate: "drift rate",
-  reserve_price_value: "Current price of the reserve asset",
-  reserve_price: "Reserve price",
-  reserve_price_aa:
-    "An autonomous agent used to obtain the target price of a reserve asset",
+  reserve_price_value: "Current price of the reserve asset", // то что возвращает reserve asset aa в долларах:($11.164200000000001 (i))
+  reserve_price:
+    "An autonomous agent used to obtain the target price of a reserve asset", // example: Reserve price(i): Z4OWP7ILJFZPSYAOBPLOH4HMIKB4POHX
   staking_aa: "Staking aa",
+  current_vp: "...",
   new_vp: "...",
 };

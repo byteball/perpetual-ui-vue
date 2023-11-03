@@ -172,7 +172,7 @@ watch(
     <div class="text-xl">{{ reserveAssetSymbol }}</div>
     <div class="mt-2 label-text flex items-center">
       Reserve price aa
-      <TooltipComponent class="ml-1" field-name="reserve_price_aa" />
+      <TooltipComponent class="ml-1" field-name="reserve_price" />
     </div>
     <div class="mt-0.5">
       <a
