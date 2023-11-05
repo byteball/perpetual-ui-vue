@@ -61,7 +61,7 @@ watch(activePresaleIndex, () => {
               psc_option_not_active: !active,
               psc_option_selected: selected,
             }"
-            class="py-2 px-4 cursor-pointer"
+            class="py-3 px-4 cursor-pointer"
           >
             {{
               `${assetsMetadata[presale.presaleAsset].name} in pool ${
@@ -93,7 +93,7 @@ watch(activePresaleIndex, () => {
   background-color: #62748c !important;
 }
 
-.psc_options_not_active {
+.psc_option_not_active {
   background-color: #2a303c;
 }
 </style>
