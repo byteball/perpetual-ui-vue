@@ -19,6 +19,7 @@ import ClaimCard from "@/components/presale/ClaimCard.vue";
 import Loading from "@/components/icons/LoadingIcon.vue";
 import { getTargetPriceByPresaleAsset } from "@/services/PerpAPI";
 import SpoilerWithPerpMetaComponent from "@/components/SpoilerWithPerpMetaComponent.vue";
+import PresaleSelectComponent from "@/components/presale/PresaleSelectComponent.vue";
 
 dayjs.extend(duration);
 
@@ -32,7 +33,7 @@ const { address } = storeToRefs(addressStore);
 
 const presaleList = ref([]);
 const preparedDataByAA = ref({});
-const currentPresaleIndex = ref(0);
+const currentPresaleIndex = ref(-1);
 const currentPresaleData = computed(() => {
   const i = currentPresaleIndex.value;
   return presaleList.value[i] || {};
@@ -198,26 +199,28 @@ const preparePresaleList = async () => {
     filterReserveAssetsWithoutPresale();
   }
 
-  isLoaded.value = true;
+  sortPresaleList();
 
   if (route.params.presale) {
     if (!presaleList.value.length) {
       return;
     }
 
-    const routePresale = presaleList.value.find(
+    const routePresaleIndex = presaleList.value.findIndex(
       (presale) => presale.presaleAsset === route.params.presale
     );
 
-    if (!routePresale) {
+    if (routePresaleIndex === -1) {
       showToastMessage("Presale not found, please choose an existing one");
       return;
     }
 
-    fillPresaleData(routePresale);
+    currentPresaleIndex.value = routePresaleIndex;
+  } else {
+    currentPresaleIndex.value = 0;
   }
 
-  sortPresaleList();
+  isLoaded.value = true;
 };
 
 const updateAddressPresaleAmount = () => {
@@ -377,22 +380,16 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
         <div v-else>
           <div v-if="presaleList.length">
             <div class="form-control">
-              <select
+              <PresaleSelectComponent
                 v-model="currentPresaleIndex"
-                class="select select-bordered w-full bg-base-200 border-gray-600"
-              >
-                <option
-                  v-for="(presale, index) in presaleList"
-                  :key="`${presale.presaleAsset}_${presale.reserveAsset}_${presale.asset0}`"
-                  :value="index"
-                >
-                  {{
-                    `${assetsMetadata[presale.presaleAsset].name} in pool ${
-                      assetsMetadata[presale.asset0].name
-                    } / ${assetsMetadata[presale.reserveAsset].name}`
-                  }}
-                </option>
-              </select>
+                :assets-metadata="assetsMetadata"
+                :model-value="currentPresaleIndex"
+                :presale-list="presaleList"
+                :selected-aa="selectedAA"
+                :selected-presale-asset="selectedPresaleAsset"
+                :selected-asset0="selectedAsset0"
+                :selected-reserve-asset="selectedReserveAsset"
+              />
             </div>
           </div>
           <div v-else>
