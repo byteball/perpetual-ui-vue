@@ -386,6 +386,7 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
         v-for="asset in assets.assetList"
         :key="asset"
         class="my-2 mx-4 cursor-pointer hover:text-gray-600"
+        :class="{ 'text-sky-500': asset1 === asset }"
         @click="setAsset1(asset)"
       >
         {{ assets.nameAndDecimalsByAsset[asset].name }}
@@ -404,6 +405,7 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
         v-for="(_key, asset) in pairedAssets"
         :key="asset"
         class="my-2 mx-4 cursor-pointer hover:text-gray-600"
+        :class="{ 'text-sky-500': asset2 === asset }"
         @click="setAsset2(asset)"
       >
         {{ assets.nameAndDecimalsByAsset[asset].name }}
