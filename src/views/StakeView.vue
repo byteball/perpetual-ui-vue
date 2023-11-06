@@ -8,7 +8,6 @@ import Loading from "@/components/icons/LoadingIcon.vue";
 import { getPreparedMeta } from "@/utils/governanceUtils";
 import { Dialog } from "@headlessui/vue";
 import ManageStakeModal from "@/components/stake/ManageStakeModal.vue";
-import LinkIcon from "@/components/icons/LinkIcon.vue";
 import { useRoute, useRouter } from "vue-router";
 
 const route = useRoute();
@@ -203,14 +202,14 @@ const showManageStakeModal = (poolAA) => {
             <tbody>
               <tr v-for="poolAA in poolList" :key="poolAA">
                 <td class="flex items-center">
-                  {{
-                    `${poolReserveNameByAA[poolAA]}/${poolSymbolAndDecimalByAA[poolAA].name}`
-                  }}
                   <RouterLink
-                    class="ml-1 text-sky-500"
                     :to="`/governance/management/${poolAA}`"
+                    class="link link-hover text-sky-500"
+                    title="Open pool in governance"
                   >
-                    <LinkIcon />
+                    {{
+                      `${poolReserveNameByAA[poolAA]}/${poolSymbolAndDecimalByAA[poolAA].name}`
+                    }}
                   </RouterLink>
                 </td>
                 <td>

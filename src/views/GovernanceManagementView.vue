@@ -413,7 +413,10 @@ watch(
               </template>
             </span>
           </div>
-          <div class="mt-4" v-if="Object.keys(dataForPie).length">
+          <div
+            class="mt-4"
+            v-if="preparedMeta.reserve && Object.keys(dataForPie).length"
+          >
             <PieComponent :data="dataForPie" class="!h-[256px]" />
           </div>
         </div>
