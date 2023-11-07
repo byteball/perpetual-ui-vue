@@ -265,7 +265,7 @@ onUnmounted(() => {
         }"
         @click="openWallet"
       >
-        Create reserve price aa
+        Create reserve price AA
       </button>
     </div>
   </div>

@@ -476,7 +476,7 @@ watch(
             @reqVote="reqVote"
           />
           <VoteBlock
-            title="Min s0 share"
+            title="Min governance asset share"
             name="min_s0_share"
             :votes-by-name="votes['min_s0_share']"
             :prepared-meta="preparedMeta"

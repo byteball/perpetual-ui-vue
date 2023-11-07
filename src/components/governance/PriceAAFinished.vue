@@ -78,7 +78,7 @@ onMounted(async () => {
 
       <div v-if="assetMeta.presale">
         <div class="font-medium text-sm mb-1">
-          Price aa:
+          Price AA:
           <div class="font-light text-sm inline-block">
             <a
               :href="fullExplorerUrlForAddress + priceAa"
@@ -203,7 +203,7 @@ onMounted(async () => {
         <div v-if="!assetMeta.presale" class="w-full">
           <div class="divider"></div>
           <VoteBlockForPriceAA
-            title="Price aa"
+            title="Price AA"
             type="address"
             name="price_aa"
             :perp-aa="perpetualAa"

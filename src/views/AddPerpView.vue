@@ -302,7 +302,7 @@ onUnmounted(() => {
             :href="linkForPriceAA"
             @click="goToStep3()"
           >
-            Publish price aa
+            Publish price AA
           </a>
         </div>
       </div>

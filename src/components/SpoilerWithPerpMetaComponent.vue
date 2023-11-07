@@ -47,7 +47,7 @@ defineProps(["preparedMeta"]);
           </span>
         </div>
         <GovernanceAssetField
-          title="Staking aa"
+          title="Staking AA"
           name="staking_aa"
           :value="preparedMeta.rawMeta.staking_aa"
           :value-link="
@@ -91,7 +91,7 @@ defineProps(["preparedMeta"]);
           }%`"
         />
         <GovernanceAssetField
-          title="Min share"
+          title="Min share of the governance asset"
           name="min_s0_share"
           :value="`${getParam('min_s0_share', preparedMeta.rawMeta) * 100}%`"
         />

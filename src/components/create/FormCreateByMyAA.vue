@@ -61,7 +61,7 @@ watch(address, () => {
       target="_blank"
       class="link text-sky-500 link-hover"
       rel="noopener"
-      >Example aa</a
+      >Example AA</a
     >
     &nbsp;
     <a
@@ -82,7 +82,7 @@ watch(address, () => {
       :class="{ '!btn-disabled': !isValidAddr || awaiting }"
       @click="checkGetterInAA"
     >
-      Create reserve price aa
+      Create reserve price AA
     </button>
   </div>
 </template>

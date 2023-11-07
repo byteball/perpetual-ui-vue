@@ -157,7 +157,7 @@ onUnmounted(() => {
         :class="{ '!btn-disabled': oracleResult.value == null }"
         @click="openWallet"
       >
-        Create reserve price aa
+        Create reserve price AA
       </button>
     </div>
   </div>

@@ -171,7 +171,7 @@ watch(
     /></Teleport>
     <div class="text-xl">{{ reserveAssetSymbol }}</div>
     <div class="mt-2 label-text flex items-center">
-      Reserve price aa
+      Reserve price AA
       <TooltipComponent class="ml-1" field-name="reserve_price" />
     </div>
     <div class="mt-0.5">
@@ -246,7 +246,7 @@ watch(
     <div class="form-control">
       <div class="flex items-center">
         <label class="label">
-          <span class="label-text">Min s0 share</span>
+          <span class="label-text">Min governance asset share</span>
         </label>
         <TooltipComponent field-name="min_s0_share"> </TooltipComponent>
       </div>
