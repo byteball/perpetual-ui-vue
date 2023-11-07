@@ -18,8 +18,6 @@ const props = defineProps([
 ]);
 const emit = defineEmits(["update:modelValue"]);
 
-console.log(props.assetsMetadata);
-
 const activePresaleIndex = ref(0);
 
 watch(

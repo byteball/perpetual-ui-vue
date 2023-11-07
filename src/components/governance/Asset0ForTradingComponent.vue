@@ -33,7 +33,7 @@ onMounted(async () => {
       </div>
       <div class="font-medium text-sm mb-2">
         Price:
-        <span class="font-light text-sm"> ${{ price }} </span>
+        <span class="font-light text-sm"> ${{ price.toPrecision(6) }} </span>
       </div>
     </div>
   </div>

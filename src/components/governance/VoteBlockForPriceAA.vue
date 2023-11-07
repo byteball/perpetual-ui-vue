@@ -96,7 +96,7 @@ onMounted(async () => {
         Currency being tracked: {{ selectedOracleData.name }}
       </div>
       <div class="mt-1">Target price: {{ selectedOracleData.value }}</div>
-      <div class="mt-1">Price ${{ price }}</div>
+      <div class="mt-1">Price ${{ price.toPrecision(6) }}</div>
     </div>
     <div class="mt-2">
       <div v-if="votesByName?.length" class="mb-4">
