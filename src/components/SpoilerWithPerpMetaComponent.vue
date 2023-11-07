@@ -12,7 +12,7 @@ defineProps(["preparedMeta"]);
 <template>
   <Disclosure v-slot="{ open }">
     <DisclosureButton class="py-2 text-gray-500 flex items-center">
-      <span>Show pull details</span>
+      <span>Show pool details</span>
       <ChevronRightIcon :class="open && 'rotate-90 transform'" class="w-5" />
     </DisclosureButton>
     <transition
@@ -42,7 +42,7 @@ defineProps(["preparedMeta"]);
             class="link text-sky-500 link-hover font-light text-sm"
             >{{ preparedMeta.reservePriceAA }}</a
           >&nbsp;<span class="inline-flex text-sm">
-            (${{ preparedMeta.reservePriceValue }}&nbsp;
+            (${{ preparedMeta.reservePriceValue.toPrecision(6) }}&nbsp;
             <TooltipComponent field-name="reserve_price_value" />)
           </span>
         </div>

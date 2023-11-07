@@ -15,6 +15,8 @@ import { getExchangeResultByState } from "@/utils/getExchangeResultByState";
 import NumberInput from "@/components/inputs/NumberInput.vue";
 import Loading from "@/components/icons/LoadingIcon.vue";
 import TextInput from "@/components/inputs/TextInput.vue";
+import { getPriceByData, getReservePrice } from "@/services/PerpAPI";
+import FeeViewComponent from "@/components/FeeViewComponent.vue";
 
 const store = useAaInfoStore();
 const { aas, meta, status } = storeToRefs(store);
@@ -44,8 +46,9 @@ const balanceByAsset = computed(() => {
 });
 
 const link = ref("");
-const percent = ref(0);
+const feeInPercent = ref(0);
 const newPrice = ref(0);
+const diff = ref("");
 
 const resultError = ref("");
 
@@ -215,7 +218,7 @@ function calcDataForSell() {
   };
 }
 
-function calcAndSetDataForMetaAndLink() {
+async function calcAndSetDataForMetaAndLink() {
   if (!asset1.value || !asset2.value) return;
 
   resultError.value = "";
@@ -233,27 +236,47 @@ function calcAndSetDataForMetaAndLink() {
   }
 
   let data;
+  let assetForPrice = "";
+  let assetAmount = 0;
   if (metaByActiveAA.value.reserve_asset === asset1.value) {
+    assetForPrice = asset2.value;
     data = calcDataForBuy();
-    asset2Amount.value =
+    assetAmount =
       Number(data.result.delta_s) /
       10 ** assets.value.nameAndDecimalsByAsset[asset2.value].decimals;
   } else {
+    assetForPrice = asset1.value;
     data = calcDataForSell();
-    asset2Amount.value =
+    assetAmount =
       Number(data.result.payout) /
       10 ** assets.value.nameAndDecimalsByAsset[asset2.value].decimals;
   }
 
+  const _oldPrice = data.result.old_price;
+  const _newPrice = data.result.new_price;
+
+  const d = ((_newPrice - _oldPrice) / _oldPrice) * 100;
+
+  const reservePriceAa = metaByActiveAA.value.reserve_price_aa;
+  const reservePrice = await getReservePrice(reservePriceAa);
+  const price = getPriceByData(
+    metaByActiveAA.value.aa,
+    assetForPrice,
+    data.result.state,
+    data.result.asset_info
+  );
+
+  const amount =
+    10 ** assets.value.nameAndDecimalsByAsset[assetForPrice].decimals;
+  newPrice.value = amount * price * reservePrice;
+  diff.value = d.toFixed(2);
   link.value = data.link;
-  percent.value = data.result.fee_percent;
-  newPrice.value = data.result.new_price;
+  feeInPercent.value = data.result.fee_percent;
+  asset2Amount.value = assetAmount;
 
   if (data?.result?.error) {
     resultError.value = data.result.error;
   }
-
-  console.log("result", data.result);
 }
 
 function swapPair() {
@@ -356,8 +379,13 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
             {{ resultError }}
           </span>
           <div v-if="asset2Amount" class="mt-4">
-            <div>Fee: {{ Number(percent.toFixed(4)) }}%</div>
-            <div>New price: ${{ newPrice }}</div>
+            <div>Fee: <FeeViewComponent :fee="Number(feeInPercent)" /></div>
+            <div>
+              New price: ${{ newPrice.toPrecision(6) }} (<FeeViewComponent
+                :fee="Number(diff)"
+                :with-diff="true"
+              />)
+            </div>
             <div></div>
           </div>
           <div class="form-control mt-8 text-center">

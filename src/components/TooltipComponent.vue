@@ -42,6 +42,7 @@ onMounted(() => {
 
 <style>
 .v-popper--theme-tooltip .v-popper__inner {
-  @apply bg-neutral-900;
+  background-color: rgb(23, 23, 23) !important;
+  opacity: 1;
 }
 </style>

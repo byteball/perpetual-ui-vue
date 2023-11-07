@@ -361,7 +361,7 @@ watch(
               >{{ preparedMeta.reservePriceAA }}</a
             >&nbsp;
             <span class="inline-flex">
-              (${{ preparedMeta.reservePriceValue }}&nbsp;
+              (${{ preparedMeta.reservePriceValue.toPrecision(6) }}&nbsp;
               <TooltipComponent
                 field-name="reserve_price_value"
               ></TooltipComponent

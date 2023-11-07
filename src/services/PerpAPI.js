@@ -54,3 +54,12 @@ export async function getPriceByAssets(aa, assets) {
 
   return priceByAsset;
 }
+
+export function getPriceByData(aa, asset, state, assetInfo) {
+  const bAsset0 = state.asset0 === asset;
+  const r = state.reserve;
+  const c = state.coef;
+  const s = bAsset0 ? state.s0 : assetInfo.supply;
+  const a = bAsset0 ? state.a0 : assetInfo.a;
+  return (c * c * a * s) / r;
+}

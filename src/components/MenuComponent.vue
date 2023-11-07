@@ -30,7 +30,7 @@ function toggle(e) {
 <template>
   <header>
     <div tabindex="0" class="navbar">
-      <div class="navbar-start">
+      <div class="navbar-start" :key="route.name">
         <details class="dropdown" @toggle="toggle" :open="isOpen">
           <summary class="btn btn-ghost lg:hidden">
             <svg
@@ -68,7 +68,11 @@ function toggle(e) {
             <li>
               <RouterLink
                 to="/governance"
-                :class="{ 'btn-active': route.name === 'governance' }"
+                :class="{
+                  'btn-active': ['governance', 'governanceManagement'].includes(
+                    route.name
+                  ),
+                }"
                 >Governance</RouterLink
               >
             </li>
@@ -103,7 +107,7 @@ function toggle(e) {
           <img src="/logo.svg" class="h-14 w-14" alt="pyth.ooo" />
         </RouterLink>
       </div>
-      <div tabindex="0" class="navbar-center hidden lg:flex">
+      <div tabindex="0" class="navbar-center hidden lg:flex" :key="route.name">
         <ul class="menu menu-horizontal items-center px-1">
           <li>
             <RouterLink
@@ -124,7 +128,11 @@ function toggle(e) {
             <RouterLink
               to="/governance"
               class="ml-2"
-              :class="{ 'btn-active': route.name === 'governance' }"
+              :class="{
+                'btn-active': ['governance', 'governanceManagement'].includes(
+                  route.name
+                ),
+              }"
               >Governance</RouterLink
             >
           </li>

@@ -195,6 +195,7 @@ export const getExchangeResultByState = (
   return {
     payout: payout,
     delta_s: deltaSupply,
+    new_supply: newSupply,
     old_reserve: reserve,
     new_reserve: newReserve,
     delta_reserve: newReserve - reserve,
@@ -204,5 +205,7 @@ export const getExchangeResultByState = (
     arb_profit_tax: arbProfitTax,
     total_fee: total_fee,
     fee_percent: fee_percent,
+    state,
+    asset_info: assetInfo,
   };
 };
