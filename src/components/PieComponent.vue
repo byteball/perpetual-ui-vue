@@ -59,6 +59,7 @@ const options = {
       align: "start",
     },
     datalabels: {
+      textAlign: "center",
       display: function (ctx) {
         const dataPoints = ctx.chart.data.datasets[0].data;
         const total = dataPoints.reduce(
@@ -71,7 +72,7 @@ const options = {
       },
       formatter: function (value, context) {
         const name = context.chart.data.labels[context.dataIndex];
-        return `${name}\n($${value})`;
+        return `${name}\n$${value}`;
       },
     },
   },

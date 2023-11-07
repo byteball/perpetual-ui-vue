@@ -297,7 +297,7 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
         <div class="form-control" v-if="assets.assetList.length">
           <div class="join">
             <NumberInput
-              class="join-item"
+              class="join-item sh-disabled"
               v-model="asset1Amount"
               :decimals="assets.nameAndDecimalsByAsset[asset1]?.decimals"
               :disabled="!asset1"
@@ -332,7 +332,7 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
           </div>
           <div class="join mt-4 !border-gray-600">
             <TextInput
-              class="join-item"
+              class="join-item sh-disabled"
               placeholder="0"
               :disabled="!asset2"
               v-model.number="asset2Amount"
@@ -357,7 +357,7 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
           </span>
           <div v-if="asset2Amount" class="mt-4">
             <div>Fee: {{ Number(percent.toFixed(4)) }}%</div>
-            <div>New price: {{ newPrice }}</div>
+            <div>New price: ${{ newPrice }}</div>
             <div></div>
           </div>
           <div class="form-control mt-8 text-center">

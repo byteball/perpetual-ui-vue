@@ -12,6 +12,10 @@ const props = defineProps({
 const options = computed(() => {
   return {
     preProcess: (val) => {
+      if (val[0] === ".") {
+        val = "0" + val;
+      }
+
       val = val
         .replace(/,/g, ".")
         .replace(/[^0-9.]/, "")
@@ -23,13 +27,6 @@ const options = computed(() => {
         val = f + "." + s.join("");
       }
 
-      if (val.startsWith("00")) {
-        val = val.replace(/^0+/, "0");
-      }
-
-      if (/^0[1-9]/.test(val)) {
-        val = val.replace(/^0+/, "");
-      }
       return val;
     },
   };

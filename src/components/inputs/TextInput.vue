@@ -20,6 +20,9 @@ const paddingRight = computed(() => {
   return labelBlock.value.offsetWidth + "px";
 });
 
+const isReadOnly = props.staticValue || attrs.readonly !== undefined;
+const roClasses = " text-gray-500 focus:outline-0";
+
 watch(
   () => props.modelValue,
   () => {
@@ -47,12 +50,12 @@ onMounted(() => {
     </template>
     <input
       type="text"
-      :class="classesList"
+      :class="classesList + (isReadOnly ? roClasses : '')"
       :style="{ paddingRight }"
       :placeholder="placeholder || ''"
       v-model="value"
       @input="$emit('update:modelValue', $event.target.value)"
-      :readonly="staticValue || attrs.readonly !== undefined"
+      :readonly="isReadOnly"
     />
     <div
       v-show="label"
