@@ -256,10 +256,17 @@ watch(
         `Manage ${props.params.poolReserveAssetName}/${props.params.poolSymbolAndDecimal.name} stake`
       }}
     </div>
+    <div class="text-center mt-2">
+      <RouterLink
+        :to="`/governance/management/${params.metaByAA.aa}`"
+        class="link link-hover text-sky-500"
+        >Governance page</RouterLink
+      >
+    </div>
     <div class="form-control">
       <div v-if="props.params.metaByAA && props.params.poolSymbolAndDecimal">
         <div>
-          <div class="tabs tabs-boxed mt-8 mb-1">
+          <div class="tabs tabs-boxed mt-6 mb-1">
             <a
               class="tab"
               :class="{ 'tab-active': activeTab === 'stake' }"

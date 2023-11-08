@@ -381,6 +381,13 @@ watch(
               Your stake balance: {{ preparedMeta.stakeBalance }}
               {{ preparedMeta.asset0SymbolAndDecimals.name }}
             </div>
+            <div>
+              <RouterLink
+                class="link text-sky-500 link-hover font-light"
+                :to="`/stake/${perpetualAA}`"
+                >Stake management</RouterLink
+              >
+            </div>
           </div>
           <div v-if="!currentVP" class="alert mt-6 bg-base-300">
             <svg

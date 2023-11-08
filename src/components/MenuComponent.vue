@@ -94,6 +94,16 @@ function toggle(e) {
               >
             </li>
             <li>
+              <RouterLink
+                to="/faq"
+                class="ml-2"
+                :class="{
+                  'btn-active': route.name === 'faq',
+                }"
+                >F.A.Q.</RouterLink
+              >
+            </li>
+            <li>
               <label
                 class="select select-sm items-center bg-base-200 border-gray-600"
                 @click="store.openAddressModal"
@@ -153,6 +163,16 @@ function toggle(e) {
                   route.name === 'create' || route.name === 'createSymbols',
               }"
               >Create</RouterLink
+            >
+          </li>
+          <li>
+            <RouterLink
+              to="/faq"
+              class="ml-2"
+              :class="{
+                'btn-active': route.name === 'faq',
+              }"
+              >F.A.Q.</RouterLink
             >
           </li>
           <li>
