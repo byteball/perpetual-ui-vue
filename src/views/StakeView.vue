@@ -201,7 +201,7 @@ const showManageStakeModal = (poolAA) => {
             </thead>
             <tbody>
               <tr v-for="poolAA in poolList" :key="poolAA">
-                <td class="flex items-center">
+                <td class="flex items-center h12">
                   <RouterLink
                     :to="`/governance/management/${poolAA}`"
                     class="link link-hover text-sky-500"
@@ -212,16 +212,16 @@ const showManageStakeModal = (poolAA) => {
                     }}
                   </RouterLink>
                 </td>
-                <td>
+                <td class="h-12">
                   {{ getUserStakeBalance(poolAA) }}
                   {{ poolSymbolAndDecimalByAA[poolAA].name }}
                 </td>
-                <td>
+                <td class="h-12">
                   <button
                     class="btn btn-xs btn-primary"
                     @click="showManageStakeModal(poolAA)"
                   >
-                    Manage
+                    Stake
                   </button>
                 </td>
               </tr>
