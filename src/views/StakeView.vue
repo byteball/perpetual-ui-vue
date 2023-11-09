@@ -223,7 +223,7 @@ const showManageStakeModal = (poolAA) => {
                       :to="`/governance/management/${poolAA}`"
                       class="btn btn-xs btn-primary ml-3"
                     >
-                      Governance
+                      Govern
                     </RouterLink>
                   </div>
                 </td>
