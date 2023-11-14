@@ -305,10 +305,9 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
 <template>
   <div class="container w-full sm:w-[512px] m-auto mt-2 mb-36 p-6 sm:p-8">
     <div class="p-2 mb-6">
-      <div class="text-lg font-semibold leading-7">Market</div>
+      <div class="text-lg font-semibold leading-7">Trade Decentralized Futures</div>
       <p class="mt-2 leading-6">
-        This information will be displayed publicly so be careful what you
-        share.
+        Buy or sell futures powered by Pythagorean bonding curves (<RouterLink class="link text-sky-500 link-hover font-light" :to="`/faq`">learn more</RouterLink>).
       </p>
     </div>
 

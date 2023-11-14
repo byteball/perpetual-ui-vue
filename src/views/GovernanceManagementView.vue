@@ -404,7 +404,7 @@ watch(
               ></path>
             </svg>
             <span
-              >To manage this aa you need to
+              >To manage this AA you need to
               <RouterLink
                 class="link text-sky-500 link-hover font-light"
                 :to="`/stake/${perpetualAA}`"

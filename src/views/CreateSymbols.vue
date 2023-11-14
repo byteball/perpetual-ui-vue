@@ -277,7 +277,7 @@ onMounted(() => {
           </svg>
           <span class="text-left">
             Done. After confirming the registration of the symbol for AA, it
-            will be available on the market
+            will be available for trading
           </span>
         </div>
         <div class="mt-6 text-center">
@@ -285,7 +285,7 @@ onMounted(() => {
             class="btn btn-sm btn-primary"
             @click="() => router.push('/')"
           >
-            Back to market
+            Back to trading
           </button>
         </div>
       </div>

@@ -178,7 +178,7 @@ watch(
     if (address.value && amount.value.value > balanceByAsset.value) {
       buttonDisabled.value = true;
       term.value.error =
-        "Insufficient funds, please buy tokens on the Market page";
+        "Insufficient funds, please buy tokens on the Trade page";
       return;
     }
 

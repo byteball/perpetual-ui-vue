@@ -54,8 +54,8 @@ function toggle(e) {
             <li>
               <RouterLink
                 to="/"
-                :class="{ 'btn-active': route.name === 'market' }"
-                >Market</RouterLink
+                :class="{ 'btn-active': route.name === 'trade' }"
+                >Trade</RouterLink
               >
             </li>
             <li>
@@ -122,8 +122,8 @@ function toggle(e) {
           <li>
             <RouterLink
               to="/"
-              :class="{ 'btn-active': route.name === 'market' }"
-              >Market</RouterLink
+              :class="{ 'btn-active': route.name === 'trade' }"
+              >Trade</RouterLink
             >
           </li>
           <li>
