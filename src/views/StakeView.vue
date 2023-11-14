@@ -162,8 +162,7 @@ const showManageStakeModal = (poolAA) => {
     <div class="p-2 mb-6">
       <div class="text-lg font-semibold leading-7">Stake</div>
       <p class="mt-2 leading-6">
-        This information will be displayed publicly so be careful what you
-        share.
+        Stake the governance asset of a futures set in order to participate in the governance of the set.
       </p>
     </div>
     <div v-if="address" class="mb-2">
@@ -179,7 +178,7 @@ const showManageStakeModal = (poolAA) => {
         :class="{ 'btn-active': poolsListFilter }"
         @click="changePoolFilter('my')"
       >
-        My pools
+        My sets
       </button>
     </div>
     <div class="card bg-base-200 shadow-xl">
@@ -194,8 +193,8 @@ const showManageStakeModal = (poolAA) => {
           <table v-else class="table w-full">
             <thead>
               <tr>
-                <th>Pool</th>
-                <th>Stake balance</th>
+                <th>Set (reserve asset / gov. asset)</th>
+                <th>Staked balance</th>
                 <th>Actions</th>
               </tr>
             </thead>
