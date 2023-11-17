@@ -53,8 +53,8 @@ watch(address, () => {
   <div class="mb-6">
     <div>AA requirements:</div>
     <div class="mt-1 mb-2">
-      <div>- must have getter get_reserve_price</div>
-      <div>- getter must return the price in dollars</div>
+      <div>- must have a getter $get_reserve_price()</div>
+      <div>- the getter must return the price in dollars</div>
     </div>
     <a
       href="https://github.com/byteball/perpetual-aa/blob/master/reserve_price_example.oscript"

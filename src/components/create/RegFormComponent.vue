@@ -169,7 +169,7 @@ watch(
     <Teleport to="#back_button"
       ><BackButtonComponent @click="$emit('goBack')"
     /></Teleport>
-    <div class="text-xl">{{ reserveAssetSymbol }}</div>
+    <div class="text-xl">Reserve asset: {{ reserveAssetSymbol }}</div>
     <div class="mt-2 label-text flex items-center">
       Reserve price AA
       <TooltipComponent class="ml-1" field-name="reserve_price" />

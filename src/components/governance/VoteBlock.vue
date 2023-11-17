@@ -95,7 +95,7 @@ function voteFromTable(value) {
             </div>
           </div>
           <div v-else class="text-center">
-            At the moment there are no votes for changing the value
+            No votes for changing this value yet
           </div>
           <div class="text-center sm:text-left mt-4" v-if="allowedControl">
             <a

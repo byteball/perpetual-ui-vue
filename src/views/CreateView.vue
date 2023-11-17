@@ -88,8 +88,7 @@ onMounted(async () => {
     <div class="p-2 mb-6">
       <div class="text-lg font-semibold leading-7">Create</div>
       <p class="mt-2 leading-6">
-        This information will be displayed publicly so be careful what you
-        share.
+        Create a new futures set. The set can host arbitrary number of futures tracking various currencies, stocks, commodities, etc.
       </p>
     </div>
     <div id="back_button"></div>
@@ -115,7 +114,7 @@ onMounted(async () => {
               Continue
             </button>
             <span v-else class="text-gray-300"
-              >To continue, please specify reserve asset</span
+              >To continue, please specify the reserve asset</span
             >
           </div>
         </div>

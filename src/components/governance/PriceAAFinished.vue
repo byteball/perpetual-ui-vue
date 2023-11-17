@@ -95,7 +95,7 @@ onMounted(async () => {
           </div>
         </div>
         <div class="font-medium text-sm mb-4">
-          Target value:
+          Target price:
           <div class="font-light text-sm inline-block">
             {{ selectedOracleData.value }}
           </div>
