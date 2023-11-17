@@ -329,13 +329,13 @@ watch(
     </div>
 
     <div class="p-2 mb-6">
-      <div class="text-lg font-semibold leading-7 inline-block">
+      <h1 class="text-lg font-bold leading-7 inline-block">
         Manage Autonomous Agent
-      </div>
-      <p class="mt-2 leading-6">
+      </h1>
+      <h2 class="mt-2 leading-6">
         This information will be displayed publicly so be careful what you
         share.
-      </p>
+      </h2>
     </div>
     <div v-if="notFound" class="text-center">AA not found</div>
     <div v-else class="card bg-base-200 shadow-xl mb-4">

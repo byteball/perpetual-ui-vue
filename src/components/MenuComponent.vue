@@ -96,7 +96,6 @@ function toggle(e) {
             <li>
               <RouterLink
                 to="/faq"
-                class="ml-2"
                 :class="{
                   'btn-active': route.name === 'faq',
                 }"
@@ -114,15 +113,19 @@ function toggle(e) {
           </ul>
         </details>
         <RouterLink class="hover:bg-none" to="/">
-          <img src="/logo.svg" class="h-14 w-14" alt="pyth.ooo" />
+          <div class="flex items-center justify-center">
+            <img src="/logo.svg" class="h-14 w-14" alt="pyth.ooo" />
+            <div class="flex flex-col">
+              <h1 class="text-sm font-bold leading-5">Pythagorean</h1>
+              <h2 class="text-xs">perpetual futures</h2>
+            </div>
+          </div>
         </RouterLink>
       </div>
       <div tabindex="0" class="navbar-center hidden lg:flex" :key="route.name">
         <ul class="menu menu-horizontal items-center px-1">
           <li>
-            <RouterLink
-              to="/"
-              :class="{ 'btn-active': route.name === 'trade' }"
+            <RouterLink to="/" :class="{ 'btn-active': route.name === 'trade' }"
               >Trade</RouterLink
             >
           </li>

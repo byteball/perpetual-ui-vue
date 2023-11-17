@@ -365,11 +365,11 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
     <ClaimCard v-if="address" />
 
     <div class="p-2 mb-6">
-      <div class="text-lg font-semibold leading-7">Presale</div>
-      <p class="mt-2 leading-6">
+      <h1 class="text-lg font-bold leading-7">Presale</h1>
+      <h2 class="mt-2 leading-6">
         This information will be displayed publicly so be careful what you
         share.
-      </p>
+      </h2>
     </div>
 
     <div class="card bg-base-200 shadow-xl">

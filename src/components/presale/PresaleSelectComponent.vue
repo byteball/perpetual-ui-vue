@@ -36,14 +36,17 @@ watch(activePresaleIndex, () => {
 <template>
   <div class="relative w-full">
     <Listbox v-model="activePresaleIndex">
-      <ListboxButton
-        class="select select-bordered w-full bg-base-200 border-gray-600 items-center"
-      >
-        {{
-          selectedAa
-            ? `${assetsMetadata[selectedPresaleAsset].name} in pool \n ${assetsMetadata[selectedAsset0].name} / ${assetsMetadata[selectedReserveAsset].name}`
-            : `Please select presale`
-        }}
+      <ListboxButton v-slot="{ open }" :as="'template'">
+        <div
+          :class="{ '!border-blue-600': open, 'border-gray-600': !open }"
+          class="select select-bordered w-full bg-base-200 border-gray-600 items-center"
+        >
+          {{
+            selectedAa
+              ? `${assetsMetadata[selectedPresaleAsset].name} in pool \n ${assetsMetadata[selectedAsset0].name} / ${assetsMetadata[selectedReserveAsset].name}`
+              : `Please select presale`
+          }}
+        </div>
       </ListboxButton>
       <ListboxOptions class="psc_options">
         <ListboxOption

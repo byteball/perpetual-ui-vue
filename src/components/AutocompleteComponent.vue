@@ -113,7 +113,7 @@ onUnmounted(() => {
     v-model="inputValue"
     :placeholder="placeholder || ''"
     @input="$emit('update:modelValue', $event.target.value)"
-    class="!input !input-bordered !w-full !text-slate-200 !bg-base-200 !border-gray-600"
+    class="!input !w-full !text-slate-200 !bg-base-200 !border-gray-600"
   />
 </template>
 

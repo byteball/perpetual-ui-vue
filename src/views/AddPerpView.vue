@@ -230,11 +230,11 @@ onUnmounted(() => {
     </div>
 
     <div class="p-2 mb-6">
-      <div class="text-lg font-semibold leading-7">Add new perpetual</div>
-      <p class="mt-2 leading-6">
+      <h1 class="text-lg font-bold leading-7">Add new perpetual</h1>
+      <h2 class="mt-2 leading-6">
         This information will be displayed publicly so be careful what you
         share.
-      </p>
+      </h2>
     </div>
 
     <div v-if="step === 1">

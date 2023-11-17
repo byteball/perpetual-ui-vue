@@ -86,11 +86,11 @@ onMounted(async () => {
 <template>
   <div class="container w-full sm:w-[512px] m-auto mt-2 mb-36 p-6 sm:p-8">
     <div class="p-2 mb-6">
-      <div class="text-lg font-semibold leading-7">Create</div>
-      <p class="mt-2 leading-6">
+      <h1 class="text-lg font-bold leading-7">Create</h1>
+      <h2 class="mt-2 leading-6">
         This information will be displayed publicly so be careful what you
         share.
-      </p>
+      </h2>
     </div>
     <div id="back_button"></div>
     <div class="card bg-base-200 shadow-xl">

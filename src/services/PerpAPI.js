@@ -24,10 +24,10 @@ export async function getTargetPriceForAddPerp(aa, priceAATargetPrice) {
   return priceAATargetPrice / reservePrice;
 }
 
-export async function getTargetPriceByPresaleAsset(aa, asset) {
+export async function getTargetPriceByPresaleAsset(aa, asset, actual) {
   const vars = await getAaStateVars(aa);
   const metaByAsset = vars[`asset_${asset}`];
-  if (metaByAsset.initial_price) {
+  if (!actual && metaByAsset.initial_price) {
     return metaByAsset.initial_price;
   }
   if (!metaByAsset || !metaByAsset.price_aa) return 0;

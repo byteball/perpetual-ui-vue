@@ -69,11 +69,11 @@ watch(meta, init, { deep: true });
 <template>
   <div class="container w-full sm:w-[768px] m-auto mt-2 mb-36 p-6 sm:p-8">
     <div class="p-2 mb-6">
-      <div class="text-lg font-semibold leading-7">Governance</div>
-      <p class="mt-1 leading-6">
+      <h1 class="text-lg font-bold leading-7">Governance</h1>
+      <h2 class="mt-1 leading-6">
         This information will be displayed publicly so be careful what you
         share.
-      </p>
+      </h2>
     </div>
     <div v-if="!isLoaded" class="card bg-base-200 shadow-xl mb-4">
       <div class="card-body p-6 sm:p-8 items-center"><LoadingIcon /></div>
