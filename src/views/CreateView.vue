@@ -88,7 +88,8 @@ onMounted(async () => {
     <div class="p-2 mb-6">
       <h1 class="text-lg font-bold leading-7">Create</h1>
       <h2 class="mt-2 leading-6">
-        Create a new futures set. The set can host arbitrary number of futures tracking various currencies, stocks, commodities, etc.
+        Create a new futures set. The set can host arbitrary number of futures
+        tracking various currencies, stocks, commodities, etc.
       </h2>
     </div>
     <div id="back_button"></div>
