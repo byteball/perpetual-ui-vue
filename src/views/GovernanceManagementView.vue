@@ -330,11 +330,10 @@ watch(
 
     <div class="p-2 mb-6">
       <h1 class="text-lg font-bold leading-7 inline-block">
-        Manage Autonomous Agent
+        Manage futures set
       </h1>
       <h2 class="mt-2 leading-6">
-        This information will be displayed publicly so be careful what you
-        share.
+        Change this set's parameters, the parameters of its futures, and add new futures.
       </h2>
     </div>
     <div v-if="notFound" class="text-center">AA not found</div>
@@ -404,11 +403,11 @@ watch(
               ></path>
             </svg>
             <span
-              >To manage this AA you need to
+              >To manage this set you need to
               <RouterLink
                 class="link text-sky-500 link-hover font-light"
                 :to="`/stake/${perpetualAA}`"
-                >stake</RouterLink
+                >stake its governance asset</RouterLink
               >
               <template v-if="!address">
                 and add
@@ -497,7 +496,7 @@ watch(
           :key="'p_' + address || 'address'"
           v-if="Object.keys(priceAAsDefinition).length"
         >
-          <div class="text-lg font-bold mt-8">Tokens issued on this AA</div>
+          <div class="text-lg font-bold mt-8">Tokens issued in this set</div>
           <div class="tabs tabs-boxed mt-4 mb-2">
             <a
               class="tab"
@@ -517,14 +516,14 @@ watch(
               }"
               @click="setTab('presale')"
             >
-              Presale
+              On presale
             </a>
             <a
               class="tab"
               :class="{ 'tab-active': activeTab === 'vote' }"
               @click="setTab('vote')"
             >
-              Vote
+              Voting
             </a>
           </div>
           <div v-if="activeTab === 'trading' || activeTab === 'presale'">
@@ -560,7 +559,7 @@ watch(
               class="card bg-base-300 shadow-xl mb-8"
             >
               <div class="card-body gap-0 p-3 sm:p-8 text-center">
-                While it's empty here
+                No assets on presale
               </div>
             </div>
           </div>
@@ -589,7 +588,7 @@ watch(
               class="card bg-base-300 shadow-xl mb-8"
             >
               <div class="card-body gap-0 p-3 sm:p-8 text-center">
-                While it's empty here
+                No new assets offered for voting
               </div>
             </div>
           </div>
@@ -600,7 +599,7 @@ watch(
             :class="{ '!btn-disabled': !allowedControl }"
             :to="`/addPerp/${perpetualAA}`"
           >
-            Add perpetual for voting
+            Add new perpetual for voting
           </RouterLink>
         </div>
       </div>

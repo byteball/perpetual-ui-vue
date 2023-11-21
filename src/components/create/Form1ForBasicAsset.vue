@@ -25,7 +25,7 @@ function goPrevStep() {
     /></Teleport>
     <div class="mb-6 mt-4 left">
       <div>
-        Well, now we need to create AA to get the asset price in dollars
+        Now we need to create an AA to get the reserve asset price in USD
       </div>
     </div>
     <div class="text-center">

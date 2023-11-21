@@ -12,7 +12,7 @@ defineProps(["preparedMeta"]);
 <template>
   <Disclosure v-slot="{ open }">
     <DisclosureButton class="py-2 text-gray-500 flex items-center">
-      <span>Show pool details</span>
+      <span>Show the set details</span>
       <ChevronRightIcon :class="open && 'rotate-90 transform'" class="w-5" />
     </DisclosureButton>
     <transition

@@ -367,8 +367,7 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
     <div class="p-2 mb-6">
       <h1 class="text-lg font-bold leading-7">Presale</h1>
       <h2 class="mt-2 leading-6">
-        This information will be displayed publicly so be careful what you
-        share.
+        Participate in presales of newly launched futures. They are sold at a fixed price sourced from an oracle.
       </h2>
     </div>
 
@@ -393,7 +392,7 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
             </div>
           </div>
           <div v-else>
-            <p class="mt-2 leading-6">There is no presale in progress now</p>
+            <p class="mt-2 leading-6">There are no presales in progress now</p>
           </div>
           <div v-if="selectedAA">
             <div>
@@ -405,10 +404,10 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
                   Currency being tracked: {{ selectedOracleData.name }}
                 </div>
                 <div class="mt-0.5">
-                  Target value: {{ selectedOracleData.value }}
+                  Target price: {{ selectedOracleData.value }}
                 </div>
                 <div class="mt-3">
-                  Finish date: {{ selectedPresaleFinishDate }}
+                  Presale ends on: {{ selectedPresaleFinishDate }}
                 </div>
                 <div>
                   Sold:

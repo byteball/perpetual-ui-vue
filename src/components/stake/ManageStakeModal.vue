@@ -256,13 +256,13 @@ watch(
         `Manage ${props.params.poolReserveAssetName}/${props.params.poolSymbolAndDecimal.name} stake`
       }}
     </div>
-    <div class="text-center mt-2">
+    <!--div class="text-center mt-2">
       <RouterLink
         :to="`/governance/management/${params.metaByAA.aa}`"
         class="link link-hover text-sky-500"
         >Governance page</RouterLink
       >
-    </div>
+    </div-->
     <div class="form-control">
       <div v-if="props.params.metaByAA && props.params.poolSymbolAndDecimal">
         <div>
@@ -304,7 +304,7 @@ watch(
             </div>
             <div class="form-control mt-2">
               <label class="label">
-                <span class="label-text">Term (in days)</span>
+                <span class="label-text">Term, in days. Longer term gives you more voting power in <RouterLink :to="`/governance/management/${params.metaByAA.aa}`" class="link link-hover text-sky-500">governance</RouterLink>.</span>
               </label>
               <IntegerInput v-model="term.value" />
               <span
@@ -321,7 +321,7 @@ watch(
             </div>
             <div class="mt-4">
               <div v-if="address">Current VP: {{ currentVP }}</div>
-              <div>New VP: {{ newVP }}</div>
+              <div>New Voting Power: {{ newVP }}</div>
             </div>
           </div>
           <div v-if="activeTab === 'withdraw'">

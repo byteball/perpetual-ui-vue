@@ -230,10 +230,9 @@ onUnmounted(() => {
     </div>
 
     <div class="p-2 mb-6">
-      <h1 class="text-lg font-bold leading-7">Add new perpetual</h1>
+      <h1 class="text-lg font-bold leading-7">Add new perpetual future</h1>
       <h2 class="mt-2 leading-6">
-        This information will be displayed publicly so be careful what you
-        share.
+        Create a governance proposal to add a new perpetual future asset tracking some currency, stock, or commodity. The proposal will be then be voted by the governance token holders (you can participate), and if approved, the new asset will first become available for presale, then regular trading will open.
       </h2>
     </div>
 
@@ -330,7 +329,7 @@ onUnmounted(() => {
             ></path>
           </svg>
           <div>
-            To continue, you need to wait until price aa is published, if you
+            To continue, you need to wait until the price AA is published. If you
             have not done so, click back
           </div>
           <div>
@@ -394,7 +393,7 @@ onUnmounted(() => {
             d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
           ></path>
         </svg>
-        <span>Great, soon perpetual will be available for voting</span>
+        <span>Great, soon the perpetual will be available for voting</span>
         <RouterLink
           class="btn btn-sm btn-primary"
           :to="`/governance/management/${route.params.aa}`"

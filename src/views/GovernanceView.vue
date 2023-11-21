@@ -71,8 +71,7 @@ watch(meta, init, { deep: true });
     <div class="p-2 mb-6">
       <h1 class="text-lg font-bold leading-7">Governance</h1>
       <h2 class="mt-1 leading-6">
-        This information will be displayed publicly so be careful what you
-        share.
+        Manage the parameters of futures sets and individual futures within them. Add new futures to the sets.
       </h2>
     </div>
     <div v-if="!isLoaded" class="card bg-base-200 shadow-xl mb-4">
@@ -108,7 +107,7 @@ watch(meta, init, { deep: true });
                       class="btn btn-sm btn-primary"
                       :to="`/governance/management/${aa[0]}`"
                     >
-                      Manage AA
+                      Manage this set
                     </RouterLink>
                   </div>
                 </div>
