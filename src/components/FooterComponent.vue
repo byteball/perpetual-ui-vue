@@ -73,7 +73,7 @@ const links = [
 
 <template>
   <footer
-    class="footer footer-center p-10 bg-base-200 text-base-content rounded"
+    class="footer footer-center p-10 bg-base-200 text-base-content rounded absolute bottom-0"
   >
     <nav>
       <div class="grid grid-flow-col gap-4">

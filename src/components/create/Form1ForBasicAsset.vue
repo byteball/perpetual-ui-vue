@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import FormCreateByUsdOracle from "@/components/create/FormCreateByUsdOracle.vue";
 import FormCreateByMyAA from "@/components/create/FormCreateByMyAA.vue";
 import BackButtonComponent from "@/components/BackButtonComponent.vue";
@@ -16,6 +16,17 @@ function setReservePriceAA(aa) {
 function goPrevStep() {
   type.value = "";
 }
+
+watch(type, () => {
+  localStorage.setItem("tmp_create_type", type.value);
+});
+
+onMounted(() => {
+  const t = localStorage.getItem("tmp_create_type");
+  if (t) {
+    type.value = t;
+  }
+});
 </script>
 
 <template>

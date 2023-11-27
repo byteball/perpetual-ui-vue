@@ -158,7 +158,7 @@ const showManageStakeModal = (poolAA) => {
 </script>
 
 <template>
-  <div class="container w-full sm:w-[860px] m-auto mt-2 mb-36 p-6 sm:p-8">
+  <div class="container w-full sm:w-[860px] m-auto mt-2 p-6 sm:p-8">
     <div class="p-2 mb-6">
       <h1 class="text-lg font-bold leading-7">Stake</h1>
       <h2 class="mt-2 leading-6">

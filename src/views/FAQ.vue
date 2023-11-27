@@ -1,7 +1,7 @@
 <script setup></script>
 
 <template>
-  <div class="container w-full sm:w-[768px] m-auto mt-2 mb-36 p-6 sm:p-8">
+  <div class="container w-full sm:w-[768px] m-auto mt-2 p-6 sm:p-8">
     <div class="p-2 mb-6">
       <h1 class="text-lg font-bold leading-7">F.A.Q.</h1>
       <h2 class="mt-1 leading-6">Desc</h2>

@@ -350,7 +350,7 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
 }
 </style>
 <template>
-  <div class="container w-full sm:w-[512px] m-auto mt-2 mb-36 p-6 sm:p-8">
+  <div class="container w-full sm:w-[512px] m-auto mt-2 p-6 sm:p-8">
     <div class="p-2 mb-6">
       <h1 class="text-lg font-bold leading-7">Trade Decentralized Futures</h1>
       <h2 class="mt-2 leading-6">

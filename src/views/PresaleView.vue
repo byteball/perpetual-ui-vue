@@ -355,7 +355,7 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
 }
 </style>
 <template>
-  <div class="container w-full sm:w-[640px] m-auto mt-2 mb-36 p-6 sm:p-8">
+  <div class="container w-full sm:w-[640px] m-auto mt-2 p-6 sm:p-8">
     <div v-if="toastMessage" class="toast toast-top toast-end">
       <div class="alert alert-error">
         <span>{{ toastMessage }}</span>

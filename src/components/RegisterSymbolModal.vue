@@ -113,7 +113,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <DialogPanel class="w-full max-w-lg rounded bg-base-200 p-8">
+  <DialogPanel class="w-full max-w-xl rounded bg-base-200 p-8">
     <div class="text-center text-2xl font-bold">
       Register a symbol for asset
     </div>

@@ -303,7 +303,7 @@ watch(
 </style>
 <template>
   <div
-    class="container w-full sm:w-[768px] m-auto mt-2 mb-36 p-6 sm:p-8"
+    class="container w-full sm:w-[768px] m-auto mt-2 p-6 sm:p-8"
     v-if="ready"
   >
     <div @click="goBack()" class="p-2 mb-6 cursor-pointer">
@@ -607,7 +607,7 @@ watch(
   </div>
   <div
     v-else
-    class="container w-full sm:w-[512px] m-auto mt-40 mb-36 p-6 sm:p-8 text-center"
+    class="container w-full sm:w-[512px] m-auto mt-40 p-6 sm:p-8 text-center"
   >
     <Loading />
   </div>

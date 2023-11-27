@@ -250,7 +250,7 @@ watch(
 </script>
 
 <template>
-  <DialogPanel class="w-full max-w-lg rounded bg-base-200 p-8">
+  <DialogPanel class="w-full max-w-xl rounded bg-base-200 p-8">
     <div class="text-center text-2xl font-bold">
       {{
         `Manage ${props.params.poolReserveAssetName}/${props.params.poolSymbolAndDecimal.name} stake`
@@ -304,7 +304,14 @@ watch(
             </div>
             <div class="form-control mt-2">
               <label class="label">
-                <span class="label-text">Term, in days. Longer term gives you more voting power in <RouterLink :to="`/governance/management/${params.metaByAA.aa}`" class="link link-hover text-sky-500">governance</RouterLink>.</span>
+                <span class="label-text"
+                  >Term, in days. Longer term gives you more voting power in
+                  <RouterLink
+                    :to="`/governance/management/${params.metaByAA.aa}`"
+                    class="link link-hover text-sky-500"
+                    >governance</RouterLink
+                  >.</span
+                >
               </label>
               <IntegerInput v-model="term.value" />
               <span
