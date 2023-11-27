@@ -355,7 +355,7 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
 }
 </style>
 <template>
-  <div class="container w-full sm:w-[640px] m-auto mt-2 mb-36 p-6 sm:p-8">
+  <div class="container w-full sm:w-[640px] m-auto mt-2 p-6 sm:p-8">
     <div v-if="toastMessage" class="toast toast-top toast-end">
       <div class="alert alert-error">
         <span>{{ toastMessage }}</span>
@@ -365,10 +365,10 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
     <ClaimCard v-if="address" />
 
     <div class="p-2 mb-6">
-      <div class="text-lg font-semibold leading-7">Presale</div>
-      <p class="mt-2 leading-6">
+      <h1 class="text-lg font-bold leading-7">Presale</h1>
+      <h2 class="mt-2 leading-6">
         Participate in presales of newly launched futures. They are sold at a fixed price sourced from an oracle.
-      </p>
+      </h2>
     </div>
 
     <div class="card bg-base-200 shadow-xl">

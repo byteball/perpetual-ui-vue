@@ -61,6 +61,12 @@ const suggestValueForSymbolField = async (reserveSymbol) => {
   symbol.value = newSymbolSuggestion;
 };
 
+function delContinueData() {
+  localStorage.removeItem("tmp_create");
+  localStorage.removeItem("tmp_create_waa");
+  localStorage.removeItem("tmp_create_type");
+}
+
 watch(exists, async () => {
   const { [currentAA.value]: currentPerpetualMeta } = await getMetaForPerpAAs([
     currentAA.value,
@@ -122,6 +128,7 @@ emitter.on(`aa_request_${import.meta.env.VITE_REGISTRY_AA}`, async (data) => {
       path: `/create/${currentAA.value}`,
       query: { step: 3 },
     });
+    delContinueData();
   }
 });
 
@@ -183,7 +190,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="container w-full sm:w-[512px] m-auto mt-2 mb-36 p-6 sm:p-8">
+  <div class="container w-full sm:w-[512px] m-auto mt-2 p-6 sm:p-8">
     <div v-if="!exists" class="text-center">
       <div class="alert shadow-lg">
         <div class="flex items-center">

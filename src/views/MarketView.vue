@@ -15,7 +15,11 @@ import { getExchangeResultByState } from "@/utils/getExchangeResultByState";
 import NumberInput from "@/components/inputs/NumberInput.vue";
 import Loading from "@/components/icons/LoadingIcon.vue";
 import TextInput from "@/components/inputs/TextInput.vue";
-import { getPriceByData, getReservePrice } from "@/services/PerpAPI";
+import {
+  getPriceByData,
+  getReservePrice,
+  getTargetPriceByPresaleAsset,
+} from "@/services/PerpAPI";
 import FeeViewComponent from "@/components/FeeViewComponent.vue";
 
 const store = useAaInfoStore();
@@ -48,6 +52,8 @@ const balanceByAsset = computed(() => {
 const link = ref("");
 const feeInPercent = ref(0);
 const newPrice = ref(0);
+const targetPrice = ref(0);
+const targetAsset = ref("");
 const diff = ref("");
 
 const resultError = ref("");
@@ -218,6 +224,27 @@ function calcDataForSell() {
   };
 }
 
+function setTargetAsset() {
+  targetAsset.value = "";
+
+  const isAsset1Actual =
+    asset1.value !== metaByActiveAA.value.reserve_asset &&
+    asset1.value !== metaByActiveAA.value.state.asset0;
+
+  if (isAsset1Actual) {
+    targetAsset.value = asset1.value;
+    return;
+  }
+
+  const isAsset2Actual =
+    asset2.value !== metaByActiveAA.value.reserve_asset &&
+    asset2.value !== metaByActiveAA.value.state.asset0;
+
+  if (isAsset2Actual) {
+    targetAsset.value = asset2.value;
+  }
+}
+
 async function calcAndSetDataForMetaAndLink() {
   if (!asset1.value || !asset2.value) return;
 
@@ -277,6 +304,26 @@ async function calcAndSetDataForMetaAndLink() {
   if (data?.result?.error) {
     resultError.value = data.result.error;
   }
+
+  targetPrice.value = 0;
+
+  setTargetAsset();
+
+  const rawTargetPrice = targetAsset.value
+    ? await getTargetPriceByPresaleAsset(
+        metaByActiveAA.value.aa,
+        targetAsset.value,
+        true
+      )
+    : 0;
+
+  if (rawTargetPrice) {
+    targetPrice.value = +(
+      rawTargetPrice *
+      reservePrice *
+      10 ** assets.value.nameAndDecimalsByAsset[targetAsset.value].decimals
+    ).toPrecision(6);
+  }
 }
 
 function swapPair() {
@@ -303,12 +350,16 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
 }
 </style>
 <template>
-  <div class="container w-full sm:w-[512px] m-auto mt-2 mb-36 p-6 sm:p-8">
+  <div class="container w-full sm:w-[512px] m-auto mt-2 p-6 sm:p-8">
     <div class="p-2 mb-6">
-      <div class="text-lg font-semibold leading-7">Trade Decentralized Futures</div>
-      <p class="mt-2 leading-6">
-        Buy or sell futures powered by Pythagorean bonding curves (<RouterLink class="link text-sky-500 link-hover font-light" :to="`/faq`">learn more</RouterLink>).
-      </p>
+      <h1 class="text-lg font-bold leading-7">Trade Decentralized Futures</h1>
+      <h2 class="mt-2 leading-6">
+        Buy or sell futures powered by Pythagorean bonding curves (<RouterLink
+          class="link text-sky-500 link-hover font-light"
+          :to="`/faq`"
+          >learn more</RouterLink
+        >).
+      </h2>
     </div>
 
     <div class="card bg-base-200 shadow-xl">
@@ -317,6 +368,9 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
           <Loading />
         </div>
         <div class="form-control" v-if="assets.assetList.length">
+          <label class="label">
+            <span class="label-text">You pay</span>
+          </label>
           <div class="join">
             <NumberInput
               class="join-item sh-disabled"
@@ -324,15 +378,27 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
               :decimals="assets.nameAndDecimalsByAsset[asset1]?.decimals"
               :disabled="!asset1"
             />
-            <label
-              for="asset1Modal"
-              class="btn btn-primary border-gray-600 join-item"
+            <label for="asset1Modal" class="btn btn-primary join-item"
               >{{
                 asset1
                   ? assets.nameAndDecimalsByAsset[asset1].name
                   : "Select asset"
-              }}</label
-            >
+              }}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="w-5 h-5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+                />
+              </svg>
+            </label>
           </div>
           <div class="mt-4 flex justify-center">
             <button @click="swapPair()" class="btn btn-circle swap-btn">
@@ -352,7 +418,10 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
               </svg>
             </button>
           </div>
-          <div class="join mt-4 !border-gray-600">
+          <label class="label">
+            <span class="label-text">You receive</span>
+          </label>
+          <div class="join !border-gray-600">
             <TextInput
               class="join-item sh-disabled"
               placeholder="0"
@@ -368,8 +437,22 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
                 asset2
                   ? assets.nameAndDecimalsByAsset[asset2].name
                   : "Select asset"
-              }}</label
-            >
+              }}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="w-5 h-5"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+                />
+              </svg>
+            </label>
           </div>
           <span
             v-if="resultError"
@@ -384,6 +467,11 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
                 :fee="Number(diff)"
                 :with-diff="true"
               />)
+            </div>
+            <div v-if="targetPrice">Target price: ${{ targetPrice }}</div>
+            <div v-if="targetPrice">
+              Target asset:
+              {{ assets.nameAndDecimalsByAsset[targetAsset].name }}
             </div>
             <div></div>
           </div>

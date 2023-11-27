@@ -303,7 +303,7 @@ watch(
 </style>
 <template>
   <div
-    class="container w-full sm:w-[768px] m-auto mt-2 mb-36 p-6 sm:p-8"
+    class="container w-full sm:w-[768px] m-auto mt-2 p-6 sm:p-8"
     v-if="ready"
   >
     <div @click="goBack()" class="p-2 mb-6 cursor-pointer">
@@ -329,12 +329,12 @@ watch(
     </div>
 
     <div class="p-2 mb-6">
-      <div class="text-lg font-semibold leading-7 inline-block">
+      <h1 class="text-lg font-bold leading-7 inline-block">
         Manage futures set
-      </div>
-      <p class="mt-2 leading-6">
+      </h1>
+      <h2 class="mt-2 leading-6">
         Change this set's parameters, the parameters of its futures, and add new futures.
-      </p>
+      </h2>
     </div>
     <div v-if="notFound" class="text-center">AA not found</div>
     <div v-else class="card bg-base-200 shadow-xl mb-4">
@@ -607,7 +607,7 @@ watch(
   </div>
   <div
     v-else
-    class="container w-full sm:w-[512px] m-auto mt-40 mb-36 p-6 sm:p-8 text-center"
+    class="container w-full sm:w-[512px] m-auto mt-40 p-6 sm:p-8 text-center"
   >
     <Loading />
   </div>

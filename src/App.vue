@@ -1,5 +1,6 @@
 <script setup>
 import MenuComponent from "@/components/MenuComponent.vue";
+import FooterComponent from "@/components/FooterComponent.vue";
 </script>
 
 <template>
@@ -8,4 +9,6 @@ import MenuComponent from "@/components/MenuComponent.vue";
   <div tabindex="0">
     <RouterView />
   </div>
+  <div class="h-96"></div>
+  <FooterComponent />
 </template>

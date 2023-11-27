@@ -115,7 +115,8 @@ async function checkAAForAlreadyExisting() {
 
     await getNameForExistsAA(address);
     addressExistsAA.value = address;
-    existsError.value = error.substring(0, 27);
+    existsError.value = "Such a futures set already exists";
+
     return;
   }
 
@@ -131,6 +132,7 @@ emitter.on(`aa_request_${ADDRESSES.factory_aa}`, async (data) => {
 
   if (JSON.stringify(_d) === JSON.stringify(obj)) {
     const address = getAddressByBaseAA(ADDRESSES.base_aa, obj);
+    localStorage.setItem("tmp_create", JSON.stringify({ step: 3, address }));
     await router.push(`/create/${address}`);
   }
 });
@@ -192,7 +194,7 @@ watch(
       </div>
       <VoteInput v-model="swapFee" :type="'percent'" label="%" />
     </div>
-    <div class="form-control">
+    <div class="form-control mt-5">
       <div class="flex items-center">
         <label class="label">
           <span class="label-text">Arb profit tax</span>
@@ -201,7 +203,7 @@ watch(
       </div>
       <VoteInput v-model="arbProfitTax" :type="'percent'" label="%" />
     </div>
-    <div class="form-control">
+    <div class="form-control mt-5">
       <div class="flex items-center">
         <label class="label">
           <span class="label-text">Adjustment period</span>
@@ -210,7 +212,7 @@ watch(
       </div>
       <VoteInput v-model="adjustmentPeriod" :type="'date'" label="days" />
     </div>
-    <div class="form-control">
+    <div class="form-control mt-5">
       <div class="flex items-center">
         <label class="label">
           <span class="label-text">Presale period</span>
@@ -219,7 +221,7 @@ watch(
       </div>
       <VoteInput v-model="presalePeriod" :type="'date'" label="days" />
     </div>
-    <div class="form-control">
+    <div class="form-control mt-5">
       <div class="flex items-center">
         <label class="label">
           <span class="label-text">Auction price halving period</span>
@@ -233,7 +235,7 @@ watch(
         label="days"
       />
     </div>
-    <div class="form-control">
+    <div class="form-control mt-5">
       <div class="flex items-center">
         <label class="label">
           <span class="label-text">Token share threshold</span>
@@ -243,7 +245,7 @@ watch(
       </div>
       <VoteInput v-model="tokenShareThreshold" :type="'percent'" label="%" />
     </div>
-    <div class="form-control">
+    <div class="form-control mt-5">
       <div class="flex items-center">
         <label class="label">
           <span class="label-text">Min governance asset share</span>

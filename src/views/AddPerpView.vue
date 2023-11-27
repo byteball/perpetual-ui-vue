@@ -206,7 +206,7 @@ onUnmounted(() => {
 });
 </script>
 <template>
-  <div class="container w-full sm:w-[640px] m-auto mt-2 mb-36 p-6 sm:p-8">
+  <div class="container w-full sm:w-[640px] m-auto mt-2 p-6 sm:p-8">
     <div @click="goBack()" class="p-2 mb-6 cursor-pointer">
       <div class="flex items-center">
         <div class="inline-block mr-2">
@@ -230,10 +230,10 @@ onUnmounted(() => {
     </div>
 
     <div class="p-2 mb-6">
-      <div class="text-lg font-semibold leading-7">Add new perpetual future</div>
-      <p class="mt-2 leading-6">
+      <h1 class="text-lg font-bold leading-7">Add new perpetual future</h1>
+      <h2 class="mt-2 leading-6">
         Create a governance proposal to add a new perpetual future asset tracking some currency, stock, or commodity. The proposal will be then be voted by the governance token holders (you can participate), and if approved, the new asset will first become available for presale, then regular trading will open.
-      </p>
+      </h2>
     </div>
 
     <div v-if="step === 1">

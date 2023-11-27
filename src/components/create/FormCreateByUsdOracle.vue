@@ -1,5 +1,5 @@
 <script setup>
-import { nextTick, onUnmounted, ref } from "vue";
+import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { ADDRESSES } from "@/config";
 import { followLink, generateDefinitionLink } from "@/utils/generateLink";
 import { getAddressByDefinition } from "@/utils/addressUtils";
@@ -18,8 +18,10 @@ const errorMessage = ref("");
 const watchAA = ref("");
 const awaiting = ref(false);
 const loaded = ref(false);
+// const timerForCheckStable = ref(null);
 
 function handleDefinition(payload) {
+  console.log("payload", payload);
   if (payload.address === watchAA.value) {
     awaiting.value = true;
   }
@@ -107,6 +109,20 @@ function oracleDataUpdated(result) {
   }
   checkAndSetLoadedVar();
 }
+
+watch(watchAA, () => {
+  localStorage.setItem("tmp_create_waa", watchAA.value);
+});
+
+onMounted(async () => {
+  const waa = localStorage.getItem("tmp_create_waa");
+  if (!waa) return;
+
+  const def = await getDefinition(waa);
+  if (def.definition) {
+    emit("setReservePriceAa", waa);
+  }
+});
 
 onUnmounted(() => {
   emitter.off(`aa_definition_${ADDRESSES.reserve_price_usd}`, handleDefinition);

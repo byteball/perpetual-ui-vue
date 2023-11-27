@@ -1,5 +1,5 @@
 <script setup>
-import { nextTick, onUnmounted, ref, watch } from "vue";
+import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import LoadingIcon from "@/components/icons/LoadingIcon.vue";
 import { getAssetMetadataByArray, getDefinition } from "@/services/DAGApi";
 import emitter from "@/services/emitter";
@@ -178,6 +178,20 @@ function yOracleDataUpdated(result) {
 function goBack() {
   emit("goBack");
 }
+
+watch(watchAA, () => {
+  localStorage.setItem("tmp_create_waa", watchAA.value);
+});
+
+onMounted(async () => {
+  const waa = localStorage.getItem("tmp_create_waa");
+  if (!waa) return;
+
+  const def = await getDefinition(waa);
+  if (def.definition) {
+    emit("setReservePriceAa", waa);
+  }
+});
 
 onUnmounted(() => {
   emitter.off(
