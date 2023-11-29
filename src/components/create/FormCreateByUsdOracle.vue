@@ -3,7 +3,7 @@ import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { ADDRESSES } from "@/config";
 import { followLink, generateDefinitionLink } from "@/utils/generateLink";
 import { getAddressByDefinition } from "@/utils/addressUtils";
-import { getDefinition } from "@/services/DAGApi";
+import { getDefinition, isUnitStable } from "@/services/DAGApi";
 import emitter from "@/services/emitter";
 import LoadingIcon from "@/components/icons/LoadingIcon.vue";
 import BackButtonComponent from "@/components/BackButtonComponent.vue";
@@ -16,18 +16,18 @@ const oracleResult = ref({});
 const errorMessage = ref("");
 
 const watchAA = ref("");
+const watchUnit = ref("");
 const awaiting = ref(false);
 const loaded = ref(false);
-// const timerForCheckStable = ref(null);
 
-function handleDefinition(payload) {
-  console.log("payload", payload);
+function handleDefinition({ payload, body }) {
   if (payload.address === watchAA.value) {
     awaiting.value = true;
+    watchUnit.value = body.unit;
   }
 }
 
-function handleDefinitionSaved(payload) {
+function handleDefinitionSaved({ payload }) {
   if (payload.address === watchAA.value) {
     emit("setReservePriceAa", watchAA.value);
   }
@@ -81,7 +81,9 @@ async function openWallet() {
 
 async function checkAndSetLoadedVar() {
   await nextTick();
+  const wu = localStorage.getItem("tmp_create_wu");
   if (Object.keys(oracleResult.value).length) {
+    if (wu) return;
     await checkDefinitionAndReturnParamsIfNotExists();
   }
 
@@ -114,14 +116,30 @@ watch(watchAA, () => {
   localStorage.setItem("tmp_create_waa", watchAA.value);
 });
 
-onMounted(async () => {
-  const waa = localStorage.getItem("tmp_create_waa");
-  if (!waa) return;
+watch(watchUnit, () => {
+  localStorage.setItem("tmp_create_wu", watchUnit.value);
+});
 
-  const def = await getDefinition(waa);
-  if (def.definition) {
+onMounted(async () => {
+  const wu = localStorage.getItem("tmp_create_wu");
+  if (!wu) return;
+
+  const waa = localStorage.getItem("tmp_create_waa");
+
+  awaiting.value = true;
+  const unitStable = await isUnitStable(wu);
+  if (unitStable) {
     emit("setReservePriceAa", waa);
+    return;
   }
+
+  const interval = setInterval(async () => {
+    const unitStable = await isUnitStable(wu);
+    if (unitStable) {
+      emit("setReservePriceAa", waa);
+      clearInterval(interval);
+    }
+  }, 30000);
 });
 
 onUnmounted(() => {

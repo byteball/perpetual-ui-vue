@@ -41,6 +41,10 @@ export async function getDefinition(aa) {
   return { aa, definition };
 }
 
+export async function isUnitStable(unit) {
+  const joint = (await getJoint(unit))?.joint;
+  return !!joint.ball;
+}
 export async function getAaStateVars(aa, prefix) {
   const params = { address: aa };
   if (prefix) {

@@ -42,7 +42,6 @@ watch(
     if (isContinue.value) return;
     const asset = reserveAssetInput.value;
 
-    console.log("qq", assetsWithSymbols.oswapAssets[asset], asset);
     if (assetsWithSymbols.oswapAssets[asset]) {
       reserveAsset.value = assetsWithSymbols.oswapAssets[asset];
       isOSWAPAsset.value = true;
@@ -90,6 +89,7 @@ function goBack() {
 function delContinueData() {
   localStorage.removeItem("tmp_create");
   localStorage.removeItem("tmp_create_waa");
+  localStorage.removeItem("tmp_create_wu");
   localStorage.removeItem("tmp_create_type");
 }
 
@@ -110,8 +110,6 @@ async function continueCreate() {
       step.value = obj.step;
       continueData.value = {};
     });
-
-    console.log("obj", obj);
   }
 }
 

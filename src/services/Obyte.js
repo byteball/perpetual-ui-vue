@@ -73,7 +73,10 @@ client.onConnect(async () => {
       const message = body.messages.find((m) => m.app === "definition");
       if (message) {
         const address = message.payload.definition[1].base_aa;
-        emitter.emit(aaEventNames[address].definition, message.payload);
+        emitter.emit(aaEventNames[address].definition, {
+          payload: message.payload,
+          body,
+        });
       }
       return;
     }
@@ -82,7 +85,10 @@ client.onConnect(async () => {
       const message = body.messages.find((m) => m.app === "definition");
       if (message) {
         const address = message.payload.definition[1].base_aa;
-        emitter.emit(aaEventNames[address].definition_saved, message.payload);
+        emitter.emit(aaEventNames[address].definition_saved, {
+          payload: message.payload,
+          body,
+        });
       }
     }
   });
