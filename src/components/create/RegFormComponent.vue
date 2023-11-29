@@ -132,7 +132,14 @@ emitter.on(`aa_request_${ADDRESSES.factory_aa}`, async (data) => {
 
   if (JSON.stringify(_d) === JSON.stringify(obj)) {
     const address = getAddressByBaseAA(ADDRESSES.base_aa, obj);
-    localStorage.setItem("tmp_create", JSON.stringify({ step: 3, address }));
+    localStorage.setItem(
+      "tmp_create",
+      JSON.stringify({
+        step: 3,
+        address,
+        reserveAssetSymbol: props.reserveAssetSymbol,
+      })
+    );
     await router.push(`/create/${address}`);
   }
 });

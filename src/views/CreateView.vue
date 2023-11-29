@@ -162,7 +162,7 @@ onMounted(async () => {
           </div>
           <div class="mt-8">
             <button class="btn btn-primary" @click="continueCreate()">
-              Сontinue creating {{ continueData.reserveAssetInput }}
+              Continue creating {{ continueData.reserveAssetInput }}
             </button>
           </div>
         </div>
