@@ -31,13 +31,14 @@ function reqVote(name, type, value) {
 }
 
 onMounted(async () => {
+  if (!props.priceAa) return;
   selectedOracleData.value = await getOracleData(props.priceAa);
 });
 </script>
 
 <template>
   <div
-    v-if="activeTab === 'presale' && assetMeta.presale"
+    v-if="activeTab === 'presale' && assetMeta.presale && priceAa"
     class="card bg-base-300 shadow-xl mb-8"
   >
     <div class="card-body gap-0 p-3 sm:p-8">
