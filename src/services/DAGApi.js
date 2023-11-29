@@ -41,6 +41,22 @@ export async function getDefinition(aa) {
   return { aa, definition };
 }
 
+export async function getAllBalances(address) {
+  const b = client.api.getBalances([address]);
+  const balanceByAddress = b[address];
+  const balances = {};
+
+  for (const asset in balanceByAddress) {
+    balances[asset] = balanceByAddress[asset].total;
+  }
+
+  return balances;
+}
+
+export async function isUnitStable(unit) {
+  const joint = (await getJoint(unit))?.joint;
+  return !!joint.ball;
+}
 export async function getAaStateVars(aa, prefix) {
   const params = { address: aa };
   if (prefix) {

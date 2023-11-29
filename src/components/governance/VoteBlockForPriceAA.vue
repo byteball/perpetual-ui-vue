@@ -6,11 +6,11 @@ import { getVPFromNormalized } from "@/utils/getVP";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import { useAddressStore } from "@/stores/addressStore";
 import VotingTable from "@/components/governance/VotingTable.vue";
-import { getOracleData } from "@/services/DAGApi";
 import TooltipComponent from "@/components/TooltipComponent.vue";
 import {
   getPriceByAssets,
   getReservePriceFromPerpAA,
+  getTargetPriceByPriceAa,
 } from "@/services/PerpAPI";
 
 const props = defineProps([
@@ -62,13 +62,16 @@ function voteFromTable(value) {
 
 onMounted(async () => {
   if (props.name === "price_aa") {
-    const { asset, decimals } = props.assetMeta.assetMetaData;
-    const oracleData = await getOracleData(currentValue);
+    const { asset, decimals, name } = props.assetMeta.assetMetaData;
+    const targetPrice = await getTargetPriceByPriceAa(currentValue);
     const reservePrice = await getReservePriceFromPerpAA(props.perpAa);
     const r = await getPriceByAssets(props.perpAa, [asset]);
 
     price.value = r[asset] * reservePrice * 10 ** decimals;
-    selectedOracleData.value = oracleData;
+    selectedOracleData.value = {
+      name,
+      value: (targetPrice * 10 ** decimals).toPrecision(6),
+    };
   }
 });
 </script>
@@ -95,7 +98,7 @@ onMounted(async () => {
       <div class="mt-1">
         Currency being tracked: {{ selectedOracleData.name }}
       </div>
-      <div class="mt-1">Target price: {{ selectedOracleData.value }}</div>
+      <div class="mt-1">Target price: ${{ selectedOracleData.value }}</div>
       <div class="mt-1">Actual price ${{ price.toPrecision(6) }}</div>
     </div>
     <div class="mt-2">

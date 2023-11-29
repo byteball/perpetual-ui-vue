@@ -1,15 +1,47 @@
 import {
-  executeAAGetter,
   getAaStateVars,
+  getAllBalances,
+  getDataFeed,
   getDefinition,
 } from "@/services/DAGApi";
+import { small_pow } from "@/utils/smallPow";
 
-export function getReservePrice(aa) {
-  return executeAAGetter(aa, "get_reserve_price");
+export async function getReservePrice(aa) {
+  const def = (await getDefinition(aa)).definition;
+  const params = def[1].params;
+  if (params.oswap_aa) {
+    const x_asset = params.x_asset || "base";
+    const y_asset = params.y_asset || "base";
+    const balances = await getAllBalances(params.oswap_aa);
+    const vars = await getAaStateVars(params.oswap_aa);
+    const x_balance = balances[x_asset];
+    const y_balance = balances[y_asset];
+    const lp_shares = vars["lp_shares"];
+    const supply = lp_shares.issued;
+    const x_rate =
+      (await getDataFeed(params.x_oracle, params.x_feed_name)) /
+      small_pow(10, params.x_decimals || 0);
+    const y_rate =
+      (await getDataFeed(params.y_oracle, params.y_feed_name)) /
+      small_pow(10, params.y_decimals || 0);
+    const balance = x_balance * x_rate + y_balance * y_rate;
+    return balance / supply;
+  } else {
+    return (
+      (await getDataFeed(params.oracle, params.feed_name)) /
+      small_pow(10, params.decimals || 0)
+    );
+  }
 }
 
 export async function getTargetPriceByPriceAa(price_aa) {
-  return executeAAGetter(price_aa, "get_target_price");
+  const def = (await getDefinition(price_aa)).definition;
+  const params = def[1].params;
+
+  return (
+    (await getDataFeed(params.oracle, params.feed_name)) *
+    (params.multiplier || 1)
+  );
 }
 
 export async function getReservePriceFromPerpAA(aa) {

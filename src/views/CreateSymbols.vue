@@ -64,6 +64,7 @@ const suggestValueForSymbolField = async (reserveSymbol) => {
 function delContinueData() {
   localStorage.removeItem("tmp_create");
   localStorage.removeItem("tmp_create_waa");
+  localStorage.removeItem("tmp_create_wu");
   localStorage.removeItem("tmp_create_type");
 }
 
