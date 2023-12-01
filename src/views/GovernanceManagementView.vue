@@ -59,7 +59,7 @@ const metaForFinishedAssetsForRendering = computed(() => {
       result[asset] = assetMeta;
     } else if (
       activeTab.value === "trading" &&
-      assetMeta.assetMetaData &&
+      (assetMeta.assetMetaData || assetMeta.preipo) &&
       !assetMeta.presale
     ) {
       result[asset] = assetMeta;
@@ -109,9 +109,11 @@ async function prepareDataForPie() {
   amountByAsset[asset0] = pm.rawMeta.state.s0;
 
   for (let asset in metaForFinishedAssets.value) {
-    const { supply, assetMetaData } = metaForFinishedAssets.value[asset];
+    const { supply, assetMetaData, symbol } =
+      metaForFinishedAssets.value[asset];
     if (!supply) continue;
-    symbolByAsset[asset] = assetMetaData.name;
+
+    symbolByAsset[asset] = assetMetaData?.name || symbol || asset;
     amountByAsset[asset] = supply;
     assetList.push(asset);
   }
@@ -333,7 +335,8 @@ watch(
         Manage futures set
       </h1>
       <h2 class="mt-2 leading-6">
-        Change this set's parameters, the parameters of its futures, and add new futures.
+        Change this set's parameters, the parameters of its futures, and add new
+        futures.
       </h2>
     </div>
     <div v-if="notFound" class="text-center">AA not found</div>
