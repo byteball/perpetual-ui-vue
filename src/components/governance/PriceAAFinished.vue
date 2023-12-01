@@ -4,7 +4,7 @@ import { getOracleData } from "@/services/DAGApi";
 import { generateAndFollowLinkForVoteAddPriceAA } from "@/utils/generateLink";
 import LinkIcon from "@/components/icons/LinkIcon.vue";
 import VoteBlockForPriceAA from "@/components/governance/VoteBlockForPriceAA.vue";
-import { fullExplorerUrlForAddress } from "@/config";
+import { fullExplorerUrlForAddress, fullExplorerUrlForAsset } from "@/config";
 
 const props = defineProps([
   "perpetualAa",
@@ -38,7 +38,42 @@ onMounted(async () => {
 
 <template>
   <div
-    v-if="activeTab === 'presale' && assetMeta.presale && priceAa"
+    v-if="activeTab === 'trading' && assetMeta.preipo && !assetMeta.presale"
+    class="card bg-base-300 shadow-xl mb-8"
+  >
+    <div class="card-body gap-0 p-3 sm:p-8">
+      <div class="font-medium mb-4">{{ assetMeta.symbol }} (pre-ipo asset)</div>
+      <div class="font-medium text-sm mb-2">
+        Asset:
+        <span class="font-light text-sm">
+          <a
+            target="_blank"
+            :href="fullExplorerUrlForAsset + asset"
+            class="link link-hover text-sky-500"
+            >{{ asset }}</a
+          ></span
+        >
+      </div>
+      <div class="font-medium text-sm mb-2">
+        Max tokens:
+        <span class="font-light text-sm"> {{ assetMeta.max_tokens }} </span>
+      </div>
+      <div class="font-medium text-sm mb-2">
+        Initial price:
+        <span class="font-light text-sm">
+          {{ assetMeta.initial_price.toPrecision(6) }}
+        </span>
+      </div>
+      <div class="font-medium text-sm mb-2">
+        Last auction price:
+        <span class="font-light text-sm">
+          {{ assetMeta.last_auction_price.toPrecision(6) }}
+        </span>
+      </div>
+    </div>
+  </div>
+  <div
+    v-else-if="activeTab === 'presale' && assetMeta.presale && priceAa"
     class="card bg-base-300 shadow-xl mb-8"
   >
     <div class="card-body gap-0 p-3 sm:p-8">
