@@ -43,7 +43,7 @@ watch(activePresaleIndex, () => {
         >
           {{
             selectedAa
-              ? `${assetsMetadata[selectedPresaleAsset].name} in pool \n ${assetsMetadata[selectedAsset0].name} / ${assetsMetadata[selectedReserveAsset].name}`
+              ? `${assetsMetadata[selectedPresaleAsset].name} in set \n ${assetsMetadata[selectedAsset0].name} / ${assetsMetadata[selectedReserveAsset].name}`
               : `Please select presale`
           }}
         </div>
@@ -65,7 +65,7 @@ watch(activePresaleIndex, () => {
             class="py-3 px-4 cursor-pointer"
           >
             {{
-              `${assetsMetadata[presale.presaleAsset].name} in pool ${
+              `${assetsMetadata[presale.presaleAsset].name} in set ${
                 assetsMetadata[presale.asset0].name
               } / ${assetsMetadata[presale.reserveAsset].name}`
             }}
