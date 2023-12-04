@@ -354,11 +354,11 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
     <div class="p-2 mb-6">
       <h1 class="text-lg font-bold leading-7">Trade Decentralized Futures</h1>
       <h2 class="mt-2 leading-6">
-        Buy or sell futures powered by Pythagorean bonding curves (<RouterLink
+        Buy or sell futures powered by <RouterLink
           class="link text-sky-500 link-hover font-light"
           :to="`/faq`"
-          >learn more</RouterLink
-        >).
+          >Pythagorean bonding curves</RouterLink
+        >.
       </h2>
     </div>
 

@@ -5,7 +5,7 @@ export const propertyTips = {
   multiplier: "Multiplier applied to the oracle's price. It is used to account for decimals and return the price of the smallest indivisible unit of the asset.",
   swap_fee: "Swapping fee, percentage of the traded amount.",
   arb_profit_tax: `Additional fee that is charged as a percentage of arbitrageur profit.
-   It is assumed that arbitrageurs buy from the pool in order
+   It is assumed that arbitrageurs buy here in order
    to sell elsewhere and make a profit from the difference in prices.`,
   adjustment_period: "The time it takes for the asset's price to automatcally correct to the target price",
   presale_period: "Presale duration in days for newly launched assets",
