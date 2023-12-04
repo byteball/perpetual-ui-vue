@@ -284,8 +284,7 @@ onMounted(() => {
             ></path>
           </svg>
           <span class="text-left">
-            Done. After confirming the registration of the symbol for AA, it
-            will be available for trading
+            Done. After symbol registration for this asset is confirmed, it'll become available for trading.
           </span>
         </div>
         <div class="mt-6 text-center">
