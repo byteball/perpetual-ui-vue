@@ -352,11 +352,15 @@ async function calcAndSetDataForMetaAndLink() {
 }
 
 function swapPair() {
+  const asset2Value = asset2Amount.value.toString();
   const currentAsset1 = asset1.value;
   const currentAsset2 = asset2.value;
 
   setAsset1(currentAsset2);
   setAsset2(currentAsset1);
+  nextTick(() => {
+    asset1Amount.value = asset2Value;
+  });
 }
 
 onMounted(() => {
