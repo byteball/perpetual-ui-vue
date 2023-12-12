@@ -1,6 +1,8 @@
 <script setup>
 import { nextTick, onMounted, reactive, ref, watch } from "vue";
+import { storeToRefs } from "pinia";
 import debounce from "lodash.debounce";
+import { useCreatePerpStore } from "@/stores/createPerpStore";
 import { getOswapPoolsWithSymbols } from "@/services/OswapApi";
 import { isValidUnit } from "@/utils/validates";
 import { getAssetBySymbol } from "@/services/DAGApi";
@@ -12,6 +14,8 @@ import RegFormComponent from "@/components/create/RegFormComponent.vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
+const createStore = useCreatePerpStore();
+const { assetsState } = storeToRefs(createStore);
 
 const dataLoaded = ref(false);
 const reserveAssetInput = ref("");
@@ -86,34 +90,31 @@ function goBack() {
   step.value = 0;
 }
 
-function delContinueData() {
-  localStorage.removeItem("tmp_create");
-  localStorage.removeItem("tmp_create_waa");
-  localStorage.removeItem("tmp_create_wu");
-  localStorage.removeItem("tmp_create_type");
+function delContinueData(asset) {
+  createStore.removeAssetState(asset);
 }
 
-async function continueCreate() {
-  const tmp = localStorage.getItem("tmp_create");
-  if (tmp) {
-    const obj = JSON.parse(tmp);
-    if (obj.step === 3) {
-      await router.push(`/create/${obj.address}`);
-      return;
-    }
-    isContinue.value = true;
-    reserveAssetInput.value = obj.reserveAssetInput;
-    isOSWAPAsset.value = obj.isOSWAPAsset;
-    nextTick(() => {
-      reserveAsset.value = obj.reserveAsset;
-      reservePriceAA.value = obj.reservePriceAA;
-      step.value = obj.step;
-      continueData.value = {};
-    });
+async function continueCreate(asset) {
+  const obj = createStore.getStateByAsset(asset);
+  if (!obj) return;
+
+  if (obj.step === 3) {
+    await router.push(`/create/${obj.address}`);
+    return;
   }
+  isContinue.value = true;
+  reserveAssetInput.value = obj.reserveAssetInput;
+  isOSWAPAsset.value = obj.isOSWAPAsset;
+  nextTick(() => {
+    reserveAsset.value = obj.reserveAsset;
+    reservePriceAA.value = obj.reservePriceAA;
+    step.value = obj.step;
+    continueData.value = {};
+  });
 }
 
 watch([step, isOSWAPAsset, reservePriceAA], () => {
+  if (step.value === 0) return;
   const obj = {
     step: step.value,
     reserveAsset: reserveAsset.value,
@@ -122,7 +123,7 @@ watch([step, isOSWAPAsset, reservePriceAA], () => {
     reserveAssetInput: reserveAssetInput.value,
   };
 
-  localStorage.setItem("tmp_create", JSON.stringify(obj));
+  createStore.setAssetState(obj.reserveAsset, obj);
 });
 
 onMounted(async () => {
@@ -131,9 +132,8 @@ onMounted(async () => {
   oswapMetadataByAsset.value = r.metaByAsset;
   dataLoaded.value = true;
 
-  const tmp = localStorage.getItem("tmp_create");
-  if (tmp) {
-    continueData.value = JSON.parse(tmp);
+  if (Object.keys(assetsState.value).length) {
+    continueData.value = assetsState.value;
   }
 });
 </script>
@@ -160,9 +160,14 @@ onMounted(async () => {
           >
             Creation not completed
           </div>
-          <div class="mt-8">
-            <button class="btn btn-primary" @click="continueCreate()">
-              Continue creating {{ continueData.reserveAssetInput }}
+          <div class="mt-6">
+            <button
+              v-for="asset in Object.keys(continueData)"
+              :key="asset"
+              class="btn btn-primary mt-4"
+              @click="continueCreate(asset)"
+            >
+              Continue creating {{ continueData[asset].reserveAssetInput }}
             </button>
           </div>
         </div>

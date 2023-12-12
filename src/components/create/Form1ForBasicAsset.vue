@@ -1,11 +1,15 @@
 <script setup>
 import { onMounted, ref, watch } from "vue";
+import { useCreatePerpStore } from "@/stores/createPerpStore";
 import FormCreateByUsdOracle from "@/components/create/FormCreateByUsdOracle.vue";
 import FormCreateByMyAA from "@/components/create/FormCreateByMyAA.vue";
 import BackButtonComponent from "@/components/BackButtonComponent.vue";
 
 defineProps(["reserveAssetSymbol"]);
 const emit = defineEmits(["setReservePriceAa", "goBack"]);
+
+const createStore = useCreatePerpStore();
+const { currentAssetState } = createStore;
 
 const type = ref("");
 
@@ -18,11 +22,12 @@ function goPrevStep() {
 }
 
 watch(type, () => {
-  localStorage.setItem("tmp_create_type", type.value);
+  createStore.setCurrentAssetState({ type: type.value });
 });
 
 onMounted(() => {
-  const t = localStorage.getItem("tmp_create_type");
+  console.log(currentAssetState.type);
+  const t = currentAssetState?.type;
   if (t) {
     type.value = t;
   }

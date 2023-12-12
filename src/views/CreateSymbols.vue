@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useCreatePerpStore } from "@/stores/createPerpStore";
 import emitter from "@/services/emitter";
 
 import Client from "@/services/Obyte";
@@ -24,6 +25,8 @@ const buttonEnabled = ref(false);
 const perpetualMeta = ref();
 
 const currentAA = computed(() => route.params.aa);
+
+const createStore = useCreatePerpStore();
 
 const fillInputsForStep = async (assetUnit) => {
   const reserveAssetMetadata = await getAssetMetadata(
@@ -61,11 +64,8 @@ const suggestValueForSymbolField = async (reserveSymbol) => {
   symbol.value = newSymbolSuggestion;
 };
 
-function delContinueData() {
-  localStorage.removeItem("tmp_create");
-  localStorage.removeItem("tmp_create_waa");
-  localStorage.removeItem("tmp_create_wu");
-  localStorage.removeItem("tmp_create_type");
+function delContinueData(asset) {
+  createStore.removeAssetState(asset);
 }
 
 watch(exists, async () => {
@@ -125,11 +125,14 @@ emitter.on(`aa_request_${import.meta.env.VITE_REGISTRY_AA}`, async (data) => {
   }
 
   if (payload.asset === asset.value && route.query.step === "2") {
+    const { [currentAA.value]: currentPerpetualMeta } = await getMetaForPerpAAs(
+      [currentAA.value]
+    );
     await router.push({
       path: `/create/${currentAA.value}`,
       query: { step: 3 },
     });
-    delContinueData();
+    delContinueData(currentPerpetualMeta.reserve_asset);
   }
 });
 
@@ -284,7 +287,8 @@ onMounted(() => {
             ></path>
           </svg>
           <span class="text-left">
-            Done. After symbol registration for this asset is confirmed, it'll become available for trading.
+            Done. After symbol registration for this asset is confirmed, it'll
+            become available for trading.
           </span>
         </div>
         <div class="mt-6 text-center">

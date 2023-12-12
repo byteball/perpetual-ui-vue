@@ -3,6 +3,7 @@ import { ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useAaInfoStore } from "@/stores/aaInfo";
+import { useCreatePerpStore } from "@/stores/createPerpStore";
 import { parseDataFromRequest } from "@/utils/parseDataFromRequest";
 import emitter from "@/services/emitter";
 import { clearObject } from "@/utils/clearObject";
@@ -26,6 +27,8 @@ defineEmits(["goBack"]);
 
 const store = useAaInfoStore();
 const { meta } = storeToRefs(store);
+
+const createStore = useCreatePerpStore();
 
 const router = useRouter();
 
@@ -132,17 +135,23 @@ emitter.on(`aa_request_${ADDRESSES.factory_aa}`, async (data) => {
 
   if (JSON.stringify(_d) === JSON.stringify(obj)) {
     const address = getAddressByBaseAA(ADDRESSES.base_aa, obj);
-    localStorage.setItem(
-      "tmp_create",
-      JSON.stringify({
-        step: 3,
-        address,
-        reserveAssetSymbol: props.reserveAssetSymbol,
-      })
-    );
+    createStore.setCurrentAssetState({
+      step: 3,
+      address,
+      reserveAssetSymbol: props.reserveAssetSymbol,
+    });
+
     await router.push(`/create/${address}`);
   }
 });
+
+function setStoreData(address) {
+  createStore.setCurrentAssetState({
+    step: 3,
+    address,
+    reserveAssetSymbol: props.reserveAssetSymbol,
+  });
+}
 
 watch(
   [
@@ -278,6 +287,7 @@ watch(
     <RouterLink
       v-if="!existsError && asset0NotRegistered"
       :to="`/create/${aaForRegSymbol}`"
+      @click="setStoreData(aaForRegSymbol)"
       class="btn btn-primary"
       >Create</RouterLink
     >

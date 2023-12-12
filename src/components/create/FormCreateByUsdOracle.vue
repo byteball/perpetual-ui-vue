@@ -1,6 +1,7 @@
 <script setup>
 import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { ADDRESSES } from "@/config";
+import { useCreatePerpStore } from "@/stores/createPerpStore";
 import { followLink, generateDefinitionLink } from "@/utils/generateLink";
 import { getAddressByDefinition } from "@/utils/addressUtils";
 import { getDefinition, isUnitStable } from "@/services/DAGApi";
@@ -11,6 +12,9 @@ import OracleComponent from "@/components/OracleComponent.vue";
 
 defineProps(["reserveAssetSymbol"]);
 const emit = defineEmits(["setReservePriceAa", "prevStep"]);
+
+const createStore = useCreatePerpStore();
+const { currentAssetState } = createStore;
 
 const oracleResult = ref({});
 const errorMessage = ref("");
@@ -81,7 +85,7 @@ async function openWallet() {
 
 async function checkAndSetLoadedVar() {
   await nextTick();
-  const wu = localStorage.getItem("tmp_create_wu");
+  const wu = currentAssetState?.wu;
   if (Object.keys(oracleResult.value).length) {
     if (wu) return;
     await checkDefinitionAndReturnParamsIfNotExists();
@@ -113,18 +117,18 @@ function oracleDataUpdated(result) {
 }
 
 watch(watchAA, () => {
-  localStorage.setItem("tmp_create_waa", watchAA.value);
+  createStore.setCurrentAssetState({ waa: watchAA.value });
 });
 
 watch(watchUnit, () => {
-  localStorage.setItem("tmp_create_wu", watchUnit.value);
+  createStore.setCurrentAssetState({ wu: watchUnit.value });
 });
 
 onMounted(async () => {
-  const wu = localStorage.getItem("tmp_create_wu");
+  const wu = currentAssetState?.wu;
   if (!wu) return;
 
-  const waa = localStorage.getItem("tmp_create_waa");
+  const waa = currentAssetState.waa;
 
   awaiting.value = true;
   const unitStable = await isUnitStable(wu);
