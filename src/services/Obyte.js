@@ -11,6 +11,7 @@ const aasForWatch = [
   ADDRESSES.reserve_price_oswap,
 ];
 
+let isFirstConnect = true;
 const aaEventNames = {};
 aasForWatch.forEach((aa) => {
   aaEventNames[aa] = {
@@ -35,12 +36,15 @@ client.onConnect(async () => {
   const store = useAaInfoStore();
   const { setAAs, setStatus, setMeta } = store;
 
-  const aas = await getAasCreatedByFactory();
-  setAAs(aas);
+  if (isFirstConnect) {
+    const aas = await getAasCreatedByFactory();
+    setAAs(aas);
 
-  const meta = await getMetaForPerpAAs(aas);
-  setMeta(meta);
-  setStatus("initialized");
+    const meta = await getMetaForPerpAAs(aas);
+    setMeta(meta);
+    setStatus("initialized");
+    isFirstConnect = false;
+  }
 
   const heartbeat = setInterval(() => {
     client.api.heartbeat();
