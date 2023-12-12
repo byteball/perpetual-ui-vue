@@ -135,7 +135,6 @@ function oracleDataUpdated(result) {
   }
 
   if (result.oracleAddress) {
-    console.log(result);
     oracleResult.value = result;
     if (result.symbolMetadata?.decimals) {
       const d = result.symbolMetadata.decimals;
@@ -231,9 +230,13 @@ onUnmounted(() => {
 
     <div class="p-2 mb-6">
       <h1 class="text-lg font-bold leading-7">Add new perpetual future</h1>
-      <h2 class="mt-2 leading-6">
-        Create a governance proposal to add a new perpetual future asset tracking some currency, stock, or commodity. The proposal will be then be voted by the governance token holders (you can participate), and if approved, the new asset will first become available for presale, then regular trading will open.
-      </h2>
+      <div class="mt-2 leading-6">
+        Create a governance proposal to add a new perpetual future asset
+        tracking some currency, stock, or commodity. The proposal will be then
+        be voted by the governance token holders (you can participate), and if
+        approved, the new asset will first become available for presale, then
+        regular trading will open.
+      </div>
     </div>
 
     <div v-if="step === 1">
@@ -329,8 +332,8 @@ onUnmounted(() => {
             ></path>
           </svg>
           <div>
-            To continue, you need to wait until the price AA is published. If you
-            have not done so, click back
+            To continue, you need to wait until the price AA is published. If
+            you have not done so, click back
           </div>
           <div>
             <a class="btn btn-sm btn-primary" @click="back()">Back</a>

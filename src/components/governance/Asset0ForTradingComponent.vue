@@ -7,12 +7,13 @@ const props = defineProps([
   "asset0Metadata",
   "priceAa",
   "reservePriceValue",
+  "metaByActiveAA",
 ]);
 const price = ref(0);
 
 onMounted(async () => {
   const { asset } = props.asset0Metadata;
-  const r = await getPriceByAssets(props.aa, [asset]);
+  const r = await getPriceByAssets(props.aa, [asset], props.metaByActiveAA);
   price.value = r[asset] * props.reservePriceValue;
 });
 </script>

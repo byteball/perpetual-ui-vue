@@ -18,9 +18,10 @@ const isPresaleFinished = (metaByAA, presaleAsset) => {
   const targetPresaleAmount = tokenShareThreshold * reserve;
 
   return (
-    targetPresaleAmount <= currentPresaleAmount ||
-    !presaleAssetData?.presale ||
-    finishDate.diff(dayjs()) < 0
+    currentPresaleAmount &&
+    (targetPresaleAmount <= currentPresaleAmount ||
+      !presaleAssetData?.presale ||
+      finishDate.diff(dayjs()) < 0)
   );
 };
 

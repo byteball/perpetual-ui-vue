@@ -3,7 +3,6 @@ import { computed } from "vue";
 
 const props = defineProps(["fee", "withDiff"]);
 const absFee = computed(() => Math.abs(props.fee));
-console.log(absFee);
 </script>
 
 <template>

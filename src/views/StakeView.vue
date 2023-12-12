@@ -161,10 +161,10 @@ const showManageStakeModal = (poolAA) => {
   <div class="container w-full sm:w-[860px] m-auto mt-2 p-6 sm:p-8">
     <div class="p-2 mb-6">
       <h1 class="text-lg font-bold leading-7">Stake</h1>
-      <h2 class="mt-2 leading-6">
+      <div class="mt-2 leading-6">
         Stake the governance asset of a futures set in order to participate in
         the governance of the set.
-      </h2>
+      </div>
     </div>
     <div v-if="address" class="mb-2">
       <button

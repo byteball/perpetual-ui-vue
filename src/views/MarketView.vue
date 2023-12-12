@@ -16,11 +16,13 @@ import NumberInput from "@/components/inputs/NumberInput.vue";
 import Loading from "@/components/icons/LoadingIcon.vue";
 import TextInput from "@/components/inputs/TextInput.vue";
 import {
+  getPriceByAssets,
   getPriceByData,
   getReservePrice,
   getTargetPriceByPresaleAsset,
 } from "@/services/PerpAPI";
 import FeeViewComponent from "@/components/FeeViewComponent.vue";
+import { adjustPrices } from "@/utils/adjustPrices";
 
 const store = useAaInfoStore();
 const { aas, meta, status } = storeToRefs(store);
@@ -55,6 +57,7 @@ const newPrice = ref(0);
 const targetPrice = ref(0);
 const targetAsset = ref("");
 const diff = ref("");
+const nameAssetForPrice = ref("");
 
 const resultError = ref("");
 
@@ -150,12 +153,12 @@ function getDecimalsAmountByAsset(amount, asset) {
       );
 }
 
-function calcDataForBuy() {
+async function calcDataForBuy() {
   const { reserve_asset, state, asset0 } = metaByActiveAA.value;
   const aa = pairedAssets.value[asset2.value];
-
+  const deltaReserve = getAmountByAsset(asset1Amount.value, asset1.value);
   const l = generateLink(
-    getAmountByAsset(asset1Amount.value, asset1.value),
+    deltaReserve,
     {
       asset: asset2.value,
     },
@@ -165,15 +168,22 @@ function calcDataForBuy() {
     true
   );
 
-  const r = getExchangeResultByState(
-    0,
-    Number(asset1Amount.value) *
-      10 ** assets.value.nameAndDecimalsByAsset[asset1.value].decimals,
-    asset2.value,
+  const s = { ...state };
+  const assetInfo =
     asset2.value === asset0
       ? null
-      : { ...getAssetInfoFromMeta(asset2.value, aa, meta.value) },
-    { ...state },
+      : { ...getAssetInfoFromMeta(asset2.value, aa, meta.value) };
+
+  if (asset2.value !== state.asset0) {
+    await adjustPrices(asset2.value, assetInfo, s, metaByActiveAA.value);
+  }
+
+  const r = getExchangeResultByState(
+    0,
+    deltaReserve - (asset1.value === "base" ? 1000 : 0),
+    asset2.value,
+    assetInfo,
+    s,
     metaByActiveAA.value
   );
 
@@ -187,12 +197,13 @@ function calcDataForBuy() {
   };
 }
 
-function calcDataForSell() {
+async function calcDataForSell() {
   const { state, asset0 } = metaByActiveAA.value;
   const aa = pairedAssets.value[asset2.value];
 
+  const tokens = getAmountByAsset(asset1Amount.value, asset1.value);
   const l = generateLink(
-    getAmountByAsset(asset1Amount.value, asset1.value),
+    tokens,
     {
       asset: asset1.value,
     },
@@ -202,16 +213,23 @@ function calcDataForSell() {
     true
   );
 
-  const r = getExchangeResultByState(
-    Number(asset1Amount.value) *
-      10 ** assets.value.nameAndDecimalsByAsset[asset1.value].decimals,
-    0,
-    asset1.value,
+  const assetInfo =
     asset1.value === asset0
       ? null
-      : { ...getAssetInfoFromMeta(asset1.value, aa, meta.value) },
-    { ...state },
-    asset1.value
+      : { ...getAssetInfoFromMeta(asset1.value, aa, meta.value) };
+  const s = { ...state };
+
+  if (asset2.value !== state.asset0) {
+    await adjustPrices(asset2.value, assetInfo, s, metaByActiveAA.value);
+  }
+
+  const r = getExchangeResultByState(
+    tokens - (asset1.value === "base" ? 1000 : 0),
+    0,
+    asset1.value,
+    assetInfo,
+    s,
+    metaByActiveAA.value
   );
 
   if (r.payout === undefined || isNaN(r.payout)) {
@@ -267,43 +285,50 @@ async function calcAndSetDataForMetaAndLink() {
   let assetAmount = 0;
   if (metaByActiveAA.value.reserve_asset === asset1.value) {
     assetForPrice = asset2.value;
-    data = calcDataForBuy();
+    data = await calcDataForBuy();
     assetAmount =
       Number(data.result.delta_s) /
       10 ** assets.value.nameAndDecimalsByAsset[asset2.value].decimals;
   } else {
     assetForPrice = asset1.value;
-    data = calcDataForSell();
+    data = await calcDataForSell();
     assetAmount =
       Number(data.result.payout) /
       10 ** assets.value.nameAndDecimalsByAsset[asset2.value].decimals;
   }
 
-  const _oldPrice = data.result.old_price;
-  const _newPrice = data.result.new_price;
-
-  const d = ((_newPrice - _oldPrice) / _oldPrice) * 100;
+  if (data.result.error) {
+    resultError.value = data.result.error;
+    return;
+  }
 
   const reservePriceAa = metaByActiveAA.value.reserve_price_aa;
   const reservePrice = await getReservePrice(reservePriceAa);
-  const price = getPriceByData(
+  const r = await getPriceByAssets(
+    metaByActiveAA.value.aa,
+    [assetForPrice],
+    metaByActiveAA.value
+  );
+  const oldPrice = r[assetForPrice];
+  const price = await getPriceByData(
     metaByActiveAA.value.aa,
     assetForPrice,
     data.result.state,
-    data.result.asset_info
+    { ...data.result.asset_info },
+    metaByActiveAA.value
   );
+
+  const d = ((price - oldPrice) / oldPrice) * 100;
 
   const amount =
     10 ** assets.value.nameAndDecimalsByAsset[assetForPrice].decimals;
+  nameAssetForPrice.value =
+    assets.value.nameAndDecimalsByAsset[assetForPrice].name;
   newPrice.value = amount * price * reservePrice;
   diff.value = d.toFixed(2);
   link.value = data.link;
   feeInPercent.value = data.result.fee_percent;
-  asset2Amount.value = assetAmount;
-
-  if (data?.result?.error) {
-    resultError.value = data.result.error;
-  }
+  asset2Amount.value = assetAmount.toString();
 
   targetPrice.value = 0;
 
@@ -353,13 +378,13 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
   <div class="container w-full sm:w-[512px] m-auto mt-2 p-6 sm:p-8">
     <div class="p-2 mb-6">
       <h1 class="text-lg font-bold leading-7">Trade Decentralized Futures</h1>
-      <h2 class="mt-2 leading-6">
+      <div class="mt-2 leading-6">
         Buy or sell futures powered by Pythagorean bonding curves (<RouterLink
           class="link text-sky-500 link-hover font-light"
           :to="`/faq`"
           >learn more</RouterLink
         >).
-      </h2>
+      </div>
     </div>
 
     <div class="card bg-base-200 shadow-xl">
@@ -460,13 +485,17 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
           >
             {{ resultError }}
           </span>
-          <div v-if="asset2Amount" class="mt-4">
+          <div v-if="asset2Amount > 0" class="mt-4">
             <div>Fee: <FeeViewComponent :fee="Number(feeInPercent)" /></div>
             <div>
-              New price: ${{ newPrice.toPrecision(6) }} (<FeeViewComponent
-                :fee="Number(diff)"
-                :with-diff="true"
-              />)
+              New price
+              {{ nameAssetForPrice }}: ${{ newPrice.toPrecision(6) }}
+              <template v-if="isFinite(diff)"
+                >(<FeeViewComponent
+                  :fee="Number(diff)"
+                  :with-diff="true"
+                />)</template
+              >
             </div>
             <div v-if="targetPrice">Target price: ${{ targetPrice }}</div>
             <div v-if="targetPrice">

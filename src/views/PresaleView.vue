@@ -366,9 +366,10 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
 
     <div class="p-2 mb-6">
       <h1 class="text-lg font-bold leading-7">Presale</h1>
-      <h2 class="mt-2 leading-6">
-        Participate in presales of newly launched futures. They are sold at a fixed price sourced from an oracle.
-      </h2>
+      <div class="mt-2 leading-6">
+        Participate in presales of newly launched futures. They are sold at a
+        fixed price sourced from an oracle.
+      </div>
     </div>
 
     <div class="card bg-base-200 shadow-xl">

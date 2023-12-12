@@ -116,8 +116,8 @@ function toggle(e) {
           <div class="flex items-center justify-center">
             <img src="/logo.svg" class="h-14 w-14" alt="pyth.ooo" />
             <div class="flex flex-col">
-              <h1 class="text-sm font-bold leading-5">Pythagorean</h1>
-              <h2 class="text-xs">perpetual futures</h2>
+              <div class="text-sm font-bold leading-5">Pythagorean</div>
+              <div class="text-xs">perpetual futures</div>
             </div>
           </div>
         </RouterLink>
