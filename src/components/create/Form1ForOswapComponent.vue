@@ -1,5 +1,6 @@
 <script setup>
 import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
+import { useCreatePerpStore } from "@/stores/createPerpStore";
 import LoadingIcon from "@/components/icons/LoadingIcon.vue";
 import {
   getAssetMetadataByArray,
@@ -15,6 +16,9 @@ import OracleComponent from "@/components/OracleComponent.vue";
 
 const props = defineProps(["reserveAsset", "reserveAssetSymbol", "metadata"]);
 const emit = defineEmits(["setReservePriceAa", "goBack"]);
+
+const createStore = useCreatePerpStore();
+const { currentAssetState } = createStore;
 
 const metadataByAsset = ref({});
 const isLoaded = ref(false);
@@ -125,7 +129,7 @@ watch(
 
 async function checkAndSetLoadedVar() {
   await nextTick();
-  const wu = localStorage.getItem("tmp_create_wu");
+  const wu = currentAssetState?.wu;
   if (oracleXLoaded.value && oracleYLoaded.value) {
     if (
       Object.keys(xOracleResult.value).length &&
@@ -188,18 +192,18 @@ function goBack() {
 }
 
 watch(watchAA, () => {
-  localStorage.setItem("tmp_create_waa", watchAA.value);
+  createStore.setCurrentAssetState({ waa: watchAA.value });
 });
 
 watch(watchUnit, () => {
-  localStorage.setItem("tmp_create_wu", watchUnit.value);
+  createStore.setCurrentAssetState({ wu: watchUnit.value });
 });
 
 onMounted(async () => {
-  const wu = localStorage.getItem("tmp_create_wu");
+  const wu = currentAssetState?.wu;
   if (!wu) return;
 
-  const waa = localStorage.getItem("tmp_create_waa");
+  const waa = currentAssetState.waa;
 
   awaiting.value = true;
   const unitStable = await isUnitStable(wu);
