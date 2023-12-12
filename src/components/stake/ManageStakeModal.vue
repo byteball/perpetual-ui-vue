@@ -106,12 +106,12 @@ const termMeta = computed(() => {
     !props.params.metaByAA ||
     !props.params.metaByAA.stakingVars[`user_${address.value}_a0`]
   )
-    return { days: 0, ended: true };
+    return { days: 13, ended: true };
 
   const expiry_ts =
     props.params.metaByAA.stakingVars[`user_${address.value}_a0`]?.expiry_ts;
 
-  if (!expiry_ts) return { days: 0, ended: true };
+  if (!expiry_ts) return { days: 13, ended: true };
 
   const days = Math.floor((expiry_ts - Math.floor(Date.now() / 1000)) / 86400);
 
@@ -121,14 +121,6 @@ const termMeta = computed(() => {
     date: dayjs.unix(expiry_ts).format("DD MMM YYYY HH:mm:ss"),
   };
 });
-
-function setAmountByUserBalance() {
-  if (address.value && balanceByAsset.value) {
-    amount.value.value = String(balanceByAsset.value);
-  } else {
-    amount.value.value = "";
-  }
-}
 
 function setAmountByUserStakeBalance() {
   if (address.value && props.params.userStakeBalance) {
@@ -141,10 +133,14 @@ function setAmountByUserStakeBalance() {
 function setTab(tabName) {
   activeTab.value = tabName;
   if (tabName === "stake") {
-    setAmountByUserBalance();
+    amount.value.value = "";
   } else {
     setAmountByUserStakeBalance();
   }
+}
+
+function setMyBalance() {
+  amount.value.value = String(balanceByAsset.value);
 }
 
 function getData() {
@@ -164,8 +160,6 @@ function getData() {
     };
   }
 }
-
-watch(balanceByAsset, setAmountByUserBalance);
 
 watch(
   [amount, term, votedGroupKey, percentages],
@@ -256,13 +250,6 @@ watch(
         `Manage ${props.params.poolReserveAssetName}/${props.params.poolSymbolAndDecimal.name} stake`
       }}
     </div>
-    <!--div class="text-center mt-2">
-      <RouterLink
-        :to="`/governance/management/${params.metaByAA.aa}`"
-        class="link link-hover text-sky-500"
-        >Governance page</RouterLink
-      >
-    </div-->
     <div class="form-control">
       <div v-if="props.params.metaByAA && props.params.poolSymbolAndDecimal">
         <div>
@@ -287,7 +274,17 @@ watch(
             <div class="form-control">
               <div>
                 <label class="label">
-                  <span class="label-text">Amount</span>
+                  <span class="label-text"
+                    >Amount
+                    <template v-if="balanceByAsset > 0"
+                      >-
+                      <a
+                        class="link link-hover text-sky-500"
+                        @click="setMyBalance"
+                        >Use my balance</a
+                      ></template
+                    ></span
+                  >
                 </label>
                 <NumberInput
                   v-model="amount.value"

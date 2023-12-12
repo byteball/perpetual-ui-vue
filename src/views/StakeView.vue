@@ -169,14 +169,14 @@ const showManageStakeModal = (poolAA) => {
     <div v-if="address" class="mb-2">
       <button
         class="btn btn-sm"
-        :class="{ 'btn-active': !poolsListFilter }"
+        :class="{ 'btn-primary': !poolsListFilter }"
         @click="changePoolFilter('all')"
       >
         All
       </button>
       <button
         class="btn btn-sm ml-1"
-        :class="{ 'btn-active': poolsListFilter }"
+        :class="{ 'btn-primary': poolsListFilter }"
         @click="changePoolFilter('my')"
       >
         My sets

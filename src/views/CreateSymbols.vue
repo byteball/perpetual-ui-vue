@@ -44,7 +44,7 @@ const suggestValueForSymbolField = async (reserveSymbol) => {
   const registryAA = Client.api.getOfficialTokenRegistryAddress();
 
   let index = 1;
-  let newSymbolSuggestion = `${reserveSymbol}_P${index}`;
+  let newSymbolSuggestion = `${reserveSymbol}_G${index}`;
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
@@ -55,7 +55,7 @@ const suggestValueForSymbolField = async (reserveSymbol) => {
 
     if (!asset) break;
 
-    newSymbolSuggestion = `${reserveSymbol}_P${++index}`;
+    newSymbolSuggestion = `${reserveSymbol}_G${++index}`;
   }
 
   symbol.value = newSymbolSuggestion;

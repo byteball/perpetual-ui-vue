@@ -38,12 +38,13 @@ const assets = ref({
 });
 const pairedAssets = ref([]);
 const asset1 = ref("");
-const asset1Amount = ref("");
+const asset1Amount = ref("1");
 const asset2 = ref("");
 const asset2Amount = ref("");
 const metaByActiveAA = ref();
 const modalForAsset1 = ref();
 const modalForAsset2 = ref();
+const searchAsset1 = ref("");
 
 const balanceByAsset = computed(() => {
   if (!asset1.value) return 0;
@@ -111,19 +112,22 @@ function setAmount1ByBalance() {
   if (!address.value) return;
 
   if (!balanceByAsset.value) {
-    asset1Amount.value = "";
+    asset1Amount.value = "1";
     return;
   }
 
-  asset1Amount.value = String(
-    getDecimalsAmountByAsset(balanceByAsset.value, asset1.value)
-  );
+  let amount = getDecimalsAmountByAsset(balanceByAsset.value, asset1.value);
+  if (amount >= 1) {
+    amount = 1;
+  }
+
+  asset1Amount.value = String(amount);
 }
 
 function setAsset1(asset) {
   asset1.value = asset;
   asset2.value = "";
-  asset1Amount.value = "";
+  asset1Amount.value = "1";
   asset2Amount.value = "";
   modalForAsset1.value.checked = false;
   setAmount1ByBalance();
@@ -529,15 +533,29 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
     class="modal-toggle"
   />
   <label for="asset1Modal" class="modal cursor-pointer">
-    <label class="modal-box relative" for="">
-      <div
-        v-for="asset in assets.assetList"
-        :key="asset"
-        class="my-2 mx-4 cursor-pointer hover:text-gray-600"
-        :class="{ 'text-sky-500': asset1 === asset }"
-        @click="setAsset1(asset)"
-      >
-        {{ assets.nameAndDecimalsByAsset[asset].name }}
+    <label class="modal-box relative overflow-hidden" for="">
+      <div>
+        <input
+          type="text"
+          v-model="searchAsset1"
+          placeholder="Search asset"
+          class="input input-bordered w-full mb-2"
+        />
+      </div>
+      <div style="max-height: calc(100vh - 11.5rem); overflow: auto">
+        <div
+          v-for="asset in assets.assetList.filter((v) => {
+            if (!searchAsset1) return true;
+            const name = assets.nameAndDecimalsByAsset[v].name;
+            return name.toLowerCase().includes(searchAsset1.toLowerCase());
+          })"
+          :key="asset"
+          class="my-2 mx-4 cursor-pointer hover:text-gray-600"
+          :class="{ 'text-sky-500': asset1 === asset }"
+          @click="setAsset1(asset)"
+        >
+          {{ assets.nameAndDecimalsByAsset[asset].name }}
+        </div>
       </div>
     </label>
   </label>
