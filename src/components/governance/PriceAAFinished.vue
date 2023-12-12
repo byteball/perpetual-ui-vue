@@ -16,13 +16,13 @@ const props = defineProps([
   "votes",
   "allowedControl",
   "activeTab",
+  "metaByActiveAA",
 ]);
 const emit = defineEmits(["reqRegister", "reqVote"]);
 
 const selectedOracleData = ref({});
 
 function reqRegister() {
-  console.log("props", props.asset);
   emit("reqRegister", props.asset);
 }
 
@@ -246,6 +246,7 @@ onMounted(async () => {
             :asset-meta="assetMeta"
             :votes-by-name="votes['change_price_aa'][asset]"
             :allowed-control="allowedControl"
+            :meta-by-active-a-a="metaByActiveAA"
             @reqVote="reqVote"
           />
           <div class="divider mt-8"></div>
@@ -257,6 +258,7 @@ onMounted(async () => {
             :asset-meta="assetMeta"
             :votes-by-name="votes['change_drift_rate'][asset]"
             :allowed-control="allowedControl"
+            :meta-by-active-a-a="metaByActiveAA"
             @reqVote="reqVote"
           />
         </div>

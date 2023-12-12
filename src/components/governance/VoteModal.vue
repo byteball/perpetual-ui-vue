@@ -82,7 +82,7 @@ function sendVotingEmit() {
 </script>
 
 <template>
-  <DialogPanel class="w-full max-w-xl rounded bg-base-200 p-8">
+  <DialogPanel class="w-full max-w-xl rounded-2xl bg-base-200 p-8">
     <div class="text-center text-2xl font-bold">{{ params.title }}</div>
     <div class="mt-8 mb-8">
       <div>

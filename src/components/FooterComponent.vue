@@ -73,7 +73,7 @@ const links = [
 
 <template>
   <footer
-    class="footer footer-center p-10 bg-base-200 text-base-content rounded absolute bottom-0"
+    class="footer footer-center p-10 bg-base-200 text-base-content rounded absolute bottom-0 text-sm gap-y-6"
   >
     <nav>
       <div class="grid grid-flow-col gap-4">
@@ -93,7 +93,7 @@ const links = [
       </div>
     </nav>
     <aside>
-      <p>
+      <p class="text-xs">
         The Pythagorean perpetual futures website (“Site”) is for informational
         and educational purposes only. The Site displays the existing perpetual futures deployed on the Obyte DAG and is a graphical user interface for
         both visualizing data from on-chain activity and interacting with
@@ -109,7 +109,10 @@ const links = [
       </p>
     </aside>
     <aside>
-      <p>Copyright © 2023 Obyte, all rights reserved</p>
+      <p class="text-sm">
+        Copyright © 2023 <a href="https://obyte.org" target="_blank">Obyte</a>,
+        all rights reserved
+      </p>
     </aside>
   </footer>
 </template>

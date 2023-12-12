@@ -38,6 +38,7 @@ const votes = ref({});
 const modalParams = ref({});
 const registerSymbolAsset = ref("");
 
+const metaByActiveAA = ref({});
 const preparedMeta = ref({});
 const priceAAsDefinition = ref({});
 const metaForFinishedAssets = ref({});
@@ -90,7 +91,10 @@ const currentVP = computed(() => {
 });
 
 const setTab = (tabName) => {
-  if (!Object.keys(metaForFinishedAssets.value).length && tabName !== "vote") {
+  if (
+    !Object.keys(metaForFinishedAssets.value).length &&
+    tabName === "presale"
+  ) {
     return;
   }
   activeTab.value = tabName;
@@ -118,7 +122,11 @@ async function prepareDataForPie() {
     assetList.push(asset);
   }
 
-  const r = await getPriceByAssets(perpetualAA.value, assetList);
+  const r = await getPriceByAssets(
+    perpetualAA.value,
+    assetList,
+    metaByActiveAA.value
+  );
   let asset0Price = 0;
   let ps = [];
   for (let asset in r) {
@@ -191,8 +199,9 @@ async function init() {
   }
 
   if (!Object.keys(metaForFinishedAssets.value).length) {
-    setTab("vote");
+    setTab("trading");
   }
+  metaByActiveAA.value = meta.value[perpetualAA.value];
   dataForPie.value = await prepareDataForPie();
   ready.value = true;
 }
@@ -334,10 +343,10 @@ watch(
       <h1 class="text-lg font-bold leading-7 inline-block">
         Manage futures set
       </h1>
-      <h2 class="mt-2 leading-6">
+      <div class="mt-2 leading-6">
         Change this set's parameters, the parameters of its futures, and add new
         futures.
-      </h2>
+      </div>
     </div>
     <div v-if="notFound" class="text-center">AA not found</div>
     <div v-else class="card bg-base-200 shadow-xl mb-4">
@@ -373,7 +382,7 @@ watch(
           <div class="text-sm mt-1">
             Reserve: {{ preparedMeta.reserve }}
             {{ preparedMeta.reserveAsset.name }} (${{
-              +preparedMeta.reserveInUsd.toFixed(2)
+              +preparedMeta.reserveInUsd.toPrecision(6)
             }})
           </div>
 
@@ -495,17 +504,13 @@ watch(
           />
         </div>
 
-        <div
-          :key="'p_' + address || 'address'"
-          v-if="Object.keys(priceAAsDefinition).length"
-        >
+        <div :key="'p_' + address || 'address'">
           <div class="text-lg font-bold mt-8">Tokens issued in this set</div>
           <div class="tabs tabs-boxed mt-4 mb-2">
             <a
               class="tab"
               :class="{
                 'tab-active': activeTab === 'trading',
-                'tab-disabled': !Object.keys(metaForFinishedAssets).length,
               }"
               @click="setTab('trading')"
             >
@@ -537,6 +542,7 @@ watch(
                 :asset0-metadata="preparedMeta.asset0SymbolAndDecimals"
                 :price-aa="preparedMeta.rawMeta.reserve_price_aa"
                 :reserve-price-value="preparedMeta.reservePriceValue"
+                :meta-by-active-a-a="metaByActiveAA"
               />
               <div
                 v-for="(assetMeta, asset) in metaForFinishedAssetsForRendering"
@@ -544,6 +550,7 @@ watch(
               >
                 <PriceAAFinished
                   :perpetual-aa="perpetualAA"
+                  :meta-by-active-a-a="metaByActiveAA"
                   :asset-meta="assetMeta"
                   :asset="asset"
                   :staking-aa="preparedMeta.rawMeta.staking_aa"
@@ -558,7 +565,10 @@ watch(
               </div>
             </div>
             <div
-              v-if="!Object.keys(metaForFinishedAssetsForRendering).length"
+              v-if="
+                !Object.keys(metaForFinishedAssetsForRendering).length &&
+                activeTab === 'presale'
+              "
               class="card bg-base-300 shadow-xl mb-8"
             >
               <div class="card-body gap-0 p-3 sm:p-8 text-center">

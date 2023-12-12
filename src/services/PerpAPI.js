@@ -5,6 +5,7 @@ import {
   getDefinition,
 } from "@/services/DAGApi";
 import { small_pow } from "@/utils/smallPow";
+import { adjustPrices } from "@/utils/adjustPrices";
 
 export async function getReservePrice(aa) {
   const def = (await getDefinition(aa)).definition;
@@ -69,29 +70,41 @@ export async function getTargetPriceByPresaleAsset(aa, asset, actual) {
   return tp / reservePrice;
 }
 
-export async function getPriceByAssets(aa, assets) {
+export async function getPriceByAssets(aa, assets, varsAndParams) {
   const vars = await getAaStateVars(aa);
-  const state = vars["state"];
+  const _state = vars["state"];
   const priceByAsset = {};
 
-  assets.forEach((asset) => {
+  for (let asset of assets) {
+    const state = { ..._state };
     const bAsset0 = state.asset0 === asset;
-    const asset_info = vars["asset_" + asset];
+    const assetInfo = vars["asset_" + asset];
+    await adjustPrices(asset, assetInfo, state, varsAndParams);
+    if (!bAsset0 && !assetInfo) return;
+
     const r = state.reserve;
     const c = state.coef;
-    const s = bAsset0 ? state.s0 : asset_info.supply;
-    const a = bAsset0 ? state.a0 : asset_info.a;
+    const s = bAsset0 ? state.s0 : assetInfo.supply;
+    const a = bAsset0 ? state.a0 : assetInfo.a;
     priceByAsset[asset] = (c * c * a * s) / r;
-  });
+  }
 
   return priceByAsset;
 }
 
-export function getPriceByData(aa, asset, state, assetInfo) {
-  const bAsset0 = state.asset0 === asset;
-  const r = state.reserve;
-  const c = state.coef;
-  const s = bAsset0 ? state.s0 : assetInfo.supply;
-  const a = bAsset0 ? state.a0 : assetInfo.a;
+export async function getPriceByData(
+  aa,
+  asset,
+  state,
+  assetInfo,
+  varsAndParams
+) {
+  const _state = { ...state };
+  const bAsset0 = _state.asset0 === asset;
+  await adjustPrices(asset, assetInfo, _state, varsAndParams);
+  const r = _state.reserve;
+  const c = _state.coef;
+  const s = bAsset0 ? _state.s0 : assetInfo.supply;
+  const a = bAsset0 ? _state.a0 : assetInfo.a;
   return (c * c * a * s) / r;
 }

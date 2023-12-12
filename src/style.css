@@ -3,97 +3,97 @@
 @tailwind utilities;
 
 body {
-    @apply text-slate-200;
+  @apply text-slate-200;
 }
 
 .form {
-    padding: 24px 8px 8px 8px;
+  padding: 24px 8px 8px 8px;
 }
 
 #app {
-    position: absolute;
-    min-height: 100%;
-    width: 100%;
-    height: auto;
+  position: absolute;
+  min-height: 100%;
+  width: 100%;
+  height: auto;
 }
 
 [data-theme="dark"] .\!btn-disabled {
-    --tw-bg-opacity: 0.7 !important;
-    --tw-text-opacity: 0.4 !important;
-    --tw-border-opacity: 1 !important;
-    background-color: transparent !important;
-    border-color: rgb(75 85 99 / var(--tw-border-opacity));
+  --tw-bg-opacity: 0.7 !important;
+  --tw-text-opacity: 0.4 !important;
+  --tw-border-opacity: 1 !important;
+  background-color: transparent !important;
+  border-color: rgb(75 85 99 / var(--tw-border-opacity));
 }
 
-
 .join .btn {
-    border-left: 0 !important;
+  border-left: 0 !important;
 }
 
 .join input {
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-    border-right: 0;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-right: 0;
 }
 
 .tab {
-    width: 50%;
-    border-bottom-color: transparent;
-    --tab-bg: transparent;
-    --tab-border-color: transparent;
+  width: 50%;
+  border-bottom-color: transparent;
+  --tab-bg: transparent;
+  --tab-border-color: transparent;
 }
 
 .no-pointer {
-    pointer-events: none;
+  pointer-events: none;
 }
 
 .tabs-boxed {
-    background-color: #191d24;
+  background-color: #191d24;
 }
 
-.divider:before, .divider:after {
-    height: 0.2rem;
+.divider:before,
+.divider:after {
+  height: 0.2rem;
 }
 
 :where(.menu li) {
-    margin: 6px 0;
+  margin: 6px 0;
 }
 
 .autoComplete_wrapper {
-    width: 100%;
+  width: 100%;
 }
 
 .autoComplete_wrapper input:focus {
-    box-shadow: none !important;
-    outline: none !important;
-    border: 1px solid #2563eb !important;
+  box-shadow: none !important;
+  outline: none !important;
+  border: 1px solid #2563eb !important;
 }
 
 .card {
-    transform: translateZ(0);
+  transform: translateZ(0);
 }
 
 .join:has(input:focus) > .join-item {
-    border-left: 0 !important;
-    --tw-border-opacity: 1;
-    border-color: #2563eb;
+  border-left: 0 !important;
+  --tw-border-opacity: 1;
+  border-color: #2563eb;
 }
 
 .join:has(input:focus) > input {
-    border-right: 0;
-    border: #2563eb;
+  border-right: 0;
+  border: #2563eb;
 }
 
 .join-item {
-    --tw-border-opacity: 1;
-    border-color: rgb(75 85 99 / var(--tw-border-opacity));
+  --tw-border-opacity: 1;
+  border-color: rgb(75 85 99 / var(--tw-border-opacity));
 }
 
 input {
-    box-shadow: none !important;
-    outline: none !important;
+  box-shadow: none !important;
+  outline: none !important;
 }
 
 .select:focus {
-    outline: none !important;
+  outline: none !important;
 }

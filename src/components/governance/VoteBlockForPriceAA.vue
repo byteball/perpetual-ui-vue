@@ -12,6 +12,7 @@ import {
   getReservePriceFromPerpAA,
   getTargetPriceByPriceAa,
 } from "@/services/PerpAPI";
+import { getDefinition } from "@/services/DAGApi";
 
 const props = defineProps([
   "perpAa",
@@ -21,6 +22,7 @@ const props = defineProps([
   "assetMeta",
   "votesByName",
   "allowedControl",
+  "metaByActiveAA",
 ]);
 const emit = defineEmits(["reqVote"]);
 const currentValue = props.assetMeta[props.name] || 0;
@@ -65,11 +67,18 @@ onMounted(async () => {
     const { asset, decimals, name } = props.assetMeta.assetMetaData;
     const targetPrice = await getTargetPriceByPriceAa(currentValue);
     const reservePrice = await getReservePriceFromPerpAA(props.perpAa);
-    const r = await getPriceByAssets(props.perpAa, [asset]);
+    const r = await getPriceByAssets(
+      props.perpAa,
+      [asset],
+      props.metaByActiveAA
+    );
+    const def = (await getDefinition(currentValue)).definition;
+    const target = def[1].params.feed_name.split("_")[0];
 
     price.value = r[asset] * reservePrice * 10 ** decimals;
     selectedOracleData.value = {
       name,
+      target,
       value: (targetPrice * 10 ** decimals).toPrecision(6),
     };
   }
@@ -96,7 +105,7 @@ onMounted(async () => {
     </div>
     <div v-if="name === 'price_aa'">
       <div class="mt-1">
-        Currency being tracked: {{ selectedOracleData.name }}
+        Currency being tracked: {{ selectedOracleData.target }}
       </div>
       <div class="mt-1">Target price: ${{ selectedOracleData.value }}</div>
       <div class="mt-1">Actual price ${{ price.toPrecision(6) }}</div>

@@ -31,7 +31,7 @@ watch(
 </script>
 
 <template>
-  <DialogPanel class="card bg-base-200 shadow-xl mb-4 w-[500px]">
+  <DialogPanel class="card bg-base-200 rounded-2xl shadow-xl mb-4 w-[500px]">
     <div class="card-body p-4 sm:p-8">
       <div>
         <div class="text-xl text-center">
