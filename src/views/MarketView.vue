@@ -496,7 +496,7 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
           <div v-if="asset2Amount > 0" class="mt-4">
             <div>Fee: <FeeViewComponent :fee="Number(feeInPercent)" /></div>
             <div>
-              New price
+              New price of
               {{ nameAssetForPrice }}: ${{ newPrice.toPrecision(6) }}
               <template v-if="isFinite(diff)"
                 >(<FeeViewComponent
