@@ -86,7 +86,8 @@ export async function getPriceByAssets(aa, assets, varsAndParams) {
     const c = state.coef;
     const s = bAsset0 ? state.s0 : assetInfo.supply;
     const a = bAsset0 ? state.a0 : assetInfo.a;
-    priceByAsset[asset] = (c * c * a * s) / r;
+    const price = (c * c * a * s) / r;
+    priceByAsset[asset] = isNaN(price) ? 0 : price;
   }
 
   return priceByAsset;
