@@ -42,7 +42,7 @@ export async function getDefinition(aa) {
 }
 
 export async function getAllBalances(address) {
-  const b = client.api.getBalances([address]);
+  const b = await client.api.getBalances([address]);
   const balanceByAddress = b[address];
   const balances = {};
 
