@@ -524,7 +524,8 @@ watch(
               }"
               @click="setTab('presale')"
             >
-              On presale
+              <span class="inline sm:hidden">Presale</span>
+              <span class="hidden sm:inline">On presale</span>
             </a>
             <a
               class="tab"
