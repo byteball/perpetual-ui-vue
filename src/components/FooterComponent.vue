@@ -76,7 +76,7 @@ const links = [
     class="footer footer-center p-10 bg-base-200 text-base-content rounded absolute bottom-0 text-sm gap-y-6"
   >
     <nav>
-      <div class="grid grid-flow-col gap-4">
+      <div class="flex justify-center flex-wrap sm:grid grid-flow-col gap-4">
         <a
           v-for="link in links"
           :key="link.name"
@@ -95,17 +95,19 @@ const links = [
     <aside>
       <p class="text-xs">
         The Pythagorean perpetual futures website (“Site”) is for informational
-        and educational purposes only. The Site displays the existing perpetual futures deployed on the Obyte DAG and is a graphical user interface for
+        and educational purposes only. The Site displays the existing perpetual
+        futures deployed on the Obyte DAG and is a graphical user interface for
         both visualizing data from on-chain activity and interacting with
-        autonomous agents directly from your own wallets. The Site and its developers take no
-        custody of users' crypto assets and do not trade. The Site makes best effort to ensure accuracy of the displayed
-        information however there are no guarantees of accuracy and the
-        information is provided as is. None of the material on the Site is
-        intended to be, nor does it constitute, a solicitation, recommendation
-        or offer to buy or sell any security, commodity, interest, derivative,
-        financial product or instrument. Users are responsible for complying
-        with all applicable laws and should conduct their own analysis and
-        consult with professional advisors prior to engaging with any futures markets.
+        autonomous agents directly from your own wallets. The Site and its
+        developers take no custody of users' crypto assets and do not trade. The
+        Site makes best effort to ensure accuracy of the displayed information
+        however there are no guarantees of accuracy and the information is
+        provided as is. None of the material on the Site is intended to be, nor
+        does it constitute, a solicitation, recommendation or offer to buy or
+        sell any security, commodity, interest, derivative, financial product or
+        instrument. Users are responsible for complying with all applicable laws
+        and should conduct their own analysis and consult with professional
+        advisors prior to engaging with any futures markets.
       </p>
     </aside>
     <aside>

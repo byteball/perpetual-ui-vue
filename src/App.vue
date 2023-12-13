@@ -9,6 +9,6 @@ import FooterComponent from "@/components/FooterComponent.vue";
   <div tabindex="0">
     <RouterView />
   </div>
-  <div class="h-96"></div>
+  <div class="h-[34rem] sm:h-96"></div>
   <FooterComponent />
 </template>
