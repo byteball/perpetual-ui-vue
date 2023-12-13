@@ -80,14 +80,18 @@ export async function getPriceByAssets(aa, assets, varsAndParams) {
     const bAsset0 = state.asset0 === asset;
     const assetInfo = vars["asset_" + asset];
     await adjustPrices(asset, assetInfo, state, varsAndParams);
-    if (!bAsset0 && !assetInfo) return;
+    if (!bAsset0 && !assetInfo) continue;
 
     const r = state.reserve;
+    if (!r) {
+      priceByAsset[asset] = 0;
+      continue;
+    }
+
     const c = state.coef;
     const s = bAsset0 ? state.s0 : assetInfo.supply;
     const a = bAsset0 ? state.a0 : assetInfo.a;
-    const price = (c * c * a * s) / r;
-    priceByAsset[asset] = isNaN(price) ? 0 : price;
+    priceByAsset[asset] = (c * c * a * s) / r;
   }
 
   return priceByAsset;
@@ -104,6 +108,8 @@ export async function getPriceByData(
   const bAsset0 = _state.asset0 === asset;
   await adjustPrices(asset, assetInfo, _state, varsAndParams);
   const r = _state.reserve;
+  if (!r) return 0;
+
   const c = _state.coef;
   const s = bAsset0 ? _state.s0 : assetInfo.supply;
   const a = bAsset0 ? _state.a0 : assetInfo.a;
