@@ -3,7 +3,7 @@ export const propertyTips = {
     "Address of an oracle that publishes the data that will be used to calculate the asset's price",
   feed_name: "Name of the data feed published by the oracle",
   multiplier:
-    "Multiplier applied to the oracle's price. It is used to account for decimals and return the price of the smallest indivisible unit of the asset.",
+    "Multiplier applied to the oracle's price. It is used to account for decimals and return the price of the smallest indivisible unit of the asset. The decimals of the symbol for this asset should correspond to this multiplier.",
   swap_fee: "Swapping fee, percentage of the traded amount.",
   arb_profit_tax: `Additional fee that is charged as a percentage of arbitrageur profit.
    It is assumed that arbitrageurs buy here in order

@@ -280,7 +280,7 @@ onUnmounted(() => {
     <div v-else-if="step === 2">
       <div class="alert shadow-lg">
         <div class="ml-2">
-          <span>Good, now you need publish price AA</span>
+          <span>Good, now you need to create the price AA for the new asset</span>
         </div>
         <div></div>
         <div>
@@ -289,7 +289,7 @@ onUnmounted(() => {
             :href="linkForPriceAA"
             @click="goToStep3()"
           >
-            Publish price AA
+            Create price AA
           </a>
         </div>
       </div>
@@ -317,11 +317,8 @@ onUnmounted(() => {
             ></path>
           </svg>
           <div>
-            To continue, you need to wait until the price AA is published. If
-            you have not done so, click back
-          </div>
-          <div>
-            <a class="btn btn-sm btn-primary" @click="back()">Back</a>
+            To continue, you need to wait until the price AA is confirmed. If
+            you didn't wait, use the back 
           </div>
         </div>
       </div>
@@ -359,7 +356,7 @@ onUnmounted(() => {
               :href="linkForPublishPerp"
               @click="step = 5"
             >
-              Publish perpetual
+              Propose this perpetual
             </a>
           </div>
         </div>

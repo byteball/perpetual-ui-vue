@@ -182,7 +182,7 @@ watch(
       return;
     }
 
-    if (Number(term.value.value) <= termMeta.value.days) {
+    if (Number(term.value.value) < termMeta.value.days) {
       buttonDisabled.value = true;
       term.value.error = `The minimum term is ${termMeta.value.days} days`;
       return;
