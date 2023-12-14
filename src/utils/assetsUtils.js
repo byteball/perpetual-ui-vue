@@ -151,6 +151,18 @@ export async function getAssetsOnlyWithSymbolsAndDecimals(assets, meta) {
     }
   }
 
+  assetList.sort((a, b) => {
+    if (nameAndDecimalsByAsset[a].name < nameAndDecimalsByAsset[b].name) {
+      return -1;
+    }
+
+    if (nameAndDecimalsByAsset[a].name > nameAndDecimalsByAsset[b].name) {
+      return 1;
+    }
+
+    return 0;
+  });
+
   return {
     assetList,
     assetsByAA,

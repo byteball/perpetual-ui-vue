@@ -276,12 +276,11 @@ watch(
                 <label class="label">
                   <span class="label-text"
                     >Amount
-                    <template v-if="balanceByAsset > 0"
-                      >-
+                    <template v-if="balanceByAsset > 0">
                       <a
                         class="link link-hover text-sky-500"
                         @click="setMyBalance"
-                        >Use my balance</a
+                        >(Balance: {{ balanceByAsset }})</a
                       ></template
                     ></span
                   >

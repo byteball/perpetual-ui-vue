@@ -9,7 +9,6 @@ import { getAssetMetadata } from "@/services/DAGApi";
 import TooltipComponent from "@/components/TooltipComponent.vue";
 import NumberInput from "@/components/inputs/NumberInput.vue";
 import OracleComponent from "@/components/OracleComponent.vue";
-import { getTargetPriceForAddPerp } from "@/services/PerpAPI";
 
 let intervalId = 0;
 const step = ref(1);
@@ -24,7 +23,6 @@ const errorMessage = ref("");
 const multiplier = ref("1");
 
 const reserveAssetData = ref({});
-const tokens = ref("");
 
 const priceAA = ref("");
 const needCheckPriceAA = ref(false);
@@ -161,15 +159,6 @@ watch(
 
       const reserveAsset = meta.value[route.params.aa].reserve_asset;
       reserveAssetData.value = await getAssetMetadata(reserveAsset);
-
-      const target_price = await getTargetPriceForAddPerp(
-        route.params.aa,
-        currentRate * Number(multiplier.value)
-      );
-
-      tokens.value = String(
-        10 ** reserveAssetData.value.decimals / target_price
-      );
     }
   },
   { immediate: true }
@@ -268,10 +257,6 @@ onUnmounted(() => {
                       >${{ +oracleResult.value.toFixed(2) }}</span
                     >
                     <span v-else>{{ currentRate }}</span>
-                  </div>
-                  <div class="mt-2">
-                    1 {{ reserveAssetData.name }} = {{ `${tokens}` }} (without
-                    decimals)
                   </div>
                 </div>
               </div>

@@ -1,6 +1,7 @@
-import { executeAAGetter, getAssetMetadata } from "@/services/DAGApi";
+import { getAssetMetadata } from "@/services/DAGApi";
 import { perpDefaults } from "@/config";
 import { getVPFromNormalized } from "@/utils/getVP";
+import { getReservePrice } from "@/services/PerpAPI";
 
 function getMajorityThreshold(aaState, stakingVars) {
   return (
@@ -83,7 +84,7 @@ export async function getPreparedMeta(metaByAA, userAddress = "_") {
 
   const reservePriceAA = metaByAA.reserve_price_aa;
   const reservePriceValue = +(
-    (await executeAAGetter(reservePriceAA, "get_reserve_price")) *
+    (await getReservePrice(reservePriceAA)) *
     10 ** (reserveAsset?.decimals || 0)
   );
 

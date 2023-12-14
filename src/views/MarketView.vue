@@ -279,9 +279,6 @@ async function calcAndSetDataForMetaAndLink() {
     const amount = getDecimalsAmountByAsset(balanceByAsset.value, asset1.value);
     const symbol = assets.value.nameAndDecimalsByAsset[asset1.value].name;
     resultError.value = `You don't have enough funds. Your balance: ${amount} ${symbol}`;
-    asset2Amount.value = 0;
-    link.value = "";
-    return;
   }
 
   let data;
@@ -329,7 +326,7 @@ async function calcAndSetDataForMetaAndLink() {
   nameAssetForPrice.value =
     assets.value.nameAndDecimalsByAsset[assetForPrice].name;
   newPrice.value = amount * price * reservePrice;
-  diff.value = d.toFixed(2);
+  diff.value = d.toFixed(3);
   link.value = data.link;
   feeInPercent.value = data.result.fee_percent;
   asset2Amount.value = assetAmount.toString();
@@ -387,9 +384,8 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
     <div class="p-2 mb-6">
       <h1 class="text-lg font-bold leading-7">Trade Decentralized Futures</h1>
       <div class="mt-2 leading-6">
-        Buy or sell futures powered by <RouterLink
-          class="link text-sky-500 link-hover font-light"
-          :to="`/faq`"
+        Buy or sell futures powered by
+        <RouterLink class="link text-sky-500 link-hover font-light" :to="`/faq`"
           >Pythagorean bonding curves</RouterLink
         >.
       </div>
@@ -516,7 +512,10 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
             <a
               class="btn btn-primary"
               :href="link"
-              :class="{ '!btn-disabled': !link || !(Number(asset2Amount) > 0) }"
+              :class="{
+                '!btn-disabled':
+                  resultError || !link || !(Number(asset2Amount) > 0),
+              }"
               >Exchange</a
             >
           </div>

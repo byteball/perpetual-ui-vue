@@ -560,6 +560,7 @@ watch(
                   :votes="votes"
                   :allowed-control="allowedControl"
                   :active-tab="activeTab"
+                  :reserve-asset-meta="preparedMeta.reserveAsset"
                   @reqRegister="reqRegister"
                   @reqVote="reqVote"
                 />
