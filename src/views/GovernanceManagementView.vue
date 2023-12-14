@@ -37,6 +37,7 @@ const perpetualAA = computed(() => route.params.aa);
 const votes = ref({});
 const modalParams = ref({});
 const registerSymbolAsset = ref("");
+const registerSymbolMultiplier = ref("");
 
 const metaByActiveAA = ref({});
 const preparedMeta = ref({});
@@ -274,8 +275,9 @@ function vote(name, value, priceAsset) {
   );
 }
 
-function reqRegister(asset) {
+function reqRegister(asset, multiplier) {
   registerSymbolAsset.value = asset;
+  registerSymbolMultiplier.value = multiplier;
   modalForRegisterSymbolIsOpen.value = true;
 }
 
@@ -645,6 +647,7 @@ watch(
     <div class="fixed inset-0 flex items-center justify-center">
       <RegisterSymbolModal
         :asset="registerSymbolAsset"
+        :multiplier="registerSymbolMultiplier"
         :perp-aa="perpetualAA"
       />
     </div>

@@ -413,7 +413,9 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
                 <div>
                   Sold:
                   {{
-                    `${selectedPresaleCurrentAmount} / ${selectedPresaleTargetAmount}`
+                    `${+selectedPresaleCurrentAmount.toPrecision(
+                      6
+                    )} / ${+selectedPresaleTargetAmount.toPrecision(6)}`
                   }}
                   {{ assetsMetadata[selectedReserveAsset].name }}
                 </div>

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import {
@@ -364,8 +364,20 @@ function swapPair() {
   });
 }
 
+function keyDownHandler(e) {
+  if (e.key === "Escape") {
+    modalForAsset1.value.checked = false;
+    modalForAsset2.value.checked = false;
+  }
+}
+
 onMounted(() => {
   initSelectedAA();
+  window.addEventListener("keydown", keyDownHandler);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("keydown", keyDownHandler);
 });
 watch(aas, initSelectedAA);
 watch(status, initSelectedAA);
