@@ -106,7 +106,7 @@ const termMeta = computed(() => {
     !props.params.metaByAA ||
     !props.params.metaByAA.stakingVars[`user_${address.value}_a0`]
   )
-    return { days: 13, ended: true };
+    return { days: 14, ended: true };
 
   const expiry_ts =
     props.params.metaByAA.stakingVars[`user_${address.value}_a0`]?.expiry_ts;
@@ -184,13 +184,13 @@ watch(
 
     if (Number(term.value.value) <= termMeta.value.days) {
       buttonDisabled.value = true;
-      term.value.error = `Time must be more than ${termMeta.value.days} days`;
+      term.value.error = `The minimum term is ${termMeta.value.days} days`;
       return;
     }
 
     if (Number(term.value.value) > DEFAULT_MAX_TERM) {
       buttonDisabled.value = true;
-      term.value.error = `The maximum term should be no more than ${DEFAULT_MAX_TERM} days`;
+      term.value.error = `The maximum term is ${DEFAULT_MAX_TERM} days`;
       return;
     }
 
