@@ -32,7 +32,7 @@ const selectedOracleData = ref({});
 const presaleData = ref({});
 
 function reqRegister() {
-  emit("reqRegister", props.asset);
+  emit("reqRegister", props.asset, props.priceAaDefinition.multiplier || 1);
 }
 
 function reqVote(name, type, value) {
@@ -56,8 +56,8 @@ function setPresaleData() {
 
   presaleData.value = {
     finishDate,
-    currentAmount: currentPresaleAmount * 10 ** props.reserveAssetMeta.decimals,
-    targetAmount: targetPresaleAmount * 10 ** props.reserveAssetMeta.decimals,
+    currentAmount: currentPresaleAmount / 10 ** props.reserveAssetMeta.decimals,
+    targetAmount: targetPresaleAmount / 10 ** props.reserveAssetMeta.decimals,
     symbol: props.reserveAssetMeta.name,
   };
 }
@@ -183,7 +183,8 @@ onMounted(async () => {
         <div class="font-medium text-sm mb-4">
           Sold:
           <div class="font-light text-sm inline-block">
-            {{ presaleData.currentAmount }} / {{ presaleData.targetAmount }}
+            {{ +presaleData.currentAmount.toPrecision(6) }} /
+            {{ +presaleData.targetAmount.toPrecision(6) }}
             {{ presaleData.symbol }}
           </div>
         </div>

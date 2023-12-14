@@ -15,7 +15,7 @@ const store = useAaInfoStore();
 
 const { meta } = storeToRefs(store);
 
-const props = defineProps(["asset", "perpAa"]);
+const props = defineProps(["asset", "perpAa", "multiplier"]);
 
 const registryAA = ref("");
 
@@ -24,6 +24,7 @@ const symbolFieldError = ref("");
 const decimals = ref("");
 const buttonEnabled = ref(false);
 const link = ref("");
+const tracked = ref("");
 
 watch(
   [symbol, decimals],
@@ -56,7 +57,7 @@ watch(
         asset: props.asset,
         symbol: symbol.value,
         decimals: decimals.value,
-        description: `Asset for perpetual futures AA ${props.perpAa}`,
+        description: `Asset for perpetual futures AA ${props.perpAa}, tracking ${tracked.value}`,
       },
       null,
       import.meta.env.VITE_REGISTRY_AA,
@@ -91,13 +92,20 @@ const suggestValueForSymbolField = async (feedName) => {
   symbol.value = newSymbolSuggestion;
 };
 
-async function setDecimals(feedName) {
+async function setDecimalsAndName(feedName) {
   const metadata = await getMetadataForSymbolByDataFeed(feedName);
   if (!metadata) {
-    return (decimals.value = "9");
+    let d = props.multiplier.split(".");
+    d = d[1] ? d[1].length : 9;
+    const name = feedName.split("_")[0];
+
+    decimals.value = String(d);
+    tracked.value = name;
+    return;
   }
 
   decimals.value = String(metadata.decimals);
+  tracked.value = metadata.name;
 }
 
 onMounted(async () => {
@@ -107,7 +115,7 @@ onMounted(async () => {
   const feedName = priceAADefinition[1].params.feed_name;
   await Promise.all([
     suggestValueForSymbolField(feedName),
-    setDecimals(feedName),
+    setDecimalsAndName(feedName),
   ]);
 });
 </script>
