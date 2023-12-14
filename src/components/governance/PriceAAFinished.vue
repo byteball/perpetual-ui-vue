@@ -1,10 +1,14 @@
 <script setup>
-import { onMounted, ref } from "vue";
+import { onBeforeMount, onMounted, ref } from "vue";
+import { storeToRefs } from "pinia";
 import { getOracleData } from "@/services/DAGApi";
 import { generateAndFollowLinkForVoteAddPriceAA } from "@/utils/generateLink";
 import LinkIcon from "@/components/icons/LinkIcon.vue";
 import VoteBlockForPriceAA from "@/components/governance/VoteBlockForPriceAA.vue";
 import { fullExplorerUrlForAddress, fullExplorerUrlForAsset } from "@/config";
+import { getParam } from "@/utils/governanceUtils";
+import { useAaInfoStore } from "@/stores/aaInfo";
+import dayjs from "dayjs";
 
 const props = defineProps([
   "perpetualAa",
@@ -17,10 +21,15 @@ const props = defineProps([
   "allowedControl",
   "activeTab",
   "metaByActiveAA",
+  "reserveAssetMeta",
 ]);
 const emit = defineEmits(["reqRegister", "reqVote"]);
 
+const store = useAaInfoStore();
+const { meta } = storeToRefs(store);
+
 const selectedOracleData = ref({});
+const presaleData = ref({});
 
 function reqRegister() {
   emit("reqRegister", props.asset);
@@ -29,6 +38,35 @@ function reqRegister() {
 function reqVote(name, type, value) {
   emit("reqVote", "change_" + name, type, "", value, props.asset);
 }
+
+function setPresaleData() {
+  const aa = props.perpetualAa;
+  const presalePeriod = getParam("presale_period", meta.value[aa]);
+  const tokenShareThreshold = getParam("token_share_threshold", meta.value[aa]);
+  const reserve = meta.value[aa].state.reserve;
+
+  const presaleAssetIssue = meta.value[aa][`asset_${props.asset}`].creation_ts;
+  const currentPresaleAmount =
+    meta.value[aa][`asset_${props.asset}`].presale_amount;
+
+  const finishDate = dayjs((presaleAssetIssue + presalePeriod) * 1000).format(
+    "MMMM D, YYYY HH:mm"
+  );
+  const targetPresaleAmount = tokenShareThreshold * reserve;
+
+  presaleData.value = {
+    finishDate,
+    currentAmount: currentPresaleAmount * 10 ** props.reserveAssetMeta.decimals,
+    targetAmount: targetPresaleAmount * 10 ** props.reserveAssetMeta.decimals,
+    symbol: props.reserveAssetMeta.name,
+  };
+}
+
+onBeforeMount(() => {
+  if (props.assetMeta.presale) {
+    setPresaleData();
+  }
+});
 
 onMounted(async () => {
   if (!props.priceAa) return;
@@ -134,6 +172,19 @@ onMounted(async () => {
           Target price:
           <div class="font-light text-sm inline-block">
             {{ selectedOracleData.value }}
+          </div>
+        </div>
+        <div class="font-medium text-sm mb-1">
+          Presale ends on:
+          <div class="font-light text-sm inline-block">
+            {{ presaleData.finishDate }}
+          </div>
+        </div>
+        <div class="font-medium text-sm mb-4">
+          Sold:
+          <div class="font-light text-sm inline-block">
+            {{ presaleData.currentAmount }} / {{ presaleData.targetAmount }}
+            {{ presaleData.symbol }}
           </div>
         </div>
       </div>

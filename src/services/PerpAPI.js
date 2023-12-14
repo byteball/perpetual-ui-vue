@@ -11,8 +11,10 @@ export async function getReservePrice(aa) {
   const def = (await getDefinition(aa)).definition;
   const params = def[1].params;
   if (params.oswap_aa) {
-    const x_asset = params.x_asset || "base";
-    const y_asset = params.y_asset || "base";
+    const oswap_params = (await getDefinition(params.oswap_aa)).definition[1]
+      .params;
+    const x_asset = oswap_params.x_asset || "base";
+    const y_asset = oswap_params.y_asset || "base";
     const balances = await getAllBalances(params.oswap_aa);
     const vars = await getAaStateVars(params.oswap_aa);
     const x_balance = balances[x_asset];
