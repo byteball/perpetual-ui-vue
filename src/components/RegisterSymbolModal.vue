@@ -56,7 +56,7 @@ watch(
         asset: props.asset,
         symbol: symbol.value,
         decimals: decimals.value,
-        description: `Asset for perpetual futures AA ${props.perpAa}`,
+        description: `Asset in perpetual futures set ${props.perpAa}`,
       },
       null,
       import.meta.env.VITE_REGISTRY_AA,
