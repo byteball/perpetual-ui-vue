@@ -2,10 +2,15 @@ import client from "./Obyte.js";
 import CacheService from "@/services/CacheService";
 import Client from "@/services/Obyte";
 
-const definitionCache = new CacheService();
+const definitionCache = new CacheService(5 * 60 * 1000);
+const stateVarsCache = new CacheService();
 const dataFeedCache = new CacheService();
-const assetMetadataCache = new CacheService();
+const assetMetadataCache = new CacheService(10 * 60 * 1000);
 const assetBySymbolCache = new CacheService();
+const getterCache = new CacheService(30 * 1000);
+const jointCache = new CacheService();
+const metaCache = new CacheService();
+const balanceCache = new CacheService(30 * 1000);
 
 export async function getAasCreatedByFactory() {
   const result = await client.api.getAaResponses({
@@ -42,6 +47,9 @@ export async function getDefinition(aa) {
 }
 
 export async function getAllBalances(address) {
+  const key = address;
+  if (balanceCache.exists(key)) return balanceCache.getValue(key);
+
   const b = await client.api.getBalances([address]);
   const balanceByAddress = b[address];
   const balances = {};
@@ -50,6 +58,7 @@ export async function getAllBalances(address) {
     balances[asset] = balanceByAddress[asset].total;
   }
 
+  balanceCache.setValue(key, balances);
   return balances;
 }
 
@@ -58,31 +67,39 @@ export async function isUnitStable(unit) {
   return !!joint.ball;
 }
 export async function getAaStateVars(aa, prefix) {
+  const key = `${aa}_${prefix || "_"}`;
+  if (stateVarsCache.exists(key)) return stateVarsCache.getValue(key);
+
   const params = { address: aa };
   if (prefix) {
     params.prefix = prefix;
   }
-  return client.api.getAaStateVars(params);
+
+  const vars = await client.api.getAaStateVars(params);
+  stateVarsCache.setValue(key, vars);
+  return vars;
 }
 
 async function getMeta(aa) {
+  const key = aa;
+  if (metaCache.exists(key)) return metaCache.getValue(key);
+
   let meta = {};
   try {
     const definition = (await getDefinition(aa)).definition;
     meta = { ...definition[1].params };
 
-    const vars = await client.api.getAaStateVars({ address: aa });
+    const vars = await getAaStateVars(aa);
     meta = { ...meta, ...vars };
 
     const stakingDefinition = (await getDefinition(meta.staking_aa)).definition;
     meta.stakingParams = stakingDefinition[1].params;
 
-    meta.stakingVars = await client.api.getAaStateVars({
-      address: meta.staking_aa,
-    });
+    meta.stakingVars = await getAaStateVars(meta.staking_aa);
 
     meta.aa = aa;
 
+    metaCache.setValue(key, meta);
     return meta;
   } catch (e) {
     console.error(e);
@@ -108,6 +125,9 @@ export async function getMetaForPerpAAs(aas) {
 }
 
 export async function getJoint(unit) {
+  const key = unit;
+  if (jointCache.exists(key)) return jointCache.getValue(key);
+
   try {
     const joint = await client.api.getJoint(unit);
 
@@ -115,6 +135,7 @@ export async function getJoint(unit) {
       return null;
     }
 
+    jointCache.setValue(key, joint);
     return joint;
   } catch (e) {
     console.error(e);
@@ -207,7 +228,10 @@ export async function getAssetBySymbol(symbol) {
   return asset || null;
 }
 
-export async function executeAAGetter(aa, getter, returnError) {
+export async function executeAAGetter(aa, getter, returnError, returnAA) {
+  const key = `${aa}_${getter}`;
+  if (getterCache.exists(key)) return getterCache.getValue(key);
+
   const params = {
     address: aa,
     getter,
@@ -215,7 +239,15 @@ export async function executeAAGetter(aa, getter, returnError) {
   };
 
   try {
-    return (await client.api.executeGetter(params))?.result;
+    const result = await client.api.executeGetter(params);
+    if (result?.result) {
+      getterCache.setValue(key, result.result);
+    }
+
+    if (returnAA) {
+      return { aa, result: result?.result || null };
+    }
+    return result?.result;
   } catch (e) {
     console.error(aa, e);
     if (returnError) return { error: e };

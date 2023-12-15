@@ -115,6 +115,8 @@ export async function getAssetsOnlyWithSymbolsAndDecimals(assets, meta) {
     assetList.push(asset);
   }
 
+  const pr = [];
+
   for (let k in assets.assetsByAA) {
     const reserve = assets.assetsByAA[k].reserve;
     const newAssets = [];
@@ -133,14 +135,18 @@ export async function getAssetsOnlyWithSymbolsAndDecimals(assets, meta) {
       }
     }
 
-    const volumes = await getPairsVolume(meta[k], newAssets);
+    pr.push(getPairsVolume(meta[k], newAssets, k));
 
     assetsByAA[k] = {
       reserve,
       assets: newAssets,
-      volumes,
     };
   }
+
+  const r = await Promise.all(pr);
+  r.forEach(({ aa, result }) => {
+    assetsByAA[aa].volumes = result;
+  });
 
   for (const [key, value] of Object.entries(reservePairs)) {
     if (!value.length) {
@@ -170,30 +176,32 @@ export async function getAssetsOnlyWithSymbolsAndDecimals(assets, meta) {
   };
 }
 
-async function getPairsVolume(metaByAA, assets) {
+async function getPairsVolume(metaByAA, assets, aa) {
   const prices = await Promise.all(
     assets.map((asset, index) => {
       const priceAA = !index
         ? metaByAA.reserve_price_aa
         : metaByAA[`asset_${asset}`].price_aa;
       const getter = !index ? "get_reserve_price" : "get_target_price";
-
       return executeAAGetter(priceAA, getter);
     })
   );
 
-  return assets.map((asset, index) => {
-    const supply = !index
-      ? metaByAA.state.reserve
-      : metaByAA[`asset_${asset}`].supply;
+  return {
+    aa,
+    result: assets.map((asset, index) => {
+      const supply = !index
+        ? metaByAA.state.reserve
+        : metaByAA[`asset_${asset}`].supply;
 
-    const volume = supply * prices[index];
+      const volume = supply * prices[index];
 
-    return {
-      asset,
-      volume,
-    };
-  });
+      return {
+        asset,
+        volume,
+      };
+    }),
+  };
 }
 
 export function getUrlForReserveAsset(asset) {
