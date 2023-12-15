@@ -111,7 +111,7 @@ onMounted(async () => {
     <div class="card-body p-4 sm:p-8">
       <div class="text-sm text-center">
         <div class="font-bold text-center sm:text-left flex items-center mb-2">
-          Claim your finished presales
+          Claim your new tokens from finished presales
         </div>
         <table class="table w-full">
           <thead>
