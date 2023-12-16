@@ -35,7 +35,7 @@ const isPresaleFinished = (aa, presaleAsset) => {
   const targetPresaleAmount = tokenShareThreshold * reserve;
 
   return (
-    targetPresaleAmount <= currentPresaleAmount ||
+    targetPresaleAmount < currentPresaleAmount ||
     !presaleAssetData?.presale ||
     finishDate.diff(dayjs()) < 0
   );
