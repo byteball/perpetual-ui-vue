@@ -52,6 +52,14 @@ const balanceByAsset = computed(() => {
   return balance.value[asset1.value]?.stable || 0;
 });
 
+const formattedBalanceByAsset = computed(() => {
+  if (!asset1.value) return 0;
+
+  const amount = balance.value[asset1.value]?.stable || 0;
+  const decimals = assets.value.nameAndDecimalsByAsset[asset1.value].decimals;
+  return amount / 10 ** decimals;
+});
+
 const link = ref("");
 const feeInPercent = ref(0);
 const newPrice = ref(0);
@@ -371,6 +379,10 @@ function keyDownHandler(e) {
   }
 }
 
+function setMyBalance() {
+  asset1Amount.value = String(formattedBalanceByAsset.value);
+}
+
 onMounted(() => {
   initSelectedAA();
   window.addEventListener("keydown", keyDownHandler);
@@ -410,7 +422,14 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
         </div>
         <div class="form-control" v-if="assets.assetList.length">
           <label class="label">
-            <span class="label-text">You pay</span>
+            <span class="label-text"
+              >You pay
+              <template v-if="balanceByAsset > 0">
+                <a class="link link-hover text-sky-500" @click="setMyBalance"
+                  >(Balance: {{ formattedBalanceByAsset }})</a
+                ></template
+              ></span
+            >
           </label>
           <div class="join">
             <NumberInput

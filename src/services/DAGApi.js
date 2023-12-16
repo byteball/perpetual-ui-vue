@@ -13,19 +13,11 @@ const metaCache = new CacheService();
 const balanceCache = new CacheService(30 * 1000);
 
 export async function getAasCreatedByFactory() {
-  const result = await client.api.getAaResponses({
-    aa: import.meta.env.VITE_FACTORY_AA,
+  const result = await client.api.getAasByBaseAas({
+    base_aa: import.meta.env.VITE_BASE_AA,
   });
 
-  const aasList = [];
-  for (let { bounced, response } of result) {
-    if (bounced) continue;
-
-    const address = response.responseVars.address;
-    aasList.push(address);
-  }
-
-  return aasList;
+  return result.map((v) => v.address);
 }
 
 export async function getDefinition(aa) {

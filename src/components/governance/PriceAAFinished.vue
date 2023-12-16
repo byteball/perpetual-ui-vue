@@ -9,6 +9,7 @@ import { fullExplorerUrlForAddress, fullExplorerUrlForAsset } from "@/config";
 import { getParam } from "@/utils/governanceUtils";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import dayjs from "dayjs";
+import { useAddressStore } from "@/stores/addressStore";
 
 const props = defineProps([
   "perpetualAa",
@@ -26,7 +27,9 @@ const props = defineProps([
 const emit = defineEmits(["reqRegister", "reqVote"]);
 
 const store = useAaInfoStore();
+const addressStore = useAddressStore();
 const { meta } = storeToRefs(store);
+const { address } = storeToRefs(addressStore);
 
 const selectedOracleData = ref({});
 const presaleData = ref({});
@@ -54,11 +57,23 @@ function setPresaleData() {
   );
   const targetPresaleAmount = tokenShareThreshold * reserve;
 
+  let contributionAmount = 0;
+  if (address.value) {
+    contributionAmount =
+      meta.value[aa][`contribution_${address.value}_${props.asset}`] || 0;
+  }
+
+  if (contributionAmount) {
+    contributionAmount =
+      contributionAmount / 10 ** props.reserveAssetMeta.decimals;
+  }
+
   presaleData.value = {
     finishDate,
     currentAmount: currentPresaleAmount / 10 ** props.reserveAssetMeta.decimals,
     targetAmount: targetPresaleAmount / 10 ** props.reserveAssetMeta.decimals,
     symbol: props.reserveAssetMeta.name,
+    contributionAmount,
   };
 }
 
@@ -180,7 +195,7 @@ onMounted(async () => {
             {{ presaleData.finishDate }}
           </div>
         </div>
-        <div class="font-medium text-sm mb-4">
+        <div class="font-medium text-sm mb-1">
           Sold:
           <div class="font-light text-sm inline-block">
             {{ +presaleData.currentAmount.toPrecision(6) }} /
@@ -188,9 +203,19 @@ onMounted(async () => {
             {{ presaleData.symbol }}
           </div>
         </div>
+        <div
+          v-if="presaleData.contributionAmount"
+          class="font-medium text-sm mb-1"
+        >
+          Your contribution:
+          <div class="font-light text-sm inline-block">
+            {{ presaleData.contributionAmount }}
+            {{ presaleData.symbol }}
+          </div>
+        </div>
       </div>
 
-      <div class="font-medium text-sm mb-2">
+      <div class="font-medium text-sm mb-2 mt-4">
         Status:
         <span v-if="assetMeta.assetMetaData" class="font-light text-sm">
           {{ "presale" }}

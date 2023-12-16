@@ -91,6 +91,9 @@ const showToastMessage = (message) => {
 
 const sortPresaleList = () => {
   presaleList.value = presaleList.value.sort((a, b) => {
+    if (a.contributionAmount - b.contributionAmount !== 0) {
+      return b.contributionAmount - a.contributionAmount;
+    }
     const aPresaleAsset = assetsMetadata.value[a.presaleAsset].name;
     const bPresaleAsset = assetsMetadata.value[b.presaleAsset].name;
 
@@ -162,10 +165,21 @@ const preparePresaleList = async () => {
 
       const targetPresaleAmount = tokenShareThreshold * reserve;
 
+      let contributionAmount = 0;
+      if (address.value) {
+        contributionAmount =
+          meta.value[aa][`contribution_${address.value}_${presaleAsset}`] || 0;
+      }
+
+      if (contributionAmount) {
+        contributionAmount =
+          contributionAmount /
+          10 ** assetsMetadata.value[reserveAsset].decimals;
+      }
+
       const isPresaleFinished =
-        currentPresaleAmount &&
-        (targetPresaleAmount <= currentPresaleAmount ||
-          finishDate.diff(dayjs()) < 0);
+        targetPresaleAmount < currentPresaleAmount ||
+        finishDate.diff(dayjs()) < 0;
 
       if (isPresaleFinished) continue;
 
@@ -177,6 +191,7 @@ const preparePresaleList = async () => {
         isPresaleFinished,
         targetPresaleAmount,
         currentPresaleAmount,
+        contributionAmount,
         finishDate: finishDate.format("MMMM D, YYYY HH:mm"),
       });
 
@@ -410,13 +425,20 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
                 <div class="mt-3">
                   Presale ends on: {{ selectedPresaleFinishDate }}
                 </div>
-                <div>
+                <div class="mt-0.5">
                   Sold:
                   {{
                     `${+selectedPresaleCurrentAmount.toPrecision(
                       6
                     )} / ${+selectedPresaleTargetAmount.toPrecision(6)}`
                   }}
+                  {{ assetsMetadata[selectedReserveAsset].name }}
+                </div>
+                <div
+                  v-if="currentPresaleData.contributionAmount"
+                  class="mt-0.5"
+                >
+                  Your contribution: {{ currentPresaleData.contributionAmount }}
                   {{ assetsMetadata[selectedReserveAsset].name }}
                 </div>
               </div>

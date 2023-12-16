@@ -2,9 +2,15 @@
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useRoute, useRouter } from "vue-router";
+import dayjs from "dayjs";
+import duration from "dayjs/plugin/duration";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import { useAddressStore } from "@/stores/addressStore";
-import { getAllVotes, getPreparedMeta } from "@/utils/governanceUtils";
+import {
+  getAllVotes,
+  getParam,
+  getPreparedMeta,
+} from "@/utils/governanceUtils";
 import { generateAndFollowLinkForVoteInGovernance } from "@/utils/generateLink";
 import { getNotDefaultAssetsFromMeta } from "@/utils/assetsUtils";
 import { getVPFromNormalized } from "@/utils/getVP";
@@ -21,6 +27,8 @@ import TooltipComponent from "@/components/TooltipComponent.vue";
 import { getPriceByAssets, getReservePrice } from "@/services/PerpAPI";
 import PieComponent from "@/components/PieComponent.vue";
 import Asset0ForTradingComponent from "@/components/governance/Asset0ForTradingComponent.vue";
+
+dayjs.extend(duration);
 
 const store = useAaInfoStore();
 const { setActiveAddress } = store;
@@ -148,6 +156,12 @@ async function prepareDataForPie() {
   return [{ price: asset0Price, symbol: asset0Name }, ...ps];
 }
 
+function isBrokenPresale(meta, presalePeriod) {
+  const presaleAssetIssue = meta.creation_ts;
+  const finishDate = dayjs((presaleAssetIssue + presalePeriod) * 1000);
+  return !meta.presale_amount && finishDate.diff(dayjs()) < 0;
+}
+
 async function init() {
   if (!aas.value.length) return;
 
@@ -183,9 +197,13 @@ async function init() {
   const assets = getNotDefaultAssetsFromMeta(metaByAA);
   const mForFinishedAssets = {};
   const metadataByAsset = await getAssetMetadataByArray(assets);
+  const presalePeriod = getParam("presale_period", metaByAA);
 
   for (let asset of assets) {
     const m = metaByAA[`asset_${asset}`];
+    if (m.presale && isBrokenPresale(m, presalePeriod)) {
+      continue;
+    }
     mForFinishedAssets[asset] = {
       metaByPriceAA: preparedMeta.value.priceAAsMeta.finished[m.price_aa],
       assetMetaData: metadataByAsset[asset],
