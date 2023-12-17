@@ -227,6 +227,8 @@ const preparePresaleList = async () => {
 
     if (routePresaleIndex === -1) {
       showToastMessage("Presale not found, please choose an existing one");
+      await router.push(`/presale`);
+      await preparePresaleList();
       return;
     }
 
@@ -275,10 +277,6 @@ const fillPresaleData = async () => {
     ? presale.currentPresaleAmount /
       10 ** assetsMetadata.value[selectedReserveAsset.value].decimals
     : 0;
-
-  if (selectedPresaleIsFinished.value) {
-    activeTab.value = "claim";
-  }
 
   selectedOracleData.value = await getOracleData(
     meta.value[presale.aa][`asset_${presale.presaleAsset}`].price_aa
@@ -331,7 +329,7 @@ watch(selectedPresaleAsset, () => {
 
 watch(() => address.value, updateAddressPresaleAmount);
 
-watch([selectedPresaleAsset, amount, activeTab], () => {
+watch([selectedPresaleAsset, amount], () => {
   const assetAmount =
     selectedReserveAsset.value === "base"
       ? Number(amount.value) * 10 ** 9 + 1000
@@ -340,11 +338,8 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
 
   const data = {
     asset: selectedPresaleAsset.value,
+    presale: 1,
   };
-
-  if (activeTab.value === "buy") {
-    data.presale = 1;
-  }
 
   const aa =
     aAsPairs.value[
@@ -377,8 +372,6 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
       </div>
     </div>
 
-    <ClaimCard v-if="address" />
-
     <div class="p-2 mb-6">
       <h1 class="text-lg font-bold leading-7">Presale</h1>
       <div class="mt-2 leading-6">
@@ -387,10 +380,29 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
       </div>
     </div>
 
+    <div v-if="address" class="mb-2">
+      <button
+        class="btn btn-sm"
+        :class="{ 'btn-primary': activeTab === 'buy' }"
+        @click="setTab('buy')"
+      >
+        Active
+      </button>
+      <button
+        class="btn btn-sm ml-1"
+        :class="{ 'btn-primary': activeTab === 'contribution' }"
+        @click="setTab('contribution')"
+      >
+        My contributions
+      </button>
+    </div>
     <div class="card bg-base-200 shadow-xl">
       <div class="card-body p-6 sm:p-8">
         <div v-if="!isLoaded" class="text-center">
           <Loading />
+        </div>
+        <div v-else-if="address && activeTab === 'contribution'">
+          <ClaimCard />
         </div>
         <div v-else>
           <div v-if="presaleList.length">
@@ -442,22 +454,7 @@ watch([selectedPresaleAsset, amount, activeTab], () => {
                   {{ assetsMetadata[selectedReserveAsset].name }}
                 </div>
               </div>
-              <div class="tabs tabs-boxed mt-8 mb-1">
-                <a
-                  class="tab tab-lifted"
-                  :class="{ 'tab-active': activeTab === 'buy' }"
-                  @click="setTab('buy')"
-                >
-                  Buy
-                </a>
-                <a
-                  class="tab tab-lifted tab-disabled"
-                  :class="{ 'tab-active': activeTab === 'withdraw' }"
-                >
-                  Withdraw
-                </a>
-              </div>
-              <div>
+              <div class="mt-8">
                 <label class="label">
                   <span class="label-text">Amount</span>
                 </label>
