@@ -69,9 +69,6 @@ watch(activePresaleIndex, () => {
                 assetsMetadata[presale.asset0].name
               } / ${assetsMetadata[presale.reserveAsset].name}`
             }}
-            <template v-if="presale.contributionAmount">
-              (participating)</template
-            >
           </li>
         </ListboxOption>
       </ListboxOptions>
