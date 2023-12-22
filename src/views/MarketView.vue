@@ -149,7 +149,7 @@ function setAsset2(asset) {
 function getAmountByAsset(amount, asset) {
   const a =
     asset === "base"
-      ? Number(amount) * 10 ** 9 + 1000
+      ? Number(amount) * 10 ** 9
       : Number(
           amount * 10 ** assets.value.nameAndDecimalsByAsset[asset].decimals
         );
