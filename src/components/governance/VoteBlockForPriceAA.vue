@@ -132,7 +132,10 @@ onMounted(async () => {
           (vp: {{ userVote.vp }})
         </div>
       </div>
-      <div class="text-center sm:text-left" v-if="allowedControl">
+      <div
+        class="text-center sm:text-left"
+        v-if="allowedControl && name !== 'price_aa'"
+      >
         <a
           class="link text-sky-500 link-hover"
           @click="$emit('reqVote', name, type)"

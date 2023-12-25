@@ -330,7 +330,7 @@ onMounted(async () => {
           <VoteBlockForPriceAA
             class="mt-8"
             title="Drift rate"
-            type="number"
+            type="float"
             name="drift_rate"
             :asset-meta="assetMeta"
             :votes-by-name="votes['change_drift_rate'][asset]"

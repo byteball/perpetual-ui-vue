@@ -26,4 +26,5 @@ export const propertyTips = {
   staking_aa: "Staking autonomous agent",
   current_vp: "Current voting power",
   new_vp: "New voting power",
+  max_drift_rate: "Maximum drift rate per year",
 };

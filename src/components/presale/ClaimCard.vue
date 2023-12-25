@@ -12,9 +12,13 @@ import { generateLink } from "@/utils/generateLink";
 import { getTargetPriceByPresaleAsset } from "@/services/PerpAPI";
 
 import WithdrawModal from "@/components/presale/WithdrawModal.vue";
+import router from "@/router";
+import LoadingIcon from "@/components/icons/LoadingIcon.vue";
 
 const addressStore = useAddressStore();
 const store = useAaInfoStore();
+
+const emit = defineEmits(["openBuy"]);
 
 const { address } = storeToRefs(addressStore);
 const { meta } = storeToRefs(store);
@@ -23,6 +27,7 @@ const addressClaims = ref([]);
 const assetsMetadata = ref({});
 const modalForWithdraw = ref(false);
 const dataForWithdraw = ref({});
+const isLoaded = ref(false);
 
 function setWithdrawModalData(data) {
   dataForWithdraw.value = data;
@@ -32,7 +37,7 @@ function closeWithdrawModal() {
   modalForWithdraw.value = false;
 }
 
-const isPresaleFinished = (aa, presaleAsset) => {
+const getPresaleStatus = (aa, presaleAsset) => {
   const presalePeriod = getParam("presale_period", meta.value[aa]);
   const tokenShareThreshold = getParam("token_share_threshold", meta.value[aa]);
   const reserve = meta.value[aa].state.reserve;
@@ -47,11 +52,13 @@ const isPresaleFinished = (aa, presaleAsset) => {
 
   const targetPresaleAmount = tokenShareThreshold * reserve;
 
-  return (
-    targetPresaleAmount < currentPresaleAmount ||
-    !presaleAssetData?.presale ||
-    finishDate.diff(dayjs()) < 0
-  );
+  return {
+    finishDate,
+    finished:
+      targetPresaleAmount < currentPresaleAmount ||
+      !presaleAssetData?.presale ||
+      finishDate.diff(dayjs()) < 0,
+  };
 };
 
 const getAssetsMetadata = async (presaleAsset, reserveAsset) => {
@@ -90,9 +97,9 @@ const prepareClaimPresaleByAddress = async () => {
       const reserveAsset = meta.value[aa].reserve_asset;
 
       await getAssetsMetadata(presaleAsset, reserveAsset);
-      const isFinished = isPresaleFinished(aa, presaleAsset);
+      const presaleStatus = getPresaleStatus(aa, presaleAsset);
       let amount, name, decimals;
-      if (isFinished) {
+      if (presaleStatus.finished) {
         const targetPrice = await getTargetPriceByPresaleAsset(
           aa,
           presaleAsset
@@ -116,7 +123,8 @@ const prepareClaimPresaleByAddress = async () => {
         amount,
         name,
         decimals,
-        isPresaleFinished: isFinished,
+        isPresaleFinished: presaleStatus.finished,
+        finishDate: presaleStatus.finishDate.format("MMMM D, YYYY HH:mm"),
         link: generateClaimLink(presaleAsset, reserveAsset, aa),
       });
     }
@@ -142,17 +150,26 @@ const prepareClaimPresaleByAddress = async () => {
   addressClaims.value = list;
 };
 
+function setBuy(asset) {
+  router.push(`/presale/${asset}`);
+  emit("openBuy");
+}
+
 watch(meta, prepareClaimPresaleByAddress);
 
 watch(() => address.value, prepareClaimPresaleByAddress);
 
 onMounted(async () => {
   await prepareClaimPresaleByAddress();
+  isLoaded.value = true;
 });
 </script>
 
 <template>
-  <div v-if="addressClaims.length">
+  <div v-if="!isLoaded" class="text-center">
+    <LoadingIcon />
+  </div>
+  <div v-else-if="addressClaims.length">
     <div class="text-sm text-center">
       <div class="font-bold text-center sm:text-left flex items-center mb-2">
         Claim or withdraw your tokens
@@ -162,7 +179,8 @@ onMounted(async () => {
           <tr>
             <th>Token</th>
             <th>Amount</th>
-            <th class="text-center">Action</th>
+            <th class="text-center">Status</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
@@ -171,7 +189,15 @@ onMounted(async () => {
               {{ assetsMetadata[claim.presaleAsset].name }}
             </td>
             <td>{{ claim.amount }} {{ claim.name }}</td>
-            <td class="text-center">
+            <td class="text-center min-w-[162px]">
+              <template v-if="claim.isPresaleFinished"
+                >Presale is completed</template
+              >
+              <template v-else
+                >Presale ends on:<br />{{ claim.finishDate }}</template
+              >
+            </td>
+            <td class="min-w-[128px]">
               <a
                 class="link text-sky-500 link-hover"
                 :href="claim.link"
@@ -179,20 +205,25 @@ onMounted(async () => {
               >
                 claim
               </a>
-              <a
-                v-else
-                class="link text-sky-500 link-hover"
-                @click="setWithdrawModalData(claim)"
-              >
-                withdraw
-              </a>
+              <template v-else>
+                <a
+                  class="link text-sky-500 link-hover mr-2"
+                  @click="setBuy(claim.presaleAsset)"
+                  >Buy</a
+                >
+                <a
+                  class="link text-sky-500 link-hover"
+                  @click="setWithdrawModalData(claim)"
+                  >withdraw</a
+                >
+              </template>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
   </div>
-  <div v-else class="text-center font-bold">No tokens to claim</div>
+  <div v-else class="mt-2 leading-6">No tokens to claim</div>
   <Dialog
     :open="modalForWithdraw"
     @close="closeWithdrawModal()"

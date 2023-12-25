@@ -14,6 +14,9 @@ let placeholder = "10";
 if (props.type === "percent") {
   decimals = 2;
   placeholder = "0.03";
+} else if (props.type === "float") {
+  decimals = 2;
+  placeholder = "0.5";
 }
 
 const options = computed(() => {

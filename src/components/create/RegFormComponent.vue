@@ -39,6 +39,7 @@ const presalePeriod = ref("14");
 const auctionPriceHalvingPeriod = ref("3");
 const tokenShareThreshold = ref("10");
 const minS0Share = ref("1");
+const maxDriftRate = ref("0.5");
 
 const existsError = ref("");
 const addressExistsAA = ref("");
@@ -61,6 +62,7 @@ function getObject() {
     auction_price_halving_period: auctionPriceHalvingPeriod.value,
     token_share_threshold: tokenShareThreshold.value,
     min_s0_share: minS0Share.value,
+    max_drift_rate: maxDriftRate.value,
   });
   convertObjectFieldValues(obj);
 
@@ -269,6 +271,15 @@ watch(
         <TooltipComponent field-name="min_s0_share"> </TooltipComponent>
       </div>
       <VoteInput v-model="minS0Share" :type="'percent'" label="%" />
+    </div>
+    <div class="form-control mt-5">
+      <div class="flex items-center">
+        <label class="label">
+          <span class="label-text">Min governance asset share</span>
+        </label>
+        <TooltipComponent field-name="max_drift_rate" />
+      </div>
+      <VoteInput v-model="maxDriftRate" :type="'float'" />
     </div>
   </div>
 

@@ -39,7 +39,7 @@ const balanceByAsset = computed(() => {
   const asset = props.params.poolSymbolAndDecimal.asset;
   const decimals = props.params.poolSymbolAndDecimal.decimals;
 
-  let b = balance.value[asset]?.stable || 0;
+  let b = balance.value[asset]?.total || 0;
   if (b) {
     b = b / 10 ** decimals;
   }

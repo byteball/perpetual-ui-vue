@@ -2,6 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'STIXGeneral-Regular';
+  src: url('@/assets/fonts/STIXGeneralRegular.eot');
+  src: url('@/assets/fonts/STIXGeneralRegular.eot') format('embedded-opentype'),
+  url('@/assets/fonts/STIXGeneralRegular.woff2') format('woff2'),
+  url('@/assets/fonts/STIXGeneralRegular.woff') format('woff'),
+  url('@/assets/fonts/STIXGeneralRegular.ttf') format('truetype'),
+  url('@/assets/fonts/STIXGeneralRegular.svg') format('svg');
+}
+
+@font-face {
+  font-family: 'STIXGeneral-Italic';
+  src: url('@/assets/fonts/STIXGeneralItalic.eot');
+  src: url('@/assets/fonts/STIXGeneralItalic.eot') format('embedded-opentype'),
+  url('@/assets/fonts/STIXGeneralItalic.woff2') format('woff2'),
+  url('@/assets/fonts/STIXGeneralItalic.woff') format('woff'),
+  url('@/assets/fonts/STIXGeneralItalic.ttf') format('truetype'),
+  url('@/assets/fonts/STIXGeneralItalic.svg') format('svg');
+}
+
 body {
   @apply text-slate-200;
 }
