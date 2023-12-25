@@ -112,9 +112,9 @@ function goToStep3() {
   step.value = 3;
 }
 
-function back() {
+function back(toStep) {
   needCheckPriceAA.value = false;
-  step.value = 2;
+  step.value = toStep;
 }
 
 function setEmptyData() {
@@ -186,6 +186,12 @@ watch(step, () => {
 });
 
 async function goBack() {
+  if (step.value === 2) {
+    return back(1);
+  }
+  if (step.value === 3 || step.value === 4) {
+    return back(2);
+  }
   await router.push(`/governance/management/${route.params.aa}`);
 }
 
@@ -218,7 +224,7 @@ onUnmounted(() => {
     </div>
 
     <div class="p-2 mb-6">
-      <h1 class="text-lg font-bold leading-7">Add new perpetual future</h1>
+      <h1 class="text-2xl font-bold leading-8">Add new perpetual future</h1>
       <div class="mt-2 leading-6">
         Create a governance proposal to add a new perpetual future asset
         tracking some currency, stock, or commodity. The proposal will be then
@@ -280,7 +286,9 @@ onUnmounted(() => {
     <div v-else-if="step === 2">
       <div class="alert shadow-lg">
         <div class="ml-2">
-          <span>Good, now you need to create the price AA for the new asset</span>
+          <span
+            >Good, now you need to create the price AA for the new asset</span
+          >
         </div>
         <div></div>
         <div>
@@ -318,7 +326,7 @@ onUnmounted(() => {
           </svg>
           <div>
             To continue, you need to wait until the price AA is confirmed. If
-            you didn't wait, use the back 
+            you didn't wait, use the back
           </div>
         </div>
       </div>
