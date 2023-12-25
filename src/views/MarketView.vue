@@ -406,7 +406,7 @@ watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
 <template>
   <div class="container w-full sm:w-[512px] m-auto mt-2 p-6 sm:p-8">
     <div class="p-2 mb-6">
-      <h1 class="text-lg font-bold leading-7">Trade Decentralized Futures</h1>
+      <h1 class="text-2xl font-bold leading-8">Trade Decentralized Futures</h1>
       <div class="mt-2 leading-6">
         Buy or sell futures powered by
         <RouterLink class="link text-sky-500 link-hover font-light" :to="`/faq`"

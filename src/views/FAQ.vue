@@ -5,7 +5,7 @@ import FormulaComponent from "@/components/FormulaComponent.vue";
 <template>
   <div class="container w-full sm:w-[768px] m-auto mt-2 p-6 sm:p-8">
     <div class="p-2 mb-6">
-      <h1 class="text-lg font-bold leading-7">Frequently asked questions</h1>
+      <h1 class="text-2xl font-bold leading-8">Frequently asked questions</h1>
     </div>
 
     <div class="card bg-base-200 shadow-xl mb-4 p-6 sm:p-8">
@@ -31,23 +31,26 @@ import FormulaComponent from "@/components/FormulaComponent.vue";
         like:
       </div>
       <FormulaComponent
-        formula="$$r = c sqrt(a_0 {s_0}^2 + a_1 {s_1}^2 + a_2 {s_2}^2 + ...)$$"
+        formula="$$r = c \: \sqrt{a_0 \: {s_0}^2 + a_1 \: {s_1}^2 + a_2 \: {s_2}^2 + ...}$$"
       />
-      <div>where:</div>
-      <ul>
-        <li>
-          <i>r</i> is the total reserve committed to issuing the futures tokens;
-        </li>
-        <li>
-          <i>s</i><sub>0</sub>, <i>s</i><sub>1</sub>, <i>s</i><sub>2</sub>, ...
-          are the supplies of the futures tokens;
-        </li>
-        <li>
-          <i>a</i><sub>0</sub>, <i>a</i><sub>1</sub>, <i>a</i><sub>2</sub>, ...
-          are some coefficients corresponding to the respective tokens;
-        </li>
-        <li><i>c</i> is another coefficient.</li>
-      </ul>
+      <div>
+        where:
+        <ul class="list-disc list-inside">
+          <li>
+            <i>r</i> is the total reserve committed to issuing the futures
+            tokens;
+          </li>
+          <li>
+            <i>s</i><sub>0</sub>, <i>s</i><sub>1</sub>, <i>s</i><sub>2</sub>,
+            ... are the supplies of the futures tokens;
+          </li>
+          <li>
+            <i>a</i><sub>0</sub>, <i>a</i><sub>1</sub>, <i>a</i><sub>2</sub>,
+            ... are some coefficients corresponding to the respective tokens;
+          </li>
+          <li><i>c</i> is another coefficient.</li>
+        </ul>
+      </div>
       <div>
         The formula resembles the well-known Pythagorean theorem, which gives
         such curves the name.
@@ -103,7 +106,7 @@ import FormulaComponent from "@/components/FormulaComponent.vue";
         <i>s</i><sub>1</sub>:
       </p>
       <FormulaComponent
-        formula="$$p1 = c a_1 s_1 / sqrt(a_0 {s_0}^2 + a_1 {s_1}^2 + a_2 {s_2}^2 + ...)$$"
+        formula="$$p1 = {c \: a_1 \: s_1 \over \sqrt{a_0 \: {s_0}^2 + a_1 \: {s_1}^2 + a_2 \: {s_2}^2 + ...}}$$"
       />
       <p>
         If the price differs from the target price (reported by an oracle), the
@@ -111,12 +114,11 @@ import FormulaComponent from "@/components/FormulaComponent.vue";
         that the <i>p</i><sub>1</sub> comes closer to the target. It would
         completely correct to the target price within a predetermined period of
         time (which can be changed by
-        <RouterLink class="btn btn-sm btn-primary" :to="`/governance`"
-          >governance</RouterLink
-        >) such as 5 days. This change of the parameters moves us to a slightly
-        different bonding curve. It also affects (to a smaller extent) the
-        prices of all other tokens, so they move closer or farther from their
-        targets and might require smaller or larger correction themselves.
+        <RouterLink :to="`/governance`">governance</RouterLink>) such as 5 days.
+        This change of the parameters moves us to a slightly different bonding
+        curve. It also affects (to a smaller extent) the prices of all other
+        tokens, so they move closer or farther from their targets and might
+        require smaller or larger correction themselves.
       </p>
       <p>
         However, even before such an adjustment happens, traders can try to
@@ -158,9 +160,8 @@ import FormulaComponent from "@/components/FormulaComponent.vue";
       <h2 class="card-title mb-4">What can be the reserve asset?</h2>
       <div>
         When a new futures set is created (anyone can do it
-        <RouterLink class="btn btn-sm btn-primary" :to="`/create`"
-          >here</RouterLink
-        >), any token can be chosen as the reserve asset.
+        <RouterLink :to="`/create`">here</RouterLink>), any token can be chosen
+        as the reserve asset.
       </div>
       <div>
         One interesting use case is using an
@@ -215,9 +216,7 @@ import FormulaComponent from "@/components/FormulaComponent.vue";
       </div>
       <div>
         Holders of the governance token can participate in
-        <RouterLink class="btn btn-sm btn-primary" :to="`/governance`"
-          >governance</RouterLink
-        >
+        <RouterLink :to="`/governance`">governance</RouterLink>
         of the set by locking their tokens for a certain time and voting about
         changing the set's parameters and adding new futures tokens.
       </div>
@@ -226,13 +225,9 @@ import FormulaComponent from "@/components/FormulaComponent.vue";
       <h2 class="card-title mb-4">How are the futures sets governed?</h2>
       <div>
         Anyone can participate in
-        <RouterLink class="btn btn-sm btn-primary" :to="`/governance`"
-          >governance</RouterLink
-        >
+        <RouterLink :to="`/governance`">governance</RouterLink>
         by buying the governance tokens and
-        <RouterLink class="btn btn-sm btn-primary" :to="`/stake`"
-          >locking (staking)</RouterLink
-        >
+        <RouterLink :to="`/stake`">locking (staking)</RouterLink>
         them for a certain period from 14 days to 1 year. Longer locking periods
         yield more voting power (VP) &mdash; weight in the future votes. After
         being locked, the VP starts decaying exponentially such that it decays 8
@@ -257,17 +252,13 @@ import FormulaComponent from "@/components/FormulaComponent.vue";
       <h2 class="card-title mb-4">Who can create a new futures set?</h2>
       <div>
         Anyone can
-        <RouterLink class="btn btn-sm btn-primary" :to="`/create`"
-          >create a new futures set</RouterLink
-        >.
+        <RouterLink :to="`/create`">create a new futures set</RouterLink>.
       </div>
       <div>
         The most important parameters of a futures set are its reserve asset and
         trading fee. The trading fee and some other parameters can be later
         changed by
-        <RouterLink class="btn btn-sm btn-primary" :to="`/governance`"
-          >governance</RouterLink
-        >.
+        <RouterLink :to="`/governance`">governance</RouterLink>.
       </div>
     </div>
     <div class="card bg-base-200 shadow-xl mb-4 p-6 sm:p-8">
@@ -276,9 +267,7 @@ import FormulaComponent from "@/components/FormulaComponent.vue";
         Anyone who has locked the governance tokens of a futures set can suggest
         adding a new futures token into that set. This function is available on
         the
-        <RouterLink class="btn btn-sm btn-primary" :to="`/governance`"
-          >governance page</RouterLink
-        >
+        <RouterLink :to="`/governance`">governance page</RouterLink>
         of the said futures set. The most important parameter of the new futures
         token is its price oracle that will be used to obtain the target price
         of the new token.
@@ -307,12 +296,11 @@ import FormulaComponent from "@/components/FormulaComponent.vue";
       <div>
         The presale ends when either its term expires (14 days by default but it
         can be changed by
-        <RouterLink class="btn btn-sm btn-primary" :to="`/governance`"
-          >governance</RouterLink
-        >) or the amount of the reserve currency committed to buying the new
-        token exceeds some share (10% by default but can be changed by
-        governance) of the current reserve of the set. The latter condition is
-        to avoid domination of a single token in the set.
+        <RouterLink :to="`/governance`">governance</RouterLink>) or the amount
+        of the reserve currency committed to buying the new token exceeds some
+        share (10% by default but can be changed by governance) of the current
+        reserve of the set. The latter condition is to avoid domination of a
+        single token in the set.
       </div>
       <div>
         After the presale ends, normal trading starts and the token's price can
@@ -324,9 +312,8 @@ import FormulaComponent from "@/components/FormulaComponent.vue";
       <p>
         The fees vary among futures sets and are determined by the set's
         creators and their
-        <RouterLink class="btn btn-sm btn-primary" :to="`/governance`"
-          >governance</RouterLink
-        >. The default trading fee is 0.3%.
+        <RouterLink :to="`/governance`">governance</RouterLink>. The default
+        trading fee is 0.3%.
       </p>
       <p>
         There is also an additional fee called
@@ -370,9 +357,7 @@ import FormulaComponent from "@/components/FormulaComponent.vue";
       <div>
         Pythagorean futures also do not allow trading with leverage (unless the
         target price is set up to follow some synthetic leveraged price, but the
-        <RouterLink class="btn btn-sm btn-primary" :to="`/governance`"
-          >governance</RouterLink
-        >
+        <RouterLink :to="`/governance`">governance</RouterLink>
         might not approve such a volatile token to be launched).
       </div>
       <div>
@@ -458,9 +443,7 @@ import FormulaComponent from "@/components/FormulaComponent.vue";
         <a href="https://obyte.org" target="_blank" rel="noopener">Obyte DAG</a>
         in a totally manless manner. Nobody can stop them, nobody can intervene
         with their operation, except their
-        <RouterLink class="btn btn-sm btn-primary" :to="`/governance`"
-          >governance</RouterLink
-        >
+        <RouterLink :to="`/governance`">governance</RouterLink>
         that has limited ability to tune the set's parameters. The code of the
         AAs, as well as all their activity, are fully transparent.
       </p>
@@ -490,10 +473,22 @@ import FormulaComponent from "@/components/FormulaComponent.vue";
 </template>
 
 <style scoped>
-a[target] {
+a {
   @apply link link-hover text-sky-500;
 }
+
 p {
   @apply my-2;
+}
+
+.card > div {
+  @apply my-2;
+}
+
+h2 {
+  @apply mb-4;
+}
+ul {
+  @apply ml-4;
 }
 </style>

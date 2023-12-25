@@ -363,7 +363,7 @@ watch(
     </div>
 
     <div class="p-2 mb-6">
-      <h1 class="text-lg font-bold leading-7 inline-block">
+      <h1 class="text-2xl font-bold leading-8 inline-block">
         Manage futures set
       </h1>
       <div class="mt-2 leading-6">
