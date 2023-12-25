@@ -257,7 +257,9 @@ const userVote = (name, priceAsset) => {
 
 function showModalForVote(title, name, type, suffix, value, priceAsset) {
   const metaByAA = meta.value[perpetualAA.value];
+  console.log(metaByAA);
   const df = metaByAA["decay_factor"];
+  const maxDriftRate = metaByAA["max_drift_rate"] || 0.5;
   const userVP = getVPFromNormalized(
     metaByAA.stakingVars[`user_${address.value}_a0`]?.normalized_vp,
     df,
@@ -280,6 +282,7 @@ function showModalForVote(title, name, type, suffix, value, priceAsset) {
     userVP,
     decimals: preparedMeta.value.asset0SymbolAndDecimals.decimals,
     priceAsset,
+    maxDriftRate,
   };
   modalForVoteIsOpen.value = true;
 }

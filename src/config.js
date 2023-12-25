@@ -1,10 +1,14 @@
-const base_aa = import.meta.env.VITE_BASE_AA;
+const base_aas = import.meta.env.VITE_BASE_AAS.split(",").filter(
+  (v) => v !== ""
+);
+const base_aa = base_aas.at(-1);
 const factory_aa = import.meta.env.VITE_FACTORY_AA;
 const reserve_price_usd = import.meta.env.VITE_RESERVE_PRICE_USD;
 const reserve_price_oswap = import.meta.env.VITE_RESERVE_PRICE_OSWAP;
 const registry_aa = import.meta.env.VITE_REGISTRY_AA;
 
 export const ADDRESSES = {
+  base_aas,
   base_aa,
   factory_aa,
   reserve_price_usd,

@@ -26,7 +26,6 @@ watch(type, () => {
 });
 
 onMounted(() => {
-  console.log(currentAssetState.type);
   const t = currentAssetState?.type;
   if (t) {
     type.value = t;

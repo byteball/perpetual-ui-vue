@@ -1,6 +1,7 @@
 import client from "./Obyte.js";
 import CacheService from "@/services/CacheService";
 import Client from "@/services/Obyte";
+import { ADDRESSES } from "@/config";
 
 const definitionCache = new CacheService(5 * 60 * 1000);
 const stateVarsCache = new CacheService();
@@ -14,7 +15,7 @@ const balanceCache = new CacheService(30 * 1000);
 
 export async function getAasCreatedByFactory() {
   const result = await client.api.getAasByBaseAas({
-    base_aa: import.meta.env.VITE_BASE_AA,
+    base_aas: ADDRESSES.base_aas,
   });
 
   return result.map((v) => v.address);
@@ -159,7 +160,7 @@ export async function getOracleData(priceAA) {
   let value = await getDataFeed(oracle, feed_name);
   if (oracle === "F4KHJUCLJKY4JV7M5F754LAJX4EB7M4N") {
     name = name.split("_")[0];
-    value = `$${value.toFixed(2)}`;
+    value = +value.toFixed(2);
   }
 
   return { name, value };

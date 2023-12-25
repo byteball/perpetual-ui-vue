@@ -59,6 +59,7 @@ export const getExchangeResultByState = (
   const oldPrice = oldSupply.gt(0)
     ? coef.pow(2).times(a).times(oldSupply).div(reserve)
     : new Decimal(0);
+  const bInitial = bAsset0 && reserve.eq(0);
 
   const key = "last_" || op;
   const last_trade = bAsset0 ? state[key] : assetInfo[key];
@@ -74,8 +75,8 @@ export const getExchangeResultByState = (
       : Decimal.min(oldPrice, last_trade.initial_p)
     : new Decimal(oldPrice);
 
-  const swapFeeRate = getSwapFee();
-  const arbProfitTaxRate = getArbProfitTaxRate();
+  const swapFeeRate = bInitial ? 0 : getSwapFee();
+  const arbProfitTaxRate = bInitial ? 0 : getArbProfitTaxRate();
 
   const getNewSupply = (newR, feeRate) => {
     return new Decimal(oldSupply)

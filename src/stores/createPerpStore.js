@@ -22,7 +22,6 @@ export const useCreatePerpStore = defineStore("createPerp", () => {
     assetsState.value[asset] = { ...assetsState.value[asset], ...state };
     currentAsset.value = asset;
 
-    console.log(assetsState.value[asset]);
     localStorage.setItem("assetsState", JSON.stringify(assetsState.value));
   }
 

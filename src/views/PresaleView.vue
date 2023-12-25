@@ -7,6 +7,7 @@ import duration from "dayjs/plugin/duration";
 import { generateLink } from "@/utils/generateLink";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import { getPresaleAssetsFromMeta } from "@/utils/getAssetsFromMeta";
+import { useUserBalance } from "@/composables/useUserBalance";
 import {
   getAssetMetadata,
   getAssetMetadataByArray,
@@ -17,7 +18,10 @@ import { getParam, getPreparedMeta } from "@/utils/governanceUtils";
 import { useAddressStore } from "@/stores/addressStore";
 import ClaimCard from "@/components/presale/ClaimCard.vue";
 import Loading from "@/components/icons/LoadingIcon.vue";
-import { getTargetPriceByPresaleAsset } from "@/services/PerpAPI";
+import {
+  getReservePriceFromPerpAA,
+  getTargetPriceByPresaleAsset,
+} from "@/services/PerpAPI";
 import SpoilerWithPerpMetaComponent from "@/components/SpoilerWithPerpMetaComponent.vue";
 import PresaleSelectComponent from "@/components/presale/PresaleSelectComponent.vue";
 
@@ -30,6 +34,21 @@ const store = useAaInfoStore();
 const addressStore = useAddressStore();
 const { aas, meta } = storeToRefs(store);
 const { address } = storeToRefs(addressStore);
+const { balance } = useUserBalance(address);
+
+const balanceByAsset = computed(() => {
+  if (!selectedReserveAsset.value) return 0;
+
+  return balance.value[selectedReserveAsset.value]?.total || 0;
+});
+
+const formattedBalanceByAsset = computed(() => {
+  if (!selectedReserveAsset.value) return 0;
+
+  const amount = balance.value[selectedReserveAsset.value]?.total || 0;
+  const decimals = assetsMetadata.value[selectedReserveAsset.value].decimals;
+  return amount / 10 ** decimals;
+});
 
 const presaleList = ref([]);
 const preparedDataByAA = ref({});
@@ -52,6 +71,7 @@ const selectedOracleData = ref({});
 const selectedTargetPrice = ref(0);
 
 const receiveAmount = ref(0);
+const receiveAmountInUsd = ref(0);
 
 const amount = ref("");
 const link = ref("");
@@ -166,14 +186,15 @@ const preparePresaleList = async () => {
       const targetPresaleAmount = tokenShareThreshold * reserve;
 
       let contributionAmount = 0;
+      let rawContributionAmount = 0;
       if (address.value) {
-        contributionAmount =
+        rawContributionAmount =
           meta.value[aa][`contribution_${address.value}_${presaleAsset}`] || 0;
       }
 
-      if (contributionAmount) {
+      if (rawContributionAmount) {
         contributionAmount =
-          contributionAmount /
+          rawContributionAmount /
           10 ** assetsMetadata.value[reserveAsset].decimals;
       }
 
@@ -182,6 +203,14 @@ const preparePresaleList = async () => {
         finishDate.diff(dayjs()) < 0;
 
       if (isPresaleFinished) continue;
+
+      const reservePrice = await getReservePriceFromPerpAA(aa);
+      const soldInUsd = `$${(currentPresaleAmount * reservePrice).toFixed(
+        2
+      )} / $${(targetPresaleAmount * reservePrice).toFixed(2)}`;
+      const contributionInUsd = `$${(
+        rawContributionAmount * reservePrice
+      ).toFixed(2)}`;
 
       presaleList.value.push({
         aa,
@@ -192,6 +221,9 @@ const preparePresaleList = async () => {
         targetPresaleAmount,
         currentPresaleAmount,
         contributionAmount,
+        reservePrice,
+        soldInUsd,
+        contributionInUsd,
         finishDate: finishDate.format("MMMM D, YYYY HH:mm"),
       });
 
@@ -218,6 +250,8 @@ const preparePresaleList = async () => {
 
   if (route.params.presale) {
     if (!presaleList.value.length) {
+      await router.push(`/presale`);
+      await preparePresaleList();
       return;
     }
 
@@ -308,7 +342,7 @@ watch(
   }
 );
 
-const calculateReceiveAmount = () => {
+const calculateReceiveAmount = async () => {
   const reserveDecimals =
     10 ** assetsMetadata.value[selectedReserveAsset.value].decimals;
   const targetPrice = selectedTargetPrice.value;
@@ -317,7 +351,13 @@ const calculateReceiveAmount = () => {
 
   receiveAmount.value =
     rawAmount / 10 ** assetsMetadata.value[selectedPresaleAsset.value].decimals;
+  receiveAmountInUsd.value =
+    selectedOracleData.value.value * receiveAmount.value;
 };
+
+function setMyBalance() {
+  amount.value = String(formattedBalanceByAsset.value);
+}
 
 watch([amount, selectedPresaleAsset], calculateReceiveAmount);
 
@@ -402,7 +442,7 @@ watch([selectedPresaleAsset, amount], () => {
           <Loading />
         </div>
         <div v-else-if="address && activeTab === 'contribution'">
-          <ClaimCard />
+          <ClaimCard @open-buy="setTab('buy')" />
         </div>
         <div v-else>
           <div v-if="presaleList.length">
@@ -432,7 +472,7 @@ watch([selectedPresaleAsset, amount], () => {
                   Currency being tracked: {{ selectedOracleData.name }}
                 </div>
                 <div class="mt-0.5">
-                  Target price: {{ selectedOracleData.value }}
+                  Target price: ${{ selectedOracleData.value }}
                 </div>
                 <div class="mt-3">
                   Presale ends on: {{ selectedPresaleFinishDate }}
@@ -444,19 +484,33 @@ watch([selectedPresaleAsset, amount], () => {
                       6
                     )} / ${+selectedPresaleTargetAmount.toPrecision(6)}`
                   }}
-                  {{ assetsMetadata[selectedReserveAsset].name }}
+                  {{ assetsMetadata[selectedReserveAsset].name }} ({{
+                    currentPresaleData.soldInUsd
+                  }})
                 </div>
                 <div
                   v-if="currentPresaleData.contributionAmount"
                   class="mt-0.5"
                 >
-                  Your contribution: {{ currentPresaleData.contributionAmount }}
-                  {{ assetsMetadata[selectedReserveAsset].name }}
+                  Your contribution:
+                  {{ currentPresaleData.contributionAmount }}
+                  {{ assetsMetadata[selectedReserveAsset].name }} ({{
+                    currentPresaleData.contributionInUsd
+                  }})
                 </div>
               </div>
               <div class="mt-8">
                 <label class="label">
-                  <span class="label-text">Amount</span>
+                  <span class="label-text"
+                    >Amount
+                    <template v-if="balanceByAsset > 0">
+                      <a
+                        class="link link-hover text-sky-500"
+                        @click="setMyBalance"
+                        >(Balance: {{ formattedBalanceByAsset }})</a
+                      ></template
+                    ></span
+                  >
                 </label>
                 <div class="input-group">
                   <NumberInput
@@ -468,13 +522,15 @@ watch([selectedPresaleAsset, amount], () => {
               </div>
               <div v-if="amount" class="mt-4">
                 <div>
-                  you will receive
+                  you are expected to receive
                   {{
                     receiveAmount.toFixed(
                       assetsMetadata[selectedPresaleAsset].decimals
                     )
                   }}
-                  {{ assetsMetadata[selectedPresaleAsset].name }}
+                  {{ assetsMetadata[selectedPresaleAsset].name }} (${{
+                    receiveAmountInUsd.toPrecision(6)
+                  }})
                 </div>
               </div>
               <div class="form-control mt-6">
