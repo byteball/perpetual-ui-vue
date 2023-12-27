@@ -325,8 +325,7 @@ onUnmounted(() => {
             ></path>
           </svg>
           <div>
-            To continue, you need to wait until the price AA is confirmed. If
-            you didn't wait, use the back
+            To continue, you need to wait until the price AA is confirmed
           </div>
         </div>
       </div>

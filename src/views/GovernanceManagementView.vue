@@ -257,9 +257,11 @@ const userVote = (name, priceAsset) => {
 
 function showModalForVote(title, name, type, suffix, value, priceAsset) {
   const metaByAA = meta.value[perpetualAA.value];
-  console.log(metaByAA);
   const df = metaByAA["decay_factor"];
-  const maxDriftRate = metaByAA["max_drift_rate"] || 0.5;
+  const maxDriftRate =
+    typeof metaByAA["max_drift_rate"] === "number"
+      ? metaByAA["max_drift_rate"]
+      : 0.5;
   const userVP = getVPFromNormalized(
     metaByAA.stakingVars[`user_${address.value}_a0`]?.normalized_vp,
     df,

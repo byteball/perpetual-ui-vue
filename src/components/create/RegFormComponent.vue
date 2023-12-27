@@ -275,7 +275,7 @@ watch(
     <div class="form-control mt-5">
       <div class="flex items-center">
         <label class="label">
-          <span class="label-text">Min governance asset share</span>
+          <span class="label-text">Max drift rate</span>
         </label>
         <TooltipComponent field-name="max_drift_rate" />
       </div>

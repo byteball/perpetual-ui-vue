@@ -188,7 +188,9 @@ function toggle(e) {
           </li>
         </ul>
       </div>
-      <div class="navbar-end"></div>
+      <div class="navbar-end">
+        <img src="/Pythagoras.svg" alt="Pythagoras" class="h-14 w-14" />
+      </div>
     </div>
     <Dialog
       :open="addressModalIsOpen"
