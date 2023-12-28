@@ -189,7 +189,11 @@ function toggle(e) {
         </ul>
       </div>
       <div class="navbar-end">
-        <img src="/Pythagoras.svg" alt="Pythagoras" class="h-14 w-14" />
+        <img
+          src="/Pythagoras.svg"
+          alt="Pythagoras"
+          class="h-14 w-14 sm:h-28 sm:w-28"
+        />
       </div>
     </div>
     <Dialog
