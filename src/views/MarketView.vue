@@ -29,7 +29,7 @@ const { aas, meta, status } = storeToRefs(store);
 const addressStore = useAddressStore();
 const { address } = storeToRefs(addressStore);
 
-const { balance } = useUserBalance(address);
+const { balance, balanceIsLoaded } = useUserBalance(address);
 
 const assets = ref({
   assetList: [],
@@ -159,7 +159,7 @@ function getAmountByAsset(amount, asset) {
 
 function getDecimalsAmountByAsset(amount, asset) {
   return asset === "base"
-    ? (Number(amount) - 1000) / 10 ** 9
+    ? Number(amount) / 10 ** 9
     : Number(
         amount / 10 ** assets.value.nameAndDecimalsByAsset[asset].decimals
       );
@@ -276,7 +276,7 @@ function setTargetAsset() {
 }
 
 async function calcAndSetDataForMetaAndLink() {
-  if (!asset1.value || !asset2.value) return;
+  if (!asset1.value || !asset2.value || !balanceIsLoaded.value) return;
 
   resultError.value = "";
 
@@ -396,7 +396,10 @@ watch(status, initSelectedAA);
 
 watch(asset1, asset1Handler);
 watch(asset2, asset2Handler);
-watch([asset1Amount, asset2Amount], calcAndSetDataForMetaAndLink);
+watch(
+  [asset1Amount, asset2Amount, balanceByAsset],
+  calcAndSetDataForMetaAndLink
+);
 </script>
 <style>
 .disabled-card-input {

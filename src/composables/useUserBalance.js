@@ -1,12 +1,16 @@
-import { onMounted, onUnmounted, ref, watch } from "vue";
+import { onBeforeMount, onUnmounted, ref, watch } from "vue";
 import client from "@/services/Obyte";
 
 export function useUserBalance(address) {
   let intervalId;
   const balance = ref({});
+  const balanceIsLoaded = ref(false);
 
   async function updateBalance() {
-    if (!address.value) return;
+    if (!address.value) {
+      balanceIsLoaded.value = true;
+      return;
+    }
     let b;
     try {
       b = await client.api.getBalances([address.value]);
@@ -18,11 +22,12 @@ export function useUserBalance(address) {
       balance.value = b;
       balance.value = b[address.value];
     }
+    balanceIsLoaded.value = true;
   }
 
   watch(() => address, updateBalance);
 
-  onMounted(() => {
+  onBeforeMount(() => {
     updateBalance();
     intervalId = setInterval(updateBalance, 60 * 1000);
   });
@@ -33,6 +38,7 @@ export function useUserBalance(address) {
 
   return {
     balance,
+    balanceIsLoaded,
     updateBalance,
   };
 }
