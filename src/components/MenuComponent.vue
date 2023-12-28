@@ -192,7 +192,7 @@ function toggle(e) {
         <img
           src="/Pythagoras.svg"
           alt="Pythagoras"
-          class="h-14 w-14 sm:h-28 sm:w-28"
+          class="block h-14 w-14 mt-0 sm:mt-14 sm:absolute sm:h-28 sm:w-28"
         />
       </div>
     </div>
