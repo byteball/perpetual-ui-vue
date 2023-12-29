@@ -55,9 +55,13 @@ function getPriceAAsMetaFromVars(aaState, stakingParams, stakingVars) {
 }
 
 const cacheForPreparedMetaByAsset0AndReserve = {};
-export async function getPreparedMeta(metaByAA, userAddress = "_") {
+export async function getPreparedMeta(
+  metaByAA,
+  userAddress = "_",
+  force = false
+) {
   const key = `${metaByAA.state.asset0}_${metaByAA.reserve_asset}_${userAddress}`;
-  if (cacheForPreparedMetaByAsset0AndReserve[key]) {
+  if (!force && cacheForPreparedMetaByAsset0AndReserve[key]) {
     return cacheForPreparedMetaByAsset0AndReserve[key];
   }
 

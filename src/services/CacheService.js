@@ -39,6 +39,11 @@ class CacheService {
   getAllValues() {
     return this.#cacheByName;
   }
+
+  clear() {
+    this.#cacheByName = {};
+    this.#expTimeByName = {};
+  }
 }
 
 export default CacheService;

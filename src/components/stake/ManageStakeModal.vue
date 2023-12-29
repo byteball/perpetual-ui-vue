@@ -53,6 +53,15 @@ const currentBalance = computed(() => {
   return Number(balance) || 0;
 });
 
+const formattedCurrentBalance = computed(() => {
+  let balance =
+    props.params.metaByAA?.stakingVars[`user_${address.value}_a0`]?.balance;
+  if (balance) {
+    balance = balance / 10 ** props.params.poolSymbolAndDecimal.decimals;
+  }
+  return Number(balance) || 0;
+});
+
 const currentVP = computed(() => {
   if (
     !props.params.metaByAA ||
@@ -132,11 +141,7 @@ function setAmountByUserStakeBalance() {
 
 function setTab(tabName) {
   activeTab.value = tabName;
-  if (tabName === "stake") {
-    amount.value.value = "";
-  } else {
-    setAmountByUserStakeBalance();
-  }
+  amount.value.value = "";
 }
 
 function setMyBalance() {
@@ -332,7 +337,16 @@ watch(
               <div v-if="termMeta.ended || !address">
                 <div>
                   <label class="label">
-                    <span class="label-text">Amount</span>
+                    <span class="label-text"
+                      >Amount
+                      <template v-if="formattedCurrentBalance > 0">
+                        <a
+                          class="link link-hover text-sky-500"
+                          @click="setAmountByUserStakeBalance"
+                          >(Balance: {{ formattedCurrentBalance }})</a
+                        ></template
+                      ></span
+                    >
                   </label>
                   <NumberInput
                     v-model="amount.value"
@@ -349,8 +363,9 @@ watch(
               </div>
               <div v-else>
                 <div class="text-center mt-8 mb-8">
-                  The withdrawal will be available after the end of the stake
-                  period: {{ termMeta.date }}
+                  The withdrawal of {{ formattedCurrentBalance }}
+                  {{ params.poolSymbolAndDecimal.name }} will be available after
+                  the end of the stake period: {{ termMeta.date }}
                 </div>
               </div>
             </div>

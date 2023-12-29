@@ -279,7 +279,7 @@ watch(
         </label>
         <TooltipComponent field-name="max_drift_rate" />
       </div>
-      <VoteInput v-model="maxDriftRate" :type="'float'" />
+      <VoteInput v-model="maxDriftRate" :type="'percent'" label="%" />
     </div>
   </div>
 

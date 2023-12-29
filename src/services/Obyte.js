@@ -1,5 +1,9 @@
 import obyte from "obyte";
-import { getMetaForPerpAAs, getAasCreatedByFactory } from "@/services/DAGApi";
+import {
+  getMetaForPerpAAs,
+  getAasCreatedByFactory,
+  clearCache,
+} from "@/services/DAGApi";
 import emitter from "@/services/emitter";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import { ADDRESSES } from "@/config";
@@ -11,6 +15,8 @@ const aasForWatch = [
   ADDRESSES.reserve_price_oswap,
 ];
 
+let aas = [];
+let allPerpAAs = [];
 let isFirstConnect = true;
 const aaEventNames = {};
 aasForWatch.forEach((aa) => {
@@ -32,25 +38,36 @@ const client = new obyte.Client(
   }
 );
 
+async function updateMeta() {
+  const store = useAaInfoStore();
+  const { setMeta } = store;
+  clearCache();
+  const meta = await getMetaForPerpAAs(aas);
+  setMeta(meta);
+}
+
 client.onConnect(async () => {
   const store = useAaInfoStore();
   const { setAAs, setStatus, setMeta } = store;
 
   if (isFirstConnect) {
-    const aas = await getAasCreatedByFactory();
+    aas = await getAasCreatedByFactory();
     setAAs(aas);
 
     const meta = await getMetaForPerpAAs(aas);
+    const stakeAAs = Object.values(meta).map((v) => v.staking_aa);
+    allPerpAAs = [...aas, ...stakeAAs];
+    setAAs(aas);
     setMeta(meta);
     setStatus("initialized");
     isFirstConnect = false;
   }
 
-  const heartbeat = setInterval(() => {
+  const heartbeat = setInterval(async () => {
     client.api.heartbeat();
   }, 10 * 1000);
 
-  aasForWatch.forEach((aa) => {
+  [...aasForWatch, ...allPerpAAs].forEach((aa) => {
     client.justsaying("light/new_aa_to_watch", {
       aa,
     });
@@ -64,11 +81,16 @@ client.onConnect(async () => {
     }
 
     if (subject === "light/aa_request") {
+      if (allPerpAAs.includes(body.aa_address)) return;
       emitter.emit(aaEventNames[body.aa_address].request, body);
       return;
     }
 
     if (subject === "light/aa_response") {
+      if (allPerpAAs.includes(body.aa_address)) {
+        updateMeta();
+        return;
+      }
       emitter.emit(aaEventNames[body.aa_address].response, body);
       return;
     }
