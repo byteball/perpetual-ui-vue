@@ -365,7 +365,7 @@ watch(
                 <div class="text-center mt-8 mb-8">
                   The withdrawal of {{ formattedCurrentBalance }}
                   {{ params.poolSymbolAndDecimal.name }} will be available after
-                  the end of the stake period: {{ termMeta.date }}
+                  the end of the staking period: {{ termMeta.date }}
                 </div>
               </div>
             </div>
