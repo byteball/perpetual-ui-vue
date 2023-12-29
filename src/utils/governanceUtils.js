@@ -10,7 +10,7 @@ function getMajorityThreshold(aaState, stakingVars) {
   );
 }
 
-function getChallengingPeriod(stakingParams) {
+export function getChallengingPeriod(stakingParams) {
   return stakingParams.challenging_period || 432000;
 }
 

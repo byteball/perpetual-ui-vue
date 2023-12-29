@@ -39,7 +39,7 @@ const presalePeriod = ref("14");
 const auctionPriceHalvingPeriod = ref("3");
 const tokenShareThreshold = ref("10");
 const minS0Share = ref("1");
-const maxDriftRate = ref("0.5");
+const maxDriftRate = ref("50");
 
 const existsError = ref("");
 const addressExistsAA = ref("");
@@ -164,6 +164,7 @@ watch(
     auctionPriceHalvingPeriod,
     tokenShareThreshold,
     minS0Share,
+    maxDriftRate,
   ],
   async () => {
     link.value = "";

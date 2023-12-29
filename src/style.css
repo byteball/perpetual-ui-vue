@@ -117,3 +117,8 @@ input {
 .select:focus {
   outline: none !important;
 }
+
+.label {
+  -webkit-user-select: auto !important;
+  user-select: auto !important;
+}

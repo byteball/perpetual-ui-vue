@@ -1,7 +1,8 @@
 <script setup>
 import { computed, ref } from "vue";
 import { storeToRefs } from "pinia";
-import { getParam } from "@/utils/governanceUtils";
+import dayjs from "dayjs";
+import { getChallengingPeriod, getParam } from "@/utils/governanceUtils";
 import { calcVoteValue } from "@/utils/voteUtils";
 import VotingTable from "@/components/governance/VotingTable.vue";
 import { useAddressStore } from "@/stores/addressStore";
@@ -50,6 +51,19 @@ const userVote = computed(() => {
   }
 });
 
+const voteFinishDate = computed(() => {
+  const stakingVars = props.preparedMeta.rawMeta.stakingVars;
+  const stakingParams = props.preparedMeta.rawMeta.stakingParams;
+  const leader = stakingVars[`leader_${props.name}`];
+  if (leader) {
+    return dayjs(
+      (leader.flip_ts + getChallengingPeriod(stakingParams)) * 1000
+    ).format("MMMM D, YYYY HH:mm");
+  }
+
+  return false;
+});
+
 function voteFromTable(value) {
   emit("reqVote", props.name, props.type, suffix.value, value);
 }
@@ -88,7 +102,14 @@ function voteFromTable(value) {
                 @vote-from-table="voteFromTable"
               />
             </div>
-            <div v-if="userVote?.vp" class="mt-2 text-left">
+            <div
+              v-if="voteFinishDate && votesByName.length"
+              class="mt-2 text-left"
+            >
+              Voting will end on {{ voteFinishDate }} and the value will change
+              to {{ calcVoteValue(votesByName[0].value, type) }}{{ suffix }}
+            </div>
+            <div v-if="userVote?.vp" class="mt-4 text-left">
               You vote for
               <span class="font-bold">{{ userVote.value }}{{ suffix }}</span>
               (vp: {{ userVote.vp }})
