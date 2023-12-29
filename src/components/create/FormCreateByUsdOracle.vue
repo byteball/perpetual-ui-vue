@@ -161,8 +161,8 @@ onUnmounted(() => {
   /></Teleport>
   <div v-if="awaiting">
     <div>
-      The payment is detected, as soon as it is confirmed, you will proceed to
-      the next step<LoadingIcon />
+      Transaction sent. You will proceed to
+      the next step as soon as it is confirmed.<LoadingIcon />
     </div>
   </div>
   <div v-if="!loaded" class="text-center">

@@ -167,7 +167,7 @@ onMounted(async () => {
               class="btn btn-primary mt-4"
               @click="continueCreate(asset)"
             >
-              Continue creating {{ continueData[asset].reserveAssetInput }}
+              Continue creating a set baseed on {{ continueData[asset].reserveAssetInput }}
             </button>
           </div>
         </div>

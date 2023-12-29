@@ -442,7 +442,7 @@ onMounted(() => {
             order to obtain voting power. Since any malicious governance
             decision would likely make users exit the set and stop income from
             trading fees, it would leave the governors in an unfavorable
-            position as their funds would stay locked for significant time.
+            position as their funds would stay locked for a significant time.
           </li>
         </ul>
       </div>

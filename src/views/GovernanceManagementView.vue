@@ -414,7 +414,7 @@ watch(
           <div v-if="address" class="mt-2">
             <div>Your VP: {{ currentVP }}</div>
             <div>
-              Your stake balance: {{ preparedMeta.stakeBalance }}
+              Your staked balance: {{ preparedMeta.stakeBalance }}
               {{ preparedMeta.asset0SymbolAndDecimals.name }}
             </div>
             <div>
