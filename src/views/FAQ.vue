@@ -1,5 +1,22 @@
 <script setup>
 import FormulaComponent from "@/components/FormulaComponent.vue";
+import { onMounted } from "vue";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
+
+function scrollTo(id) {
+  document.getElementById(id).scrollIntoView({ behavior: "smooth" });
+  router.replace({ hash: `#${id}` });
+}
+
+onMounted(() => {
+  if (location.hash) {
+    setTimeout(() => {
+      scrollTo(location.hash.slice(1));
+    }, 1000);
+  }
+});
 </script>
 
 <template>
@@ -11,12 +28,22 @@ import FormulaComponent from "@/components/FormulaComponent.vue";
     <div class="card bg-base-200 shadow-xl mb-4 p-6 sm:p-8">
       <h2 class="card-title mb-4">What are Pythagorean futures?</h2>
       <div>
-        Pythagorean futures are perpetual futures issued on Pythagorean bonding
-        curves.
+        Pythagorean futures are
+        <a @click.prevent="scrollTo('perp_futures')" href="#perp_futures"
+          >perpetual futures</a
+        >
+        issued on
+        <a
+          @click.prevent="scrollTo('pythagorean_bonding_curves')"
+          href="#pythagorean_bonding_curves"
+          >Pythagorean bonding curves</a
+        >.
       </div>
     </div>
     <div class="card bg-base-200 shadow-xl mb-4 p-6 sm:p-8">
-      <h2 class="card-title mb-4">What are perpetual futures?</h2>
+      <h2 class="card-title mb-4" id="perp_futures">
+        What are perpetual futures?
+      </h2>
       <div>
         Perpetual futures follow the price of an asset, such as a commodity,
         stock, or cryptocurrency. They allow traders to take positions in such
@@ -25,7 +52,9 @@ import FormulaComponent from "@/components/FormulaComponent.vue";
       </div>
     </div>
     <div class="card bg-base-200 shadow-xl mb-4 p-6 sm:p-8">
-      <h2 class="card-title mb-4">What are Pythagorean bonding curves?</h2>
+      <h2 class="card-title mb-4" id="pythagorean_bonding_curves">
+        What are Pythagorean bonding curves?
+      </h2>
       <div>
         Pythagorean bonding curves are bonding curves described by formulas
         like:
@@ -35,7 +64,7 @@ import FormulaComponent from "@/components/FormulaComponent.vue";
       />
       <div>
         where:
-        <ul class="list-disc list-inside">
+        <ul>
           <li>
             <i>r</i> is the total reserve committed to issuing the futures
             tokens;
@@ -106,7 +135,7 @@ import FormulaComponent from "@/components/FormulaComponent.vue";
         <i>s</i><sub>1</sub>:
       </p>
       <FormulaComponent
-        formula="$$p1 = {c \: a_1 \: s_1 \over \sqrt{a_0 \: {s_0}^2 + a_1 \: {s_1}^2 + a_2 \: {s_2}^2 + ...}}$$"
+        formula="$$p_1 = {c \: a_1 \: s_1 \over \sqrt{a_0 \: {s_0}^2 + a_1 \: {s_1}^2 + a_2 \: {s_2}^2 + ...}}$$"
       />
       <p>
         If the price differs from the target price (reported by an oracle), the
@@ -488,7 +517,8 @@ p {
 h2 {
   @apply mb-4;
 }
+
 ul {
-  @apply ml-4;
+  @apply ml-4 list-disc list-inside;
 }
 </style>

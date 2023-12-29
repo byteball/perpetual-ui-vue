@@ -400,6 +400,7 @@ watch(
   [asset1Amount, asset2Amount, balanceByAsset],
   calcAndSetDataForMetaAndLink
 );
+watch(meta, asset2Handler, { deep: true });
 </script>
 <style>
 .disabled-card-input {

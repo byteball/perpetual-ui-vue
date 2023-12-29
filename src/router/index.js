@@ -51,6 +51,7 @@ const router = createRouter({
     },
   ],
   scrollBehavior(to, from, savedPosition) {
+    if (location.hash?.slice(1).length) return;
     if (to.name === from.name) return savedPosition;
     if (savedPosition)
       return new Promise((resolve) => {

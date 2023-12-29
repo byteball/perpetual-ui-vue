@@ -247,3 +247,11 @@ export async function executeAAGetter(aa, getter, returnError, returnAA) {
     return null;
   }
 }
+
+export function clearCache() {
+  getterCache.clear();
+  dataFeedCache.clear();
+  stateVarsCache.clear();
+  balanceCache.clear();
+  metaCache.clear();
+}

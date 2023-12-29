@@ -66,14 +66,14 @@ function sortPoolsByName(_pools) {
   });
 }
 
-async function initPools() {
+async function initPools(force = false) {
   if (status.value !== "initialized") return;
 
   const _pools = [];
   const promises = [];
 
   async function getAndSetPoolData(aa) {
-    const result = await getPreparedMeta(meta.value[aa], address.value);
+    const result = await getPreparedMeta(meta.value[aa], address.value, force);
     if (!result.asset0SymbolAndDecimals) return;
     preparedMetaByAA.value[aa] = result;
 
@@ -139,8 +139,18 @@ const poolList = computed(() => {
 onMounted(() => {
   initPools();
 });
-watch([aas, status], initPools);
-watch(() => address.value, initPools);
+watch([aas, status], () => initPools);
+watch(
+  () => address.value,
+  () => initPools
+);
+watch(
+  meta,
+  () => {
+    initPools(true);
+  },
+  { deep: true }
+);
 
 const showManageStakeModal = (poolAA) => {
   router.replace(`/stake/${poolAA}`);
