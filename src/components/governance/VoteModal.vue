@@ -53,7 +53,7 @@ const vp = computed(() => {
 
   let newVP = 0 + currentVp;
   const userVote = props.params.userVote;
-  if (userVote.vp && userVote.value === props.params.value) {
+  if (userVote.vp && userVote.value === +props.params.value) {
     newVP -= userVote.vp;
   }
   newVP += props.params.userVP;

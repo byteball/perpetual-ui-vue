@@ -6,6 +6,7 @@ const fieldTypes = {
   auction_price_halving_period: "date",
   token_share_threshold: "percent",
   min_s0_share: "percent",
+  max_drift_rate: "percent",
 };
 
 export function rawToFormatVotingValue(type, value) {
