@@ -129,7 +129,7 @@ onMounted(async () => {
           <span class="font-normal sm:font-bold text-xs sm:text-sm">{{
             userVote.value
           }}</span>
-          (vp: {{ userVote.vp }})
+          (VP: {{ userVote.vp }})
         </div>
       </div>
       <div

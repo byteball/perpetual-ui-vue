@@ -106,13 +106,13 @@ function voteFromTable(value) {
               v-if="voteFinishDate && votesByName.length"
               class="mt-2 text-left"
             >
-              Voting will end on {{ voteFinishDate }} and the value will change
+              If no new votes are received, voting will end on {{ voteFinishDate }} and the value will change
               to {{ calcVoteValue(votesByName[0].value, type) }}{{ suffix }}
             </div>
             <div v-if="userVote?.vp" class="mt-4 text-left">
               You vote for
               <span class="font-bold">{{ userVote.value }}{{ suffix }}</span>
-              (vp: {{ userVote.vp }})
+              (VP: {{ userVote.vp }})
             </div>
           </div>
           <div v-else class="text-center">
