@@ -38,7 +38,7 @@ const fillInputsForStep = async (assetUnit) => {
   description.value = "";
 
   if (route.query.step === "2") {
-    description.value = `Asset0 for perpetual futures AA ${currentAA.value}`;
+    description.value = `Governance asset for perpetual futures AA ${currentAA.value}`;
   }
 };
 
