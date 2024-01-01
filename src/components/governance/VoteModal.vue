@@ -108,8 +108,7 @@ function sendVotingEmit() {
             v-if="
               params.type === 'date' ||
               params.type === 'percent' ||
-              params.type === 'number' ||
-              params.type === 'float'
+              params.type === 'number'
             "
             v-model="inputValue"
             :type="props.params.type"

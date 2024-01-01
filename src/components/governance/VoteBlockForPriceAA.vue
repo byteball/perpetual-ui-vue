@@ -13,6 +13,9 @@ import {
   getTargetPriceByPriceAa,
 } from "@/services/PerpAPI";
 import { getDefinition } from "@/services/DAGApi";
+import dayjs from "dayjs";
+import { getChallengingPeriod } from "@/utils/governanceUtils";
+import { calcVoteValue } from "@/utils/voteUtils";
 
 const props = defineProps([
   "perpAa",
@@ -20,6 +23,7 @@ const props = defineProps([
   "name",
   "type",
   "assetMeta",
+  "reserveAssetMeta",
   "votesByName",
   "allowedControl",
   "metaByActiveAA",
@@ -40,12 +44,12 @@ const userVote = computed(() => {
   const stakingVars = metaByActiveAddress.value.stakingVars;
   const vote =
     stakingVars[
-      `user_value_votes_${address.value}_change_price_aa${props.assetMeta.assetMetaData.asset}`
+      `user_value_votes_${address.value}_change_${props.name}${props.assetMeta.assetMetaData.asset}`
     ];
 
   if (vote) {
     const df = metaByActiveAddress.value["decay_factor"];
-    const decimals = props.assetMeta.assetMetaData.decimals;
+    const decimals = props.reserveAssetMeta.decimals;
     const vp =
       getVPFromNormalized(vote.vp, df, timestamp.value) / 10 ** decimals;
 
@@ -58,11 +62,31 @@ const userVote = computed(() => {
   }
 });
 
+const leaderDate = computed(() => {
+  const stakingVars = props.metaByActiveAA.stakingVars;
+  const stakingParams = props.metaByActiveAA.stakingParams;
+  const leader =
+    stakingVars[
+      `leader_change_${props.name}${props.assetMeta.assetMetaData.asset}`
+    ];
+  console.log(leader);
+  if (leader) {
+    return {
+      finishDate: dayjs(
+        (leader.flip_ts + getChallengingPeriod(stakingParams)) * 1000
+      ).format("MMMM D, YYYY HH:mm"),
+    };
+  }
+
+  return false;
+});
+
 function voteFromTable(value) {
   emit("reqVote", props.name, props.type, value);
 }
 
 onMounted(async () => {
+  console.log(props);
   if (props.name === "price_aa") {
     const { asset, decimals, name } = props.assetMeta.assetMetaData;
     const targetPrice = await getTargetPriceByPriceAa(currentValue);
@@ -119,12 +143,18 @@ onMounted(async () => {
           <VotingTable
             :type="type"
             :votes="votesByName"
-            :decimals="assetMeta.assetMetaData.decimals"
+            :decimals="reserveAssetMeta.decimals"
             :allowed-control="allowedControl"
+            :user-voting-power="userVote.vp"
             @vote-from-table="voteFromTable"
           />
         </div>
-        <div v-if="userVote?.vp" class="mt-2 text-center">
+        <div v-if="leaderDate" class="mt-2 text-left">
+          Voting will end on {{ leaderDate.finishDate }} and the value will
+          change to {{ calcVoteValue(votesByName[0].value, type)
+          }}{{ type === "percent" ? "%" : "" }}
+        </div>
+        <div v-if="userVote?.vp" class="mt-2">
           You vote for
           <span class="font-normal sm:font-bold text-xs sm:text-sm">{{
             userVote.value

@@ -2,6 +2,7 @@ import { getAssetMetadata } from "@/services/DAGApi";
 import { perpDefaults } from "@/config";
 import { getVPFromNormalized } from "@/utils/getVP";
 import { getReservePrice } from "@/services/PerpAPI";
+import dayjs from "dayjs";
 
 function getMajorityThreshold(aaState, stakingVars) {
   return (
@@ -41,11 +42,19 @@ function getPriceAAsMetaFromVars(aaState, stakingParams, stakingVars) {
             leaderAddPriceAA.flip_ts + getChallengingPeriod(stakingParams)
         : null;
 
+      const finishDate = finished
+        ? null
+        : dayjs(
+            (leaderAddPriceAA.flip_ts + getChallengingPeriod(stakingParams)) *
+              1000
+          ).format("MMMM D, YYYY HH:mm");
+
       priceAAsMeta[finished ? "finished" : "notFinished"][priceAA] = {
         result,
         leaderAddPriceAA,
         vpAddPrice,
         vpAddPriceBCommit,
+        finishDate,
       };
       priceAAsMeta.allPriceAAs.push(priceAA);
     }

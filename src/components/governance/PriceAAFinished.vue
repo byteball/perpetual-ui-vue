@@ -39,7 +39,14 @@ function reqRegister() {
 }
 
 function reqVote(name, type, value) {
-  emit("reqVote", "change_" + name, type, "", value, props.asset);
+  emit(
+    "reqVote",
+    "change_" + name,
+    type,
+    type === "percent" ? "%" : "",
+    value,
+    props.asset
+  );
 }
 
 function setPresaleData() {
@@ -321,6 +328,7 @@ onMounted(async () => {
             name="price_aa"
             :perp-aa="perpetualAa"
             :asset-meta="assetMeta"
+            :reserve-asset-meta="reserveAssetMeta"
             :votes-by-name="votes['change_price_aa'][asset]"
             :allowed-control="allowedControl"
             :meta-by-active-a-a="metaByActiveAA"
@@ -330,9 +338,10 @@ onMounted(async () => {
           <VoteBlockForPriceAA
             class="mt-8"
             title="Drift rate"
-            type="float"
+            type="percent"
             name="drift_rate"
             :asset-meta="assetMeta"
+            :reserve-asset-meta="reserveAssetMeta"
             :votes-by-name="votes['change_drift_rate'][asset]"
             :allowed-control="allowedControl"
             :meta-by-active-a-a="metaByActiveAA"
