@@ -20,6 +20,7 @@ const props = defineProps([
   "name",
   "type",
   "assetMeta",
+  "reserveAssetMeta",
   "votesByName",
   "allowedControl",
   "metaByActiveAA",
@@ -40,12 +41,12 @@ const userVote = computed(() => {
   const stakingVars = metaByActiveAddress.value.stakingVars;
   const vote =
     stakingVars[
-      `user_value_votes_${address.value}_change_price_aa${props.assetMeta.assetMetaData.asset}`
+      `user_value_votes_${address.value}_change_${props.name}${props.assetMeta.assetMetaData.asset}`
     ];
 
   if (vote) {
     const df = metaByActiveAddress.value["decay_factor"];
-    const decimals = props.assetMeta.assetMetaData.decimals;
+    const decimals = props.reserveAssetMeta.decimals;
     const vp =
       getVPFromNormalized(vote.vp, df, timestamp.value) / 10 ** decimals;
 
@@ -119,7 +120,7 @@ onMounted(async () => {
           <VotingTable
             :type="type"
             :votes="votesByName"
-            :decimals="assetMeta.assetMetaData.decimals"
+            :decimals="reserveAssetMeta.decimals"
             :allowed-control="allowedControl"
             @vote-from-table="voteFromTable"
           />

@@ -194,7 +194,12 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="container w-full sm:w-[512px] m-auto mt-2 p-6 sm:p-8">
+  <div class="container w-full sm:w-[600px] m-auto mt-2 p-6 sm:p-8">
+    <div class="p-2 mb-6">
+      <h1 class="text-2xl font-bold leading-8">
+        Create governance asset for the new set
+      </h1>
+    </div>
     <div v-if="!exists" class="text-center">
       <div class="alert shadow-lg">
         <div class="flex items-center">

@@ -79,6 +79,10 @@ onMounted(async () => {
       </div>
     </div>
   </div>
+  <div v-if="!priceAasMeta.vpAddPriceBCommit" class="mt-2 mb-4 text-sm">
+    The voting will end on {{ priceAasMeta.finishDate }} or if the majority
+    votes in favor of the addition
+  </div>
   <div
     class="card-actions justify-start mt-4 text-center sm:text-left"
     v-if="allowedControl"
