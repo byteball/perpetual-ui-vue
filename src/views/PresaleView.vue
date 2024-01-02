@@ -373,7 +373,7 @@ watch([selectedPresaleAsset, amount], () => {
   const assetAmount =
     selectedReserveAsset.value === "base"
       ? Number(amount.value) * 10 ** 9 + 1000
-      : amount.value /
+      : amount.value *
         10 ** assetsMetadata.value[selectedReserveAsset.value].decimals;
 
   const data = {
