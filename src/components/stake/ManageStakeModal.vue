@@ -3,7 +3,7 @@ import { DialogPanel } from "@headlessui/vue";
 import dayjs from "dayjs";
 import NumberInput from "@/components/inputs/NumberInput.vue";
 import IntegerInput from "@/components/inputs/IntegerInput.vue";
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { DEFAULT_MAX_TERM } from "@/globalConstants";
 import { generateLink } from "@/utils/generateLink";
 import { getVP, getVPFromNormalized } from "@/utils/getVP";
@@ -172,7 +172,8 @@ watch(
     if (!props.params.metaByAA) return;
 
     buttonDisabled.value =
-      !amount.value.value || Number(amount.value.value) === 0;
+      (!amount.value.value || Number(amount.value.value) === 0) &&
+      !currentVP.value;
 
     if (address.value && amount.value.value > balanceByAsset.value) {
       buttonDisabled.value = true;
@@ -217,8 +218,9 @@ watch(
     const a =
       Number(amount.value.value) *
       10 ** props.params.poolSymbolAndDecimal.decimals;
+
     link.value = generateLink(
-      Math.floor(a),
+      a ? Math.floor(a) : 1,
       data,
       null,
       props.params.metaByAA.staking_aa,
@@ -246,6 +248,12 @@ watch(
     immediate: true,
   }
 );
+
+onMounted(() => {
+  if (currentVP.value) {
+    buttonDisabled.value = false;
+  }
+});
 </script>
 
 <template>
@@ -371,12 +379,26 @@ watch(
             </div>
           </div>
           <div class="form-control mt-6">
-            <a
-              class="btn btn-primary"
-              :class="{ '!btn-disabled': buttonDisabled }"
-              :href="link"
-              >{{ activeTab === "stake" ? "stake" : "withdraw" }}</a
-            >
+            <template v-if="activeTab === 'stake'">
+              <a
+                class="btn btn-primary"
+                :class="{ '!btn-disabled': buttonDisabled }"
+                :href="link"
+                >{{
+                  currentVP && (!amount.value || +amount.value === 0)
+                    ? "extend stake"
+                    : "stake"
+                }}</a
+              >
+            </template>
+            <template v-else>
+              <a
+                class="btn btn-primary"
+                :class="{ '!btn-disabled': buttonDisabled }"
+                :href="link"
+                >withdraw</a
+              >
+            </template>
           </div>
         </div>
       </div>
