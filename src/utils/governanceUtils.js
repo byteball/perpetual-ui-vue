@@ -101,7 +101,7 @@ export async function getPreparedMeta(
 
   const reserve = metaByAA.state.reserve / 10 ** reserveAsset.decimals;
   const reserveInUsd = reserve * reservePriceValue;
-  const totalStakeBalance = metaByAA.stakingVars["perp_asset_balance_a0"];
+  const totalStakeBalance = metaByAA.stakingVars["perp_asset_balance_a0"] || 0;
   const price = await getPriceByAssets(
     metaByAA.aa,
     [metaByAA.state.asset0],
