@@ -215,9 +215,7 @@ async function init() {
 
   if (route.hash) {
     setTab(route.hash.replace("#", ""));
-  }
-
-  if (!Object.keys(metaForFinishedAssets.value).length) {
+  } else if (!Object.keys(metaForFinishedAssets.value).length) {
     setTab("trading");
   }
   metaByActiveAA.value = meta.value[perpetualAA.value];
@@ -639,6 +637,10 @@ watch(
                       :definition="priceAAsDefinition[priceAA]"
                       :price-aas-meta="priceAAsMeta"
                       :allowed-control="allowedControl"
+                      :votes="votes.add_price_aa[priceAA]"
+                      :vp-decimals="
+                        preparedMeta.asset0SymbolAndDecimals.decimals
+                      "
                     />
                   </div>
                 </div>

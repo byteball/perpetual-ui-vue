@@ -182,8 +182,6 @@ export function getAllVotes(vars, timestamp, decayFactor) {
 
         key = key.substring(length);
         if (!votes[type][key]) votes[type][key] = [];
-        if (type === "add_price_aa") value = Number(value);
-        if (!votes[type][key]) votes[type][key] = [];
 
         votes[type][key].push({ value, amount });
       }
