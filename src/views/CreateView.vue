@@ -94,6 +94,11 @@ function delContinueData(asset) {
   createStore.removeAssetState(asset);
 }
 
+function delAllContinueData() {
+  createStore.clear();
+  continueData.value = {};
+}
+
 async function continueCreate(asset) {
   const obj = createStore.getStateByAsset(asset);
   if (!obj) return;
@@ -167,8 +172,19 @@ onMounted(async () => {
               class="btn btn-primary mt-4"
               @click="continueCreate(asset)"
             >
-              Continue creating a set baseed on {{ continueData[asset].reserveAssetInput }}
+              Continue creating a set baseed on
+              {{ continueData[asset].reserveAssetInput }}
             </button>
+          </div>
+          <div
+            class="text-center mt-6"
+            v-if="Object.keys(continueData).length > 3"
+          >
+            <a
+              @click="delAllContinueData"
+              class="link link-hover text-sky-500 font-normal"
+              >Delete all</a
+            >
           </div>
         </div>
       </div>

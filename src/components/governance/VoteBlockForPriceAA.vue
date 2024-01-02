@@ -69,7 +69,7 @@ const leaderDate = computed(() => {
     stakingVars[
       `leader_change_${props.name}${props.assetMeta.assetMetaData.asset}`
     ];
-  console.log(leader);
+
   if (leader) {
     return {
       finishDate: dayjs(
@@ -86,7 +86,6 @@ function voteFromTable(value) {
 }
 
 onMounted(async () => {
-  console.log(props);
   if (props.name === "price_aa") {
     const { asset, decimals, name } = props.assetMeta.assetMetaData;
     const targetPrice = await getTargetPriceByPriceAa(currentValue);

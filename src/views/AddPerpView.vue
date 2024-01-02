@@ -1,11 +1,13 @@
 <script setup>
-import { onUnmounted, ref, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { ref, watch } from "vue";
+import { onBeforeRouteLeave, useRoute, useRouter } from "vue-router";
+import { storeToRefs } from "pinia";
 import Client from "@/services/Obyte";
 import { generateDefinitionLink, generateLink } from "@/utils/generateLink";
-import { storeToRefs } from "pinia";
+import { parseDataFromRequest } from "@/utils/parseDataFromRequest";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import { getAssetMetadata } from "@/services/DAGApi";
+import emitter from "@/services/emitter";
 import TooltipComponent from "@/components/TooltipComponent.vue";
 import NumberInput from "@/components/inputs/NumberInput.vue";
 import OracleComponent from "@/components/OracleComponent.vue";
@@ -17,6 +19,8 @@ const route = useRoute();
 const store = useAaInfoStore();
 const { meta } = storeToRefs(store);
 const router = useRouter();
+
+const stakingAA = ref("");
 
 const oracleResult = ref({});
 const errorMessage = ref("");
@@ -178,7 +182,7 @@ watch(step, () => {
         value: "yes",
       },
       null,
-      meta.value[route.params.aa].staking_aa,
+      stakingAA.value,
       "base",
       true
     );
@@ -195,8 +199,29 @@ async function goBack() {
   await router.push(`/governance/management/${route.params.aa}`);
 }
 
-onUnmounted(() => {
+function handlerForStakeRequests(data) {
+  const _d = parseDataFromRequest(data);
+  if (_d.name === "add_price_aa" && _d.price_aa === priceAA.value) {
+    step.value = 5;
+  }
+}
+
+watch(
+  [meta],
+  () => {
+    if (!meta.value[route.params.aa]) {
+      return;
+    }
+
+    stakingAA.value = meta.value[route.params.aa].staking_aa;
+    emitter.on(`aa_request_${stakingAA.value}`, handlerForStakeRequests);
+  },
+  { immediate: true }
+);
+
+onBeforeRouteLeave(() => {
   clearPriceInterval();
+  emitter.off(`aa_request_${stakingAA.value}`, handlerForStakeRequests);
 });
 </script>
 <template>
@@ -358,11 +383,7 @@ onUnmounted(() => {
             </div>
           </div>
           <div class="card-actions justify-start mt-4">
-            <a
-              class="btn btn-sm gap-2 btn-primary"
-              :href="linkForPublishPerp"
-              @click="step = 5"
-            >
+            <a class="btn btn-sm gap-2 btn-primary" :href="linkForPublishPerp">
               Propose this perpetual
             </a>
           </div>
