@@ -6,6 +6,10 @@ function getState() {
   if (state) return JSON.parse(state);
   return {};
 }
+
+function clearState() {
+  localStorage.removeItem("assetsState");
+}
 export const useCreatePerpStore = defineStore("createPerp", () => {
   const assetsState = ref(getState());
   const currentAsset = ref("");
@@ -35,6 +39,12 @@ export const useCreatePerpStore = defineStore("createPerp", () => {
     setAssetState(currentAsset.value, state);
   }
 
+  function clear() {
+    clearState();
+    assetsState.value = {};
+    currentAsset.value = "";
+  }
+
   return {
     assetsState,
     currentAssetState,
@@ -42,5 +52,6 @@ export const useCreatePerpStore = defineStore("createPerp", () => {
     setCurrentAssetState,
     setAssetState,
     removeAssetState,
+    clear,
   };
 });

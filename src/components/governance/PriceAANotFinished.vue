@@ -10,9 +10,27 @@ const props = defineProps([
   "definition",
   "priceAasMeta",
   "allowedControl",
+  "votes",
+  "vpDecimals",
 ]);
 
 const selectedOracleData = ref({});
+const vpByVote = getVPByVote();
+
+function getVPByVote() {
+  let yes = props.votes[0]?.amount || 0;
+  let no = props.votes[1]?.amount || 0;
+
+  if (yes) {
+    yes = yes / 10 ** props.vpDecimals;
+  }
+
+  if (no) {
+    no = no / 10 ** props.vpDecimals;
+  }
+
+  return { yes, no };
+}
 
 onMounted(async () => {
   selectedOracleData.value = await getOracleData(props.priceAa);
@@ -49,6 +67,20 @@ onMounted(async () => {
       {{ selectedOracleData.value }}
     </div>
   </div>
+  <div class="block sm:flex justify-between mt-4">
+    <div class="font-medium text-sm inline-block mb-1">
+      Yes VP:
+      <div class="font-light text-xs sm:text-sm block sm:inline-block">
+        {{ +vpByVote.yes.toPrecision(6) }}
+      </div>
+    </div>
+    <div class="font-medium text-sm inline-block mb-1">
+      No VP:
+      <div class="font-light text-sm inline-block">
+        {{ +vpByVote.no.toPrecision(6) }}
+      </div>
+    </div>
+  </div>
   <div class="block sm:flex justify-between">
     <div class="text-sm font-medium block sm:inline-block">
       Status:
@@ -79,7 +111,7 @@ onMounted(async () => {
       </div>
     </div>
   </div>
-  <div v-if="!priceAasMeta.vpAddPriceBCommit" class="mt-2 mb-4 text-sm">
+  <div v-if="!priceAasMeta.vpAddPriceBCommit" class="my-4 text-sm">
     The voting will end on {{ priceAasMeta.finishDate }} or if the majority
     votes in favor of the addition
   </div>

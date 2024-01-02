@@ -19,14 +19,17 @@ let aas = [];
 let allPerpAAs = [];
 let isFirstConnect = true;
 const aaEventNames = {};
-aasForWatch.forEach((aa) => {
-  aaEventNames[aa] = {
-    request: `aa_request_${aa}`,
-    response: `aa_response_${aa}`,
-    definition: `aa_definition_${aa}`,
-    definition_saved: `aa_definition_saved_${aa}`,
-  };
-});
+
+function generateEventNames(aas) {
+  aas.forEach((aa) => {
+    aaEventNames[aa] = {
+      request: `aa_request_${aa}`,
+      response: `aa_response_${aa}`,
+      definition: `aa_definition_${aa}`,
+      definition_saved: `aa_definition_saved_${aa}`,
+    };
+  });
+}
 
 const client = new obyte.Client(
   `wss://obyte.org/bb${
@@ -67,7 +70,9 @@ client.onConnect(async () => {
     client.api.heartbeat();
   }, 10 * 1000);
 
-  [...aasForWatch, ...allPerpAAs].forEach((aa) => {
+  const allAA = [...aasForWatch, ...allPerpAAs];
+  generateEventNames(allAA);
+  allAA.forEach((aa) => {
     client.justsaying("light/new_aa_to_watch", {
       aa,
     });
@@ -81,7 +86,7 @@ client.onConnect(async () => {
     }
 
     if (subject === "light/aa_request") {
-      if (allPerpAAs.includes(body.aa_address)) return;
+      if (!aaEventNames[body.aa_address]) return;
       emitter.emit(aaEventNames[body.aa_address].request, body);
       return;
     }
@@ -89,8 +94,9 @@ client.onConnect(async () => {
     if (subject === "light/aa_response") {
       if (allPerpAAs.includes(body.aa_address)) {
         updateMeta();
-        return;
       }
+
+      if (!aaEventNames[body.aa_address]) return;
       emitter.emit(aaEventNames[body.aa_address].response, body);
       return;
     }

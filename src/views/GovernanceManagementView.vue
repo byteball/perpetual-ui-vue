@@ -215,9 +215,7 @@ async function init() {
 
   if (route.hash) {
     setTab(route.hash.replace("#", ""));
-  }
-
-  if (!Object.keys(metaForFinishedAssets.value).length) {
+  } else if (!Object.keys(metaForFinishedAssets.value).length) {
     setTab("trading");
   }
   metaByActiveAA.value = meta.value[perpetualAA.value];
@@ -410,12 +408,33 @@ watch(
               +preparedMeta.reserveInUsd.toPrecision(6)
             }})
           </div>
+          <div class="text-sm mt-1">
+            Total staked:
+            {{
+              preparedMeta.totalStakeBalance /
+              10 ** preparedMeta.asset0SymbolAndDecimals.decimals
+            }}
+            {{ preparedMeta.asset0SymbolAndDecimals.name }} (${{
+              +(
+                (preparedMeta.totalStakeBalance /
+                  10 ** preparedMeta.asset0SymbolAndDecimals.decimals) *
+                preparedMeta.stakeInUsd *
+                10 ** preparedMeta.asset0SymbolAndDecimals.decimals
+              ).toPrecision(6)
+            }})
+          </div>
 
           <div v-if="address" class="mt-2">
             <div>Your VP: {{ currentVP }}</div>
             <div>
               Your staked balance: {{ preparedMeta.stakeBalance }}
-              {{ preparedMeta.asset0SymbolAndDecimals.name }}
+              {{ preparedMeta.asset0SymbolAndDecimals.name }} (${{
+                +(
+                  preparedMeta.stakeBalance *
+                  (preparedMeta.stakeInUsd *
+                    10 ** preparedMeta.asset0SymbolAndDecimals.decimals)
+                ).toPrecision(6)
+              }})
             </div>
             <div>
               <RouterLink
@@ -618,6 +637,10 @@ watch(
                       :definition="priceAAsDefinition[priceAA]"
                       :price-aas-meta="priceAAsMeta"
                       :allowed-control="allowedControl"
+                      :votes="votes.add_price_aa[priceAA]"
+                      :vp-decimals="
+                        preparedMeta.asset0SymbolAndDecimals.decimals
+                      "
                     />
                   </div>
                 </div>

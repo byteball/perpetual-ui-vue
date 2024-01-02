@@ -69,7 +69,8 @@ const vp = computed(() => {
 });
 
 const isValidValue = computed(() => {
-  if (props.params.type === "date" || props.params.type === "percent") {
+  const { type } = props.params;
+  if (type === "date" || type === "percent") {
     return isValidNumber(inputValue.value);
   }
 
@@ -77,12 +78,21 @@ const isValidValue = computed(() => {
 });
 
 watch(inputValue, () => {
-  if (props.params.name === "change_drift_rate") {
-    if (inputValue.value > props.params.maxDriftRate) {
-      inputError.value = `Max drift rate is ${props.params.maxDriftRate}`;
+  const { name, type, maxDriftRate } = props.params;
+  if (name === "change_drift_rate") {
+    if (inputValue.value > maxDriftRate) {
+      inputError.value = `Max drift rate is ${maxDriftRate}`;
       return;
     }
   }
+
+  if (type === "percent") {
+    if (inputValue.value > 100) {
+      inputError.value = "Max value is 100%";
+      return;
+    }
+  }
+
   inputError.value = "";
 });
 

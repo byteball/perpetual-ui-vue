@@ -30,16 +30,14 @@ const preparedMetaByAA = ref({});
 const modalForManage = ref(false);
 const poolsListFilter = ref(false);
 
-const getUserStakeBalance = (aa) => {
-  if (
-    !meta.value[aa] ||
-    !meta.value[aa].stakingVars[`user_${address.value}_a0`]
-  ) {
-    return 0;
-  }
+function getTVLByAA(aa) {
+  const { totalStakeBalance, stakeInUsd } = preparedMetaByAA.value[aa];
 
-  let balance =
-    meta.value[aa].stakingVars[`user_${address.value}_a0`]?.balance || 0;
+  return +(totalStakeBalance * stakeInUsd).toPrecision(6);
+}
+
+const getUserStakeBalance = (aa) => {
+  let balance = stakeBalanceByPool.value[aa];
 
   if (balance) {
     const decimals = poolSymbolAndDecimalByAA.value[aa].decimals;
@@ -49,21 +47,21 @@ const getUserStakeBalance = (aa) => {
   return balance;
 };
 
-function sortPoolsByName(_pools) {
-  return _pools.sort((a, b) => {
-    const aPoolName = `${poolReserveNameByAA.value[a]}/${poolSymbolAndDecimalByAA.value[a].name}`;
-    const bPoolName = `${poolReserveNameByAA.value[b]}/${poolSymbolAndDecimalByAA.value[b].name}`;
+const getUserStakeBalanceInUsd = (aa) => {
+  return +(
+    getUserStakeBalance(aa) *
+    preparedMetaByAA.value[aa].stakeInUsd *
+    10 ** poolSymbolAndDecimalByAA.value[aa].decimals
+  ).toPrecision(6);
+};
 
-    if (aPoolName > bPoolName) {
-      return 1;
-    }
-
-    if (aPoolName < bPoolName) {
-      return -1;
-    }
-
-    return 0;
-  });
+function sortPoolsByTVL(_pools) {
+  return _pools.sort((a, b) => getTVLByAA(b) - getTVLByAA(a));
+}
+function sortByBalanceInUSD(_pools) {
+  return _pools.sort(
+    (a, b) => getUserStakeBalanceInUsd(b) - getUserStakeBalanceInUsd(a)
+  );
 }
 
 async function initPools(force = false) {
@@ -99,7 +97,7 @@ async function initPools(force = false) {
 
   await Promise.all(promises);
 
-  pools.value = sortPoolsByName(_pools);
+  pools.value = _pools;
   poolsInited.value = true;
 
   if (
@@ -128,12 +126,14 @@ const poolList = computed(() => {
   const list = pools.value;
 
   if (!poolsListFilter.value) {
-    return list;
+    return sortPoolsByTVL(list);
   }
 
-  return list.filter((pool) => {
+  const filteredList = list.filter((pool) => {
     return !!getUserStakeBalance(pool);
   });
+
+  return sortByBalanceInUSD(filteredList);
 });
 
 onMounted(() => {
@@ -205,7 +205,9 @@ const showManageStakeModal = (poolAA) => {
             <thead>
               <tr>
                 <th>Set (reserve asset / gov. asset)</th>
-                <th>Staked balance</th>
+                <th>
+                  {{ !poolsListFilter ? "TVL" : "Staked balance" }}
+                </th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -217,8 +219,15 @@ const showManageStakeModal = (poolAA) => {
                   }}
                 </td>
                 <td class="h-12">
-                  {{ getUserStakeBalance(poolAA) }}
-                  {{ poolSymbolAndDecimalByAA[poolAA].name }}
+                  <template v-if="!poolsListFilter">
+                    ${{ getTVLByAA(poolAA) }}
+                  </template>
+                  <template v-else>
+                    {{ getUserStakeBalance(poolAA) }}
+                    {{ poolSymbolAndDecimalByAA[poolAA].name }} (${{
+                      getUserStakeBalanceInUsd(poolAA)
+                    }})
+                  </template>
                 </td>
                 <td class="h-12">
                   <div class="min-w-max">

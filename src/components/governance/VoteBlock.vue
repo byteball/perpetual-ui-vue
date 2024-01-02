@@ -55,7 +55,7 @@ const voteFinishDate = computed(() => {
   const stakingVars = props.preparedMeta.rawMeta.stakingVars;
   const stakingParams = props.preparedMeta.rawMeta.stakingParams;
   const leader = stakingVars[`leader_${props.name}`];
-  if (leader) {
+  if (leader && leader.value !== stakingVars[props.name]) {
     return dayjs(
       (leader.flip_ts + getChallengingPeriod(stakingParams)) * 1000
     ).format("MMMM D, YYYY HH:mm");
@@ -106,8 +106,9 @@ function voteFromTable(value) {
               v-if="voteFinishDate && votesByName.length"
               class="mt-2 text-left"
             >
-              If no new votes are received, voting will end on {{ voteFinishDate }} and the value will change
-              to {{ calcVoteValue(votesByName[0].value, type) }}{{ suffix }}
+              If no new votes are received, voting will end on
+              {{ voteFinishDate }} and the value will change to
+              {{ calcVoteValue(votesByName[0].value, type) }}{{ suffix }}
             </div>
             <div v-if="userVote?.vp" class="mt-4 text-left">
               You vote for
