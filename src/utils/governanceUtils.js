@@ -1,7 +1,7 @@
 import { getAssetMetadata } from "@/services/DAGApi";
 import { perpDefaults } from "@/config";
 import { getVPFromNormalized } from "@/utils/getVP";
-import { getReservePrice } from "@/services/PerpAPI";
+import { getPriceByAssets, getReservePrice } from "@/services/PerpAPI";
 import dayjs from "dayjs";
 
 function getMajorityThreshold(aaState, stakingVars) {
@@ -96,13 +96,18 @@ export async function getPreparedMeta(
   const reserveAsset = await getAssetMetadata(metaByAA.reserve_asset);
 
   const reservePriceAA = metaByAA.reserve_price_aa;
-  const reservePriceValue = +(
-    (await getReservePrice(reservePriceAA)) *
-    10 ** (reserveAsset?.decimals || 0)
-  );
+  const reservePrice = await getReservePrice(reservePriceAA);
+  const reservePriceValue = reservePrice * 10 ** (reserveAsset?.decimals || 0);
 
   const reserve = metaByAA.state.reserve / 10 ** reserveAsset.decimals;
   const reserveInUsd = reserve * reservePriceValue;
+  const totalStakeBalance = metaByAA.stakingVars["perp_asset_balance_a0"];
+  const price = await getPriceByAssets(
+    metaByAA.aa,
+    [metaByAA.state.asset0],
+    metaByAA
+  );
+  const stakeInUsd = price[metaByAA.state.asset0] * reservePrice;
 
   const meta = {
     asset0SymbolAndDecimals,
@@ -116,6 +121,8 @@ export async function getPreparedMeta(
     reservePriceValue,
     reserve,
     reserveInUsd,
+    totalStakeBalance,
+    stakeInUsd,
   };
   cacheForPreparedMetaByAsset0AndReserve[key] = meta;
 
