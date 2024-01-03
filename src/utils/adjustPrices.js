@@ -40,7 +40,7 @@ export const adjustPrices = async (asset, asset_info, state, varsAndParams) => {
     if (
       asset_info.presale_amount &&
       (timestamp >= asset_info.presale_finish_ts ||
-        asset_info.presale_amount >
+        asset_info.presale_amount >=
           get_token_share_threshold() * state.reserve ||
         (asset_info.preipo &&
           asset_info.presale_amount / target_price >= asset_info.max_tokens))

@@ -149,7 +149,7 @@ onMounted(async () => {
           />
         </div>
         <div v-if="leaderDate" class="mt-2 text-left">
-          Voting will end on {{ leaderDate.finishDate }} and the value will
+          If no new votes are received, the voting will end on {{ leaderDate.finishDate }} and the value will
           change to {{ calcVoteValue(votesByName[0].value, type)
           }}{{ type === "percent" ? "%" : "" }}
         </div>

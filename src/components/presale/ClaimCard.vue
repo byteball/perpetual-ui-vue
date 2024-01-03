@@ -55,7 +55,7 @@ const getPresaleStatus = (aa, presaleAsset) => {
   return {
     finishDate,
     finished:
-      targetPresaleAmount < currentPresaleAmount ||
+      targetPresaleAmount <= currentPresaleAmount ||
       !presaleAssetData?.presale ||
       finishDate.diff(dayjs()) < 0,
   };
@@ -209,8 +209,8 @@ onMounted(async () => {
                 <a
                   class="link text-sky-500 link-hover mr-2"
                   @click="setBuy(claim.presaleAsset)"
-                  >Buy</a
-                >
+                  >buy more</a
+                ><br />
                 <a
                   class="link text-sky-500 link-hover"
                   @click="setWithdrawModalData(claim)"
