@@ -180,7 +180,7 @@ function withdrawEvent() {
 }
 
 watch(
-  [amount, term, votedGroupKey, percentages],
+  [amount, term, votedGroupKey, percentages, activeTab],
   () => {
     if (!props.params.metaByAA) return;
 
@@ -243,6 +243,7 @@ watch(
   },
   {
     deep: true,
+    immediate: true,
   }
 );
 
@@ -407,6 +408,7 @@ onMounted(() => {
             </template>
             <template v-else>
               <a
+                v-if="termMeta.ended"
                 class="btn btn-primary"
                 :class="{ '!btn-disabled': buttonDisabled }"
                 :href="link"

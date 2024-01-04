@@ -29,11 +29,11 @@ function getMinMaxValue() {
   switch (props.params.name) {
     case "min_s0_share":
     case "swap_fee":
-    case "token_share_threshold":
       min = 0;
       max = 100;
       break;
     case "arb_profit_tax":
+    case "token_share_threshold":
       min = 0;
       break;
     case "adjustment_period":
