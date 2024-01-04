@@ -143,7 +143,7 @@ onMounted(() => {
         that the <i>p</i><sub>1</sub> comes closer to the target. It would
         completely correct to the target price within a predetermined period of
         time (which can be changed by
-        <RouterLink :to="`/governance`">governance</RouterLink>) such as 5 days.
+        <RouterLink :to="`/governance`">governance</RouterLink>) such as 3 days.
         This change of the parameters moves us to a slightly different bonding
         curve. It also affects (to a smaller extent) the prices of all other
         tokens, so they move closer or farther from their targets and might
@@ -373,11 +373,23 @@ onMounted(() => {
       </p>
     </div>
     <div class="card bg-base-200 shadow-xl mb-4 p-6 sm:p-8">
+      <h2 class="card-title mb-4">How are the Pythagorean futures different from bonded stablecoins?</h2>
+      <div>
+        Both Pythagorean perpetual futures and  <a href="https://blog.obyte.org/using-multi-dimensional-bonding-curves-to-create-stablecoins-81e857b4355c" target="_blank" rel="noopener">bonded stablecoins</a> are issued on bonding curves.
+      </div>
+      <div>
+        However, the curves used in bonded stablecoins had the total value of the issued assets greater than the locked reserve, which was supposed to attract interest of traders but in practice led to wild speculative movements and depegged many stablecoins. In contrast, Pythagorean bonding curves are zero-sum, meaning that the total value of all issued tokens is equal to the locked reserve. We believe there are no destabilzing incentives in the Pythagorean futures and expect them to closely follow the benchmark prices.
+      </div>
+      <div>
+        Also, the mechanisms returning the price to the target are different. In bonded stablecoins, the growing fee disincentivized trades that pushed the price further from the target, which meant that when the price was far enough below the target, it was impossible to sell the stablecoins. In Pythagorean futures, there are no prohibitive fees, and it is always possible to sell them, even when the price is far below the benchmark. The price tracking mechanism redistributes the value among tokens trying to get the price closer to the target.
+      </div>
+    </div>
+    <div class="card bg-base-200 shadow-xl mb-4 p-6 sm:p-8">
       <h2 class="card-title mb-4">
         How are Pythagorean futures different from other perpetual futures?
       </h2>
       <div>
-        A trader's position in Pythagorean futures can never be liquidated. A
+        Unlike traditional perpetual futures (traded on BitMEX, Binance futures, Deribit, etc), a trader's position in Pythagorean futures can never be liquidated. A
         trader just holds the tokens and no matter how the price changes there
         is no way for the trader's capital to become insufficient and be
         liquidated. There is also no systemic risk that liquidations fail due to
@@ -392,6 +404,9 @@ onMounted(() => {
       <div>
         Also, the Pythagorean futures are just normal tokens and can be freely
         used in other DeFi apps, which ensures better composability.
+      </div>
+      <div>
+        The mechanisms that correct the price to the target are somewhat similar but not the same. In traditional perpetual futures, longs pay shorts or shorts pay longs depending on the direction of the price deviation. This doesn't affect the price directly but provides incentives for its correction to the target. In Pythagorean futures, the bonding curve gradually morphs to redistribute value from overpriced futures to underpriced ones and to correct the price at the same time.
       </div>
     </div>
     <div class="card bg-base-200 shadow-xl mb-4 p-6 sm:p-8">
