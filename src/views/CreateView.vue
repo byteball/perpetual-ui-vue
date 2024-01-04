@@ -176,10 +176,7 @@ onMounted(async () => {
               {{ continueData[asset].reserveAssetInput }}
             </button>
           </div>
-          <div
-            class="text-center mt-6"
-            v-if="Object.keys(continueData).length > 3"
-          >
+          <div class="text-center mt-6">
             <a
               @click="delAllContinueData"
               class="link link-hover text-sky-500 font-normal"

@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { event } from "vue-gtag";
 import { useCreatePerpStore } from "@/stores/createPerpStore";
 import emitter from "@/services/emitter";
 
@@ -145,6 +146,12 @@ emitter.on(`aa_response_${import.meta.env.VITE_FACTORY_AA}`, (data) => {
   }
 });
 
+function regGovernanceSymbolEvent() {
+  event("reg_governance_symbol", {
+    event_label: `${asset.value} - ${symbol.value}`,
+  });
+}
+
 watch([asset, symbol, decimals, description], async () => {
   const registryAA = Client.api.getOfficialTokenRegistryAddress();
   buttonEnabled.value = false;
@@ -266,6 +273,7 @@ onMounted(() => {
             <a
               class="btn btn-primary"
               :href="link"
+              @click="regGovernanceSymbolEvent"
               :class="{ '!btn-disabled': !buttonEnabled }"
               >Register symbol</a
             >

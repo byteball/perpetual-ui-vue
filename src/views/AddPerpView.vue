@@ -2,6 +2,7 @@
 import { ref, watch } from "vue";
 import { onBeforeRouteLeave, useRoute, useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
+import { event } from "vue-gtag";
 import Client from "@/services/Obyte";
 import { generateDefinitionLink, generateLink } from "@/utils/generateLink";
 import { parseDataFromRequest } from "@/utils/parseDataFromRequest";
@@ -114,6 +115,7 @@ function setTimerForCheckPriceAA() {
 function goToStep3() {
   needCheckPriceAA.value = true;
   step.value = 3;
+  createPriceAAEvent();
 }
 
 function back(toStep) {
@@ -145,6 +147,19 @@ function oracleDataUpdated(result) {
     }
     multiplier.value = "1";
   }
+}
+
+function createPriceAAEvent() {
+  const { oracleAddress, dataFeed } = oracleResult.value;
+  event("create_price_aa", {
+    event_label: `${oracleAddress} - ${dataFeed} - ${multiplier.value}`,
+  });
+}
+
+function addPriceAA() {
+  event("add_price_aa", {
+    event_label: priceAA.value,
+  });
 }
 
 watch(
@@ -383,7 +398,11 @@ onBeforeRouteLeave(() => {
             </div>
           </div>
           <div class="card-actions justify-start mt-4">
-            <a class="btn btn-sm gap-2 btn-primary" :href="linkForPublishPerp">
+            <a
+              class="btn btn-sm gap-2 btn-primary"
+              :href="linkForPublishPerp"
+              @click="addPriceAA"
+            >
               Propose this perpetual
             </a>
           </div>

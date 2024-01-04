@@ -4,6 +4,7 @@ import { DialogPanel } from "@headlessui/vue";
 import { generateLink } from "@/utils/generateLink";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import { storeToRefs } from "pinia";
+import { event } from "vue-gtag";
 import Client from "@/services/Obyte";
 import debounce from "lodash.debounce";
 import TextInput from "@/components/inputs/TextInput.vue";
@@ -25,6 +26,12 @@ const decimals = ref("");
 const buttonEnabled = ref(false);
 const link = ref("");
 const tracked = ref("");
+
+function regSymbolEvent() {
+  event("register_symbol", {
+    event_label: `${props.asset} - ${symbol.value} - ${decimals.value}`,
+  });
+}
 
 watch(
   [symbol, decimals],
@@ -156,6 +163,7 @@ onMounted(async () => {
       <a
         class="btn btn-primary btn-sm"
         :href="link"
+        @click="regSymbolEvent"
         :class="{ '!btn-disabled': !buttonEnabled }"
         >Register symbol</a
       >

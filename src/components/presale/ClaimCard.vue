@@ -3,6 +3,7 @@ import { onMounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { Dialog } from "@headlessui/vue";
 import dayjs from "dayjs";
+import { event } from "vue-gtag";
 
 import { useAddressStore } from "@/stores/addressStore";
 import { useAaInfoStore } from "@/stores/aaInfo";
@@ -155,6 +156,14 @@ function setBuy(asset) {
   emit("openBuy");
 }
 
+function claimEvent(aa, asset, amount) {
+  event("claim_presale", {
+    event_category: aa,
+    event_label: asset,
+    value: amount,
+  });
+}
+
 watch(meta, prepareClaimPresaleByAddress);
 
 watch(() => address.value, prepareClaimPresaleByAddress);
@@ -201,6 +210,7 @@ onMounted(async () => {
               <a
                 class="link text-sky-500 link-hover"
                 :href="claim.link"
+                @click="claimEvent(claim.aa, claim.presaleAsset, claim.amount)"
                 v-if="claim.isPresaleFinished"
               >
                 claim

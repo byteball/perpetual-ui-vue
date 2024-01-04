@@ -2,6 +2,7 @@
 import { ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { DialogPanel } from "@headlessui/vue";
+import { event } from "vue-gtag";
 import { useAddressStore } from "@/stores/addressStore";
 import TextInput from "@/components/inputs/TextInput.vue";
 import { isValidAddress } from "@/utils/validates";
@@ -12,10 +13,14 @@ const { address } = storeToRefs(store);
 const addressInput = ref("");
 const changeMode = ref(false);
 
+function addAddressEvent() {
+  event("add_address");
+}
 function setAddress() {
   if (!addressInput.value || !isValidAddress(addressInput.value)) return;
 
   store.setAddress(addressInput.value);
+  addAddressEvent();
   store.closeAddressModal();
 }
 

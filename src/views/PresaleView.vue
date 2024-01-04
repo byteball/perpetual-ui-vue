@@ -3,6 +3,7 @@ import { computed, onMounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useRoute, useRouter } from "vue-router";
 import dayjs from "dayjs";
+import { event } from "vue-gtag";
 import duration from "dayjs/plugin/duration";
 import { generateLink } from "@/utils/generateLink";
 import { useAaInfoStore } from "@/stores/aaInfo";
@@ -326,6 +327,13 @@ const fillPresaleData = async () => {
   }
 };
 
+function buyPresale() {
+  event("buy_presale", {
+    event_label: selectedPresaleAsset.value,
+    value: +amount.value,
+  });
+}
+
 onMounted(async () => {
   await preparePresaleList();
 });
@@ -538,6 +546,7 @@ watch([selectedPresaleAsset, amount], () => {
                   class="btn btn-primary"
                   :class="{ '!btn-disabled': !amount }"
                   :href="link"
+                  @click="buyPresale"
                   >{{ "buy" }}</a
                 >
               </div>

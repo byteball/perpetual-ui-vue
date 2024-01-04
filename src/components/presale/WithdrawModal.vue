@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch } from "vue";
 import { DialogPanel } from "@headlessui/vue";
+import { event } from "vue-gtag";
 
 const props = defineProps({
   dataForWithdraw: {
@@ -22,6 +23,14 @@ const link = ref("");
 
 function setMyBalance() {
   withdrawAmount.value = props.dataForWithdraw.amount;
+}
+
+function withdrawEvent() {
+  event("withdraw_presale", {
+    event_category: props.dataForWithdraw.aa,
+    event_label: props.dataForWithdraw.presaleAsset,
+    value: +withdrawAmount.value,
+  });
 }
 
 watch(withdrawAmount, () => {
@@ -90,6 +99,7 @@ watch(withdrawAmount, () => {
         class="btn btn-primary"
         :class="{ '!btn-disabled': !link }"
         :href="link"
+        @click="withdrawEvent"
         >withdraw</a
       >
     </div>

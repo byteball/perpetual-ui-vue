@@ -24,6 +24,29 @@ if (props.params.value !== undefined) {
   );
 }
 
+function getMinMaxValue() {
+  let min, max;
+  switch (props.params.name) {
+    case "min_s0_share":
+    case "swap_fee":
+      min = 0;
+      max = 100;
+      break;
+    case "arb_profit_tax":
+    case "token_share_threshold":
+      min = 0;
+      break;
+    case "adjustment_period":
+    case "presale_period":
+    case "auction_price_halving_period":
+    case "challenging_period":
+      min = 0.001;
+      break;
+  }
+
+  return { min, max };
+}
+
 const leader = computed(() => {
   let l = 0;
   if (props.params.votesByName) {
@@ -86,9 +109,28 @@ watch(inputValue, () => {
     }
   }
 
+  const { min, max } = getMinMaxValue();
+
   if (type === "percent") {
-    if (inputValue.value > 100) {
-      inputError.value = "Max value is 100%";
+    if (typeof min === "number" && +inputValue.value < min) {
+      inputError.value = `Minimum value is ${min}%`;
+      return;
+    }
+
+    if (typeof max === "number" && +inputValue.value >= max) {
+      inputError.value = `The value must be less than ${max}%`;
+      return;
+    }
+  }
+
+  if (type === "date") {
+    if (typeof min === "number" && +inputValue.value < min) {
+      inputError.value = `Minimum value is ${min} days`;
+      return;
+    }
+
+    if (typeof max === "number" && +inputValue.value >= max) {
+      inputError.value = `The value must be less than ${max} days`;
       return;
     }
   }
@@ -149,9 +191,7 @@ function sendVotingEmit() {
       <button
         class="btn btn-primary"
         @click="sendVotingEmit"
-        :disabled="
-          !inputValue || !isValidValue || inputError || Number(inputValue) === 0
-        "
+        :disabled="inputValue === '' || !isValidValue || inputError !== ''"
       >
         Vote for {{ isNewValue ? "new value" : "value" }}
       </button>
