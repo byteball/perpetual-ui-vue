@@ -1,6 +1,7 @@
 <script setup>
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
+import { event } from "vue-gtag";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import {
   getAssetsFromMeta,
@@ -383,6 +384,13 @@ function setMyBalance() {
   asset1Amount.value = String(formattedBalanceByAsset.value);
 }
 
+function buyEvent() {
+  event("buy", {
+    event_label: `${asset1.value} - ${asset2.value}`,
+    value: +asset1Amount.value,
+  });
+}
+
 onMounted(() => {
   initSelectedAA();
   window.addEventListener("keydown", keyDownHandler);
@@ -547,6 +555,7 @@ watch(meta, asset2Handler, { deep: true });
             <a
               class="btn btn-primary"
               :href="link"
+              @click="buyEvent"
               :class="{
                 '!btn-disabled':
                   resultError || !link || !(Number(asset2Amount) > 0),

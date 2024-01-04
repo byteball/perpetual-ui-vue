@@ -3,6 +3,7 @@ import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useRoute, useRouter } from "vue-router";
 import dayjs from "dayjs";
+import { event } from "vue-gtag";
 import duration from "dayjs/plugin/duration";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import { useAddressStore } from "@/stores/addressStore";
@@ -253,6 +254,22 @@ const userVote = (name, priceAsset) => {
   }
 };
 
+function openModalEvent(aa, name, value) {
+  event("open_vote_modal", {
+    event_category: aa,
+    event_label: name,
+    value: value || null,
+  });
+}
+
+function voteEvent(aa, name, value) {
+  event("vote", {
+    event_category: aa,
+    event_label: name,
+    value: value,
+  });
+}
+
 function showModalForVote(title, name, type, suffix, value, priceAsset) {
   const metaByAA = meta.value[perpetualAA.value];
   const df = metaByAA["decay_factor"];
@@ -285,6 +302,7 @@ function showModalForVote(title, name, type, suffix, value, priceAsset) {
     maxDriftRate,
   };
   modalForVoteIsOpen.value = true;
+  openModalEvent(metaByAA.aa, name, value);
 }
 
 function vote(name, value, priceAsset) {
@@ -294,6 +312,7 @@ function vote(name, value, priceAsset) {
     preparedMeta.value.rawMeta.staking_aa,
     priceAsset
   );
+  voteEvent(preparedMeta.value.rawMeta.aa, name, value);
 }
 
 function reqRegister(asset, multiplier) {

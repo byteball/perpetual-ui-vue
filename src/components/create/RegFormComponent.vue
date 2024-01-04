@@ -2,6 +2,7 @@
 import { ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
+import { event } from "vue-gtag";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import { useCreatePerpStore } from "@/stores/createPerpStore";
 import { parseDataFromRequest } from "@/utils/parseDataFromRequest";
@@ -204,6 +205,12 @@ function checkInputs() {
   return true;
 }
 
+function createPerpEvent() {
+  event("add_new_perpetual_future", {
+    event_label: `${props.reserveAsset} - ${props.reservePriceAA}`,
+  });
+}
+
 watch(
   [
     swapFee,
@@ -396,7 +403,12 @@ watch(
       :class="{
         '!btn-disabled': reserveAsset === '' || existsError || link === '',
       }"
-      @click="setAwaiting(true)"
+      @click="
+        () => {
+          setAwaiting(true);
+          createPerpEvent();
+        }
+      "
       >Create</a
     >
   </div>

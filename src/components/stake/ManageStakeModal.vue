@@ -8,6 +8,7 @@ import { DEFAULT_MAX_TERM } from "@/globalConstants";
 import { generateLink } from "@/utils/generateLink";
 import { getVP, getVPFromNormalized } from "@/utils/getVP";
 import { storeToRefs } from "pinia";
+import { event } from "vue-gtag";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import { useUserBalance } from "@/composables/useUserBalance";
 import { useAddressStore } from "@/stores/addressStore";
@@ -164,6 +165,18 @@ function getData() {
       perp_asset: props.params.metaByAA.state.asset0,
     };
   }
+}
+
+function stakeEvent() {
+  event("stake", {
+    event_label: `${props.params.poolSymbolAndDecimal.asset}`,
+    value: +amount.value.value,
+  });
+}
+function withdrawEvent() {
+  event("withdraw", {
+    event_label: `${props.params.poolSymbolAndDecimal.asset}`,
+  });
 }
 
 watch(
@@ -384,6 +397,7 @@ onMounted(() => {
                 class="btn btn-primary"
                 :class="{ '!btn-disabled': buttonDisabled }"
                 :href="link"
+                @click="stakeEvent"
                 >{{
                   currentVP && (!amount.value || +amount.value === 0)
                     ? "extend stake"
@@ -396,6 +410,7 @@ onMounted(() => {
                 class="btn btn-primary"
                 :class="{ '!btn-disabled': buttonDisabled }"
                 :href="link"
+                @click="withdrawEvent"
                 >withdraw</a
               >
             </template>
