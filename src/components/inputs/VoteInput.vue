@@ -24,7 +24,7 @@ const options = computed(() => {
     preProcess: (val) => {
       val = val
         .replace(/,/g, ".")
-        .replace(/[^0-9.]/, "")
+        .replace(/[^0-9.-]/, "")
         .replace(/\.\./g, ".");
 
       if (val.match(/\./g)?.length > 1) {
@@ -46,7 +46,7 @@ const options = computed(() => {
 });
 
 const mask = computed(() => {
-  let s = "0";
+  let s = "Z0";
   if (decimals) {
     s += "." + "9".repeat(Number(decimals));
   }
@@ -75,7 +75,7 @@ watch(
       v-maska:[options]
       :data-maska="mask"
       :placeholder="placeholder"
-      data-maska-tokens="0:\d:multiple|9:\d:optional"
+      data-maska-tokens="Z:-:optional|0:\d:multiple|9:\d:optional"
       type="text"
       :class="classesList"
       :style="{ paddingRight }"
