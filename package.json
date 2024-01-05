@@ -28,7 +28,7 @@
     "vue": "^3.3.4",
     "vue-chartjs": "^5.2.0",
     "vue-gtag": "^2.0.1",
-    "vue-mathjax-next": "^0.0.6",
+    "vue-mathjax-v3": "^0.0.1",
     "vue-router": "^4.2.2"
   },
   "devDependencies": {

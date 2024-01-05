@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import MarketView from "../views/MarketView.vue";
+import FAQ from "../views/FAQ.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -47,7 +48,7 @@ const router = createRouter({
     {
       path: "/faq",
       name: "faq",
-      component: () => import("../views/FAQ.vue"),
+      component: FAQ,
     },
   ],
   scrollBehavior(to, from, savedPosition) {

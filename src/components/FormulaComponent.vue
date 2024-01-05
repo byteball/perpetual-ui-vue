@@ -1,21 +1,10 @@
 <script setup>
-import VueMathjax from "vue-mathjax-next";
+import MathJax from "vue-mathjax-v3";
 defineProps(["formula"]);
 </script>
 
 <template>
-  <VueMathjax
-    class="my-4"
-    :formula="formula"
-    :options="{
-      showMathMenu: false,
-      displayAlign: 'left',
-      ['HTML-CSS']: {
-        styles: { '.MathJax_Display': { margin: 0, display: 'inline' } },
-        linebreaks: { automatic: true },
-      },
-    }"
-  />
+  <MathJax :formula="formula" />
 </template>
 
 <style scoped></style>
