@@ -32,7 +32,23 @@
     <meta name="theme-color" content="#ffffff" />
     <meta name="apple-mobile-web-app-title" content="Perpetual" />
     <meta name="application-name" content="Perpetual" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS_HTML"></script>
+    <script>
+      window.MathJax = {
+        tex: {
+          inlineMath: [['$', '$']],
+          displayMath: [['$$', '$$']],
+          processEscapes: true,
+          processEnvironments: true,
+        },
+        options: {
+          enableMenu: false,
+        },
+        chtml: {
+          displayAlign: 'left'
+        },
+      };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script"></script>
     <title>Pythagorean - perpetual futures</title>
   </head>
   <body>

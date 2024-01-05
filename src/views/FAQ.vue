@@ -60,24 +60,27 @@ onMounted(() => {
         like:
       </div>
       <FormulaComponent
-        formula="$$r = c \: \sqrt{a_0 \: {s_0}^2 + a_1 \: {s_1}^2 + a_2 \: {s_2}^2 + ...}$$"
+        formula="$$r = c \: \sqrt{a_0 \: {s_0}^2\: +\: a_1 \: {s_1}^2 + a_2 \: {s_2}^2\: +\: ...}$$"
       />
       <div>
         where:
         <ul>
           <li>
-            <i>r</i> is the total reserve committed to issuing the futures
-            tokens;
+            <FormulaComponent formula="$r$" :inline="true" /> is the total
+            reserve committed to issuing the futures tokens;
           </li>
           <li>
-            <i>s</i><sub>0</sub>, <i>s</i><sub>1</sub>, <i>s</i><sub>2</sub>,
+            <FormulaComponent formula="$s_0,\: s_1,\: s_2$" :inline="true" />,
             ... are the supplies of the futures tokens;
           </li>
           <li>
-            <i>a</i><sub>0</sub>, <i>a</i><sub>1</sub>, <i>a</i><sub>2</sub>,
+            <FormulaComponent formula="$a_0,\: a_1,\: a_2$" :inline="true" />,
             ... are some coefficients corresponding to the respective tokens;
           </li>
-          <li><i>c</i> is another coefficient.</li>
+          <li>
+            <FormulaComponent formula="$c$" :inline="true" /> is another
+            coefficient.
+          </li>
         </ul>
       </div>
       <div>
@@ -112,11 +115,13 @@ onMounted(() => {
       <div>
         A bonding curve determines how much reserve currency should be paid in
         order to issue a given amount of any token. For example, if we want to
-        issue more of the 1st token, i.e. increase its supply <i>s</i
-        ><sub>1</sub>, we need to calculate the right-hand side of the above
-        formula with the new (increased) <i>s</i><sub>1</sub> to learn the new
-        required reserve. Its difference from the previous amount of reserve
-        shows how much additional reserve should be paid to issue the tokens.
+        issue more of the 1st token, i.e. increase its supply
+        <FormulaComponent formula="$s_1$" :inline="true" />, we need to
+        calculate the right-hand side of the above formula with the new
+        (increased) <FormulaComponent formula="$s_1$" :inline="true" /> to learn
+        the new required reserve. Its difference from the previous amount of
+        reserve shows how much additional reserve should be paid to issue the
+        tokens.
       </div>
     </div>
     <div class="card bg-base-200 shadow-xl mb-4 p-6 sm:p-8">
@@ -125,24 +130,27 @@ onMounted(() => {
       </h2>
       <div>
         Pythagorean futures follow the price of the currency/stock/commodity
-        they are tracking, and they do so by adjusting the parameters <i>a</i
-        ><sub>0</sub>, <i>a</i><sub>1</sub>, <i>a</i><sub>2</sub>, ... and
-        <i>c</i> of the bonding curve.
+        they are tracking, and they do so by adjusting the parameters
+        <FormulaComponent formula="$a_0,\: a_1,\: a_2$" :inline="true" />, ...
+        and <FormulaComponent formula="$c$" :inline="true" /> of the bonding
+        curve.
       </div>
       <p>
         From the bonding curve formula above, the price of the token 1 in terms
-        of the reserve currency would be the partial derivative of <i>r</i> by
-        <i>s</i><sub>1</sub>:
+        of the reserve currency would be the partial derivative of
+        <FormulaComponent formula="$r$" :inline="true" /> by
+        <FormulaComponent formula="$s_1$" :inline="true" />:
       </p>
       <FormulaComponent
-        formula="$$p_1 = {c \: a_1 \: s_1 \over \sqrt{a_0 \: {s_0}^2 + a_1 \: {s_1}^2 + a_2 \: {s_2}^2 + ...}}$$"
+        formula="$$p_1 = {c \: a_1 \: s_1 \over \sqrt{a_0 \: {s_0}^2\: +\: a_1 \: {s_1}^2 + a_2 \: {s_2}^2\: +\: ...}}$$"
       />
       <p>
         If the price differs from the target price (reported by an oracle), the
-        parameters <i>a</i><sub>1</sub> and <i>c</i> would gradually change such
-        that the <i>p</i><sub>1</sub> comes closer to the target. It would
-        completely correct to the target price within a predetermined period of
-        time (which can be changed by
+        parameters <FormulaComponent formula="$a_1$" :inline="true" /> and
+        <FormulaComponent formula="$c$" :inline="true" /> would gradually change
+        such that the <FormulaComponent formula="$p_1$" :inline="true" /> comes
+        closer to the target. It would completely correct to the target price
+        within a predetermined period of time (which can be changed by
         <RouterLink :to="`/governance`">governance</RouterLink>) such as 3 days.
         This change of the parameters moves us to a slightly different bonding
         curve. It also affects (to a smaller extent) the prices of all other
@@ -227,15 +235,16 @@ onMounted(() => {
       </h2>
       <div>
         Every futures set has a governance token. In the formulas above, it is
-        the 0th asset, and its supply is <i>s</i><sub>0</sub>. It is not pegged
-        to any price unlike all other (1st, 2nd, 3rd, and so on) tokens in the
-        set.
+        the 0th asset, and its supply is
+        <FormulaComponent formula="$s_0$" :inline="true" />. It is not pegged to
+        any price unlike all other (1st, 2nd, 3rd, and so on) tokens in the set.
       </div>
       <div>
         Holders of the governance asset earn from fees generated from all
         trading in the set. The earnings are automatically reflected in the
         price of the governance token &mdash; by adjusting the parameters
-        <i>a</i><sub>0</sub> and <i>c</i> after each trade.
+        <FormulaComponent formula="$a_0$" :inline="true" /> and
+        <FormulaComponent formula="$c$" :inline="true" /> after each trade.
       </div>
       <div>
         However, holders of the governance token bear the risks of the price of
@@ -373,15 +382,38 @@ onMounted(() => {
       </p>
     </div>
     <div class="card bg-base-200 shadow-xl mb-4 p-6 sm:p-8">
-      <h2 class="card-title mb-4">How are the Pythagorean futures different from bonded stablecoins?</h2>
+      <h2 class="card-title mb-4">
+        How are the Pythagorean futures different from bonded stablecoins?
+      </h2>
       <div>
-        Both Pythagorean perpetual futures and  <a href="https://blog.obyte.org/using-multi-dimensional-bonding-curves-to-create-stablecoins-81e857b4355c" target="_blank" rel="noopener">bonded stablecoins</a> are issued on bonding curves.
+        Both Pythagorean perpetual futures and
+        <a
+          href="https://blog.obyte.org/using-multi-dimensional-bonding-curves-to-create-stablecoins-81e857b4355c"
+          target="_blank"
+          rel="noopener"
+          >bonded stablecoins</a
+        >
+        are issued on bonding curves.
       </div>
       <div>
-        However, the curves used in bonded stablecoins had the total value of the issued assets greater than the locked reserve, which was supposed to attract interest of traders but in practice led to wild speculative movements and depegged many stablecoins. In contrast, Pythagorean bonding curves are zero-sum, meaning that the total value of all issued tokens is equal to the locked reserve. We believe there are no destabilzing incentives in the Pythagorean futures and expect them to closely follow the benchmark prices.
+        However, the curves used in bonded stablecoins had the total value of
+        the issued assets greater than the locked reserve, which was supposed to
+        attract interest of traders but in practice led to wild speculative
+        movements and depegged many stablecoins. In contrast, Pythagorean
+        bonding curves are zero-sum, meaning that the total value of all issued
+        tokens is equal to the locked reserve. We believe there are no
+        destabilzing incentives in the Pythagorean futures and expect them to
+        closely follow the benchmark prices.
       </div>
       <div>
-        Also, the mechanisms returning the price to the target are different. In bonded stablecoins, the growing fee disincentivized trades that pushed the price further from the target, which meant that when the price was far enough below the target, it was impossible to sell the stablecoins. In Pythagorean futures, there are no prohibitive fees, and it is always possible to sell them, even when the price is far below the benchmark. The price tracking mechanism redistributes the value among tokens trying to get the price closer to the target.
+        Also, the mechanisms returning the price to the target are different. In
+        bonded stablecoins, the growing fee disincentivized trades that pushed
+        the price further from the target, which meant that when the price was
+        far enough below the target, it was impossible to sell the stablecoins.
+        In Pythagorean futures, there are no prohibitive fees, and it is always
+        possible to sell them, even when the price is far below the benchmark.
+        The price tracking mechanism redistributes the value among tokens trying
+        to get the price closer to the target.
       </div>
     </div>
     <div class="card bg-base-200 shadow-xl mb-4 p-6 sm:p-8">
@@ -389,11 +421,12 @@ onMounted(() => {
         How are Pythagorean futures different from other perpetual futures?
       </h2>
       <div>
-        Unlike traditional perpetual futures (traded on BitMEX, Binance futures, Deribit, etc), a trader's position in Pythagorean futures can never be liquidated. A
-        trader just holds the tokens and no matter how the price changes there
-        is no way for the trader's capital to become insufficient and be
-        liquidated. There is also no systemic risk that liquidations fail due to
-        too fast movement of a price and the system becomes insolvent.
+        Unlike traditional perpetual futures (traded on BitMEX, Binance futures,
+        Deribit, etc), a trader's position in Pythagorean futures can never be
+        liquidated. A trader just holds the tokens and no matter how the price
+        changes there is no way for the trader's capital to become insufficient
+        and be liquidated. There is also no systemic risk that liquidations fail
+        due to too fast movement of a price and the system becomes insolvent.
       </div>
       <div>
         Pythagorean futures also do not allow trading with leverage (unless the
@@ -406,7 +439,13 @@ onMounted(() => {
         used in other DeFi apps, which ensures better composability.
       </div>
       <div>
-        The mechanisms that correct the price to the target are somewhat similar but not the same. In traditional perpetual futures, longs pay shorts or shorts pay longs depending on the direction of the price deviation. This doesn't affect the price directly but provides incentives for its correction to the target. In Pythagorean futures, the bonding curve gradually morphs to redistribute value from overpriced futures to underpriced ones and to correct the price at the same time.
+        The mechanisms that correct the price to the target are somewhat similar
+        but not the same. In traditional perpetual futures, longs pay shorts or
+        shorts pay longs depending on the direction of the price deviation. This
+        doesn't affect the price directly but provides incentives for its
+        correction to the target. In Pythagorean futures, the bonding curve
+        gradually morphs to redistribute value from overpriced futures to
+        underpriced ones and to correct the price at the same time.
       </div>
     </div>
     <div class="card bg-base-200 shadow-xl mb-4 p-6 sm:p-8">
