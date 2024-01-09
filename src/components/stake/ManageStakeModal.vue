@@ -228,16 +228,23 @@ watch(
     term.value.error = "";
     const data = getData();
 
-    const a =
+    let a =
       Number(amount.value.value) *
       10 ** props.params.poolSymbolAndDecimal.decimals;
+    let asset = props.params.metaByAA.state.asset0;
+
+    if (!a) {
+      a = 10000;
+      asset = "base";
+      data.perp_asset = props.params.metaByAA.state.asset0;
+    }
 
     link.value = generateLink(
       a ? Math.floor(a) : 1,
       data,
       null,
       props.params.metaByAA.staking_aa,
-      props.params.metaByAA.state.asset0,
+      asset,
       true
     );
   },
