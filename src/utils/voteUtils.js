@@ -1,7 +1,9 @@
+import Decimal from "decimal.js";
+
 export function calcVoteValue(value, type) {
   if (type === "date") {
-    return value / 24 / 3600;
+    return new Decimal(value).times(24).times(3600).toNumber();
   } else {
-    return value * 100;
+    return new Decimal(value).div(100).toNumber();
   }
 }
