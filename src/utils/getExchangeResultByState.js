@@ -30,6 +30,7 @@ export const getExchangeResultByState = (
 
   const getSwapFee = () => getParameter("swap_fee", 0.003);
   const getArbProfitTaxRate = () => getParameter("arb_profit_tax", 0.9);
+  const getStakersFeeShare = () => getParameter("stakers_fee_share", 0.5);
 
   if (
     (tokens.toNumber() < 0 && deltaReserve.toNumber() !== 0) ||
@@ -54,6 +55,7 @@ export const getExchangeResultByState = (
 
   const reserve = new Decimal(state.reserve);
   const coef = new Decimal(state.coef);
+  const a0 = new Decimal(state.a0);
   const oldSupply = new Decimal(bAsset0 ? state.s0 : assetInfo.supply);
   const a = new Decimal(bAsset0 ? state.a0 : assetInfo.a);
   const oldPrice = oldSupply.gt(0)
@@ -77,6 +79,8 @@ export const getExchangeResultByState = (
 
   const swapFeeRate = bInitial ? 0 : getSwapFee();
   const arbProfitTaxRate = bInitial ? 0 : getArbProfitTaxRate();
+  const stakersFeeShare = getStakersFeeShare();
+  const a0FeeShare = 1 - stakersFeeShare;
 
   const getNewSupply = (newR, feeRate) => {
     return new Decimal(oldSupply)
@@ -111,9 +115,12 @@ export const getExchangeResultByState = (
   let arbProfitTax;
   let fullFeeRate;
   let swapFee;
-  let deltaSupply;
+  let deltaSupply = new Decimal(0);
+  let payout = new Decimal(0);
+  let totalFee;
+  let stakerFee;
 
-  if (tokens.gt(0)) {
+  if (!tokens.eq(0)) {
     deltaSupply = new Decimal(tokens).negated();
     newSupply = new Decimal(oldSupply).minus(tokens);
     const newReserve1 = getNewReserve(newSupply, swapFeeRate);
@@ -152,11 +159,27 @@ export const getExchangeResultByState = (
       .times(newSupply)
       .div(newReserve1);
 
+    if (
+      !(
+        newPrice1.lt(oldPrice) ||
+        newPrice1.minus(oldPrice).abs().div(oldPrice).lt(swapFeeRate)
+      )
+    ) {
+      return {
+        error: `price should go down when selling, got ${oldPrice.toString()} => ${newPrice1.toString()}`,
+      };
+    }
+
     arbProfitTax = new Decimal(arbProfitTaxRate)
-      .times(initial_p.minus(newPrice1))
-      .times(tokens.minus(recent_delta_s))
-      .div(2)
+      .times(
+        new Decimal(initial_p)
+          .minus(newPrice1)
+          .abs()
+          .times(tokens.minus(recent_delta_s))
+          .div(2)
+      )
       .minus(recent_tax);
+
     fullFeeRate = new Decimal(swapFeeRate).plus(
       arbProfitTax.div(new Decimal(reserve).minus(newReserve1))
     );
@@ -165,58 +188,47 @@ export const getExchangeResultByState = (
       return { error: "fee would exceed 100%" };
     }
 
-    newReserve = Decimal.ceil(getNewReserve(newSupply, fullFeeRate));
+    const newRGross = Decimal.ceil(getNewReserve(newSupply, fullFeeRate));
+    if (newRGross.gt(reserve)) {
+      return { error: `r_gross would increase to ${newRGross}` };
+    }
+    newReserve = Decimal.ceil(
+      getNewReserve(newSupply, fullFeeRate.times(a0FeeShare))
+    );
 
     if (new Decimal(newReserve).gt(reserve)) {
       return { error: `The amount is too large, try less` };
     }
 
-    swapFee = new Decimal(swapFeeRate).times(
-      new Decimal(reserve).minus(newReserve)
-    );
-    state.a0 = bAsset0
-      ? new Decimal(state.a0)
-          .times(oldSupply)
-          .times(oldSupply)
-          .plus(
-            new Decimal(newReserve)
-              .times(newReserve)
-              .minus(new Decimal(reserve).times(reserve))
-              .div(coef)
-              .div(coef)
-          )
-          .div(newSupply)
-          .div(newSupply)
-      : new Decimal(state.a0).plus(
-          new Decimal(fullFeeRate)
-            .times(a)
-            .times(oldSupply)
-            .times(oldSupply)
-            .minus(newSupply)
-            .times(newSupply)
-            .div(state.s0)
-            .div(state.s0)
-        );
+    stakerFee = newRGross.minus(newReserve);
+    if (stakerFee.lt(0)) {
+      return {
+        error: `negative staker fee ${stakerFee.toString()}`,
+      };
+    }
+    payout = reserve.minus(newRGross);
+    const swapFee = new Decimal(swapFeeRate).times(payout);
+    totalFee = swapFee.plus(arbProfitTax);
   } else {
-    newReserve = deltaReserve.plus(reserve);
+    const newRGross = deltaReserve.plus(reserve);
     swapFee = deltaReserve.times(swapFeeRate);
-    const newSupply1 = getNewSupply(newReserve, swapFeeRate);
+    const newSupply1 = getNewSupply(newRGross, swapFeeRate);
 
     let newA1;
     if (bAsset0) {
       const aDecimal = new Decimal(a);
       const oldSupplyDecimal = new Decimal(oldSupply);
-      const newReserveDecimal = new Decimal(newReserve);
+      const newRGrossDecimal = new Decimal(newRGross);
       const reserveDecimal = new Decimal(reserve);
       const coefDecimal = new Decimal(coef);
       const newSupply1Decimal = new Decimal(newSupply1);
 
       const oldSupplySq = oldSupplyDecimal.mul(oldSupplyDecimal);
-      const newReserveSq = newReserveDecimal.mul(newReserveDecimal);
+      const newRGrossSq = newRGrossDecimal.mul(newRGrossDecimal);
       const reserveSq = reserveDecimal.mul(reserveDecimal);
 
       const part1 = aDecimal.mul(oldSupplySq);
-      const part2 = newReserveSq
+      const part2 = newRGrossSq
         .minus(reserveSq)
         .div(coefDecimal)
         .div(coefDecimal);
@@ -232,7 +244,7 @@ export const getExchangeResultByState = (
 
     const newP1 = new Decimal(
       new Decimal(coef).pow(2).times(newA1).times(newSupply1)
-    ).div(newReserve);
+    ).div(newRGross);
 
     arbProfitTax = new Decimal(arbProfitTaxRate)
       .times(new Decimal(newP1).minus(initial_p))
@@ -240,39 +252,55 @@ export const getExchangeResultByState = (
       .div(2)
       .minus(recent_tax);
 
+    totalFee = swapFee.plus(arbProfitTax);
+    stakerFee = totalFee.times(stakersFeeShare).floor();
+
     fullFeeRate = new Decimal(swapFeeRate).plus(arbProfitTax.div(deltaReserve));
 
     if (fullFeeRate.gt(1)) {
       return { error: "fee would exceed 100%" };
     }
 
-    newSupply = getNewSupply(newReserve, fullFeeRate).floor();
+    newReserve = newRGross.minus(stakerFee);
+    newSupply = getNewSupply(newReserve, fullFeeRate.times(a0FeeShare)).floor();
 
     deltaSupply = newSupply.minus(oldSupply);
 
     if (deltaSupply.lt(0)) {
       return { error: `The amount is too small, try more` };
     }
-
-    state.a0 = bAsset0
-      ? new Decimal(state.a0)
-          .times(new Decimal(oldSupply).pow(2))
-          .plus(
-            new Decimal(newReserve)
-              .pow(2)
-              .minus(new Decimal(reserve).pow(2))
-              .div(new Decimal(coef).pow(2))
-          )
-          .div(new Decimal(newSupply).pow(2))
-      : new Decimal(state.a0).plus(
-          new Decimal(fullFeeRate)
-            .times(
-              new Decimal(newReserve).pow(2).minus(new Decimal(reserve).pow(2))
-            )
-            .div(new Decimal(coef).pow(2))
-            .div(new Decimal(state.s0).pow(2))
-        );
   }
+
+  state.a0 = bAsset0
+    ? new Decimal(state.a0)
+        .times(oldSupply)
+        .times(oldSupply)
+        .plus(
+          new Decimal(newReserve)
+            .times(newReserve)
+            .minus(new Decimal(reserve).times(reserve))
+            .div(coef)
+            .div(coef)
+        )
+        .div(newSupply)
+        .div(newSupply)
+    : new Decimal(a0)
+        .plus(
+          new Decimal(newReserve)
+            .times(newReserve)
+            .minus(new Decimal(reserve).times(reserve))
+            .div(coef)
+            .div(coef)
+            .minus(
+              new Decimal(a).times(
+                new Decimal(newSupply)
+                  .times(newSupply)
+                  .minus(new Decimal(oldSupply).times(oldSupply))
+              )
+            )
+        )
+        .div(state.s0)
+        .div(state.s0);
 
   if (state.a0.lt(0)) {
     return { error: `a0 would become ${state.a0.toString()}` };
@@ -280,9 +308,6 @@ export const getExchangeResultByState = (
 
   state.reserve = newReserve.toNumber();
   if (bAsset0) {
-    if (state.a0.lt(a)) {
-      return { error: "a0 should grow" };
-    }
     state.s0 = newSupply.toNumber();
   } else {
     assetInfo.supply = newSupply.toNumber();
@@ -294,15 +319,34 @@ export const getExchangeResultByState = (
     .times(newSupply)
     .div(newReserve);
 
-  const total_fee = new Decimal(swapFee).plus(arbProfitTax);
-
-  let payout;
   let fee_percent;
-  if (tokens) {
-    payout = new Decimal(reserve).minus(newReserve);
-    fee_percent = total_fee.div(payout).times(100);
+  if (!tokens.eq(0)) {
+    fee_percent = totalFee.div(payout).times(100);
   } else {
-    fee_percent = total_fee.div(deltaReserve).times(100);
+    fee_percent = totalFee.div(deltaReserve).times(100);
+  }
+
+  if (!state.total_staker_fees) {
+    state.total_staker_fees = 0;
+  }
+
+  state.total_staker_fees = new Decimal(state.total_staker_fees).plus(
+    stakerFee
+  );
+
+  const timestamp = Math.floor(Date.now() / 1000);
+  if (bAsset0) {
+    if (!state[key]) state[key] = {};
+    state[key].delta_s = deltaSupply.toNumber();
+    state[key].initial_p = initial_p.toNumber();
+    state[key].tax = arbProfitTax.toNumber();
+    state[key].ts = timestamp;
+  } else {
+    if (!assetInfo[key]) assetInfo[key] = {};
+    assetInfo[key].delta_s = deltaSupply.toNumber();
+    assetInfo[key].initial_p = initial_p.toNumber();
+    assetInfo[key].tax = arbProfitTax.toNumber();
+    assetInfo[key].ts = timestamp;
   }
 
   state.a0 = state.a0.toNumber();
@@ -317,7 +361,7 @@ export const getExchangeResultByState = (
     new_price: newPrice.toNumber(),
     swap_fee: swapFee,
     arb_profit_tax: arbProfitTax,
-    total_fee: total_fee.toNumber(),
+    total_fee: totalFee.toNumber(),
     fee_percent: fee_percent.abs().toNumber(),
     state,
     asset_info: assetInfo,

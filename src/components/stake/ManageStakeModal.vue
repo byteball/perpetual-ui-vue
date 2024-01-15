@@ -240,7 +240,7 @@ watch(
     }
 
     link.value = generateLink(
-      a ? Math.floor(a) : 1,
+      a,
       data,
       null,
       props.params.metaByAA.staking_aa,

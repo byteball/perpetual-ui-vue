@@ -9,13 +9,14 @@ import { getPreparedMeta } from "@/utils/governanceUtils";
 import { Dialog } from "@headlessui/vue";
 import ManageStakeModal from "@/components/stake/ManageStakeModal.vue";
 import { useRoute, useRouter } from "vue-router";
+import { withdrawReward } from "@/utils/withdrawReward";
 
 const route = useRoute();
 const router = useRouter();
 
 const store = useAaInfoStore();
 const addressStore = useAddressStore();
-const { aas, meta, status } = storeToRefs(store);
+const { meta, status } = storeToRefs(store);
 const { address } = storeToRefs(addressStore);
 
 const pools = ref([]);
@@ -24,6 +25,8 @@ const poolSymbolAndDecimalByAA = ref({});
 const poolReserveNameByAA = ref({});
 const stakeBalanceByPool = ref({});
 const manageModalParams = ref({});
+
+const rewardByAA = ref({});
 
 const preparedMetaByAA = ref({});
 
@@ -71,24 +74,30 @@ async function initPools(force = false) {
   const promises = [];
 
   async function getAndSetPoolData(aa) {
-    const result = await getPreparedMeta(meta.value[aa], address.value, force);
+    const metaByAA = meta.value[aa];
+    const result = await getPreparedMeta(metaByAA, address.value, force);
     if (!result.asset0SymbolAndDecimals) return;
     preparedMetaByAA.value[aa] = result;
+    console.log(result);
 
     if (address.value) {
       stakeBalanceByPool.value[aa] =
-        meta.value[aa]?.stakingVars[`user_${address.value}_a0`]?.balance || 0;
+        metaByAA?.stakingVars[`user_${address.value}_a0`]?.balance || 0;
     }
 
     poolSymbolAndDecimalByAA.value[aa] = result.asset0SymbolAndDecimals;
     _pools.push(aa);
 
     if (!result.reserveAsset) {
-      poolReserveNameByAA.value[aa] = meta.value[aa].reserve_asset;
+      poolReserveNameByAA.value[aa] = metaByAA.reserve_asset;
       return;
     }
 
     poolReserveNameByAA.value[aa] = result.reserveAsset.name;
+
+    rewardByAA.value[aa] = +(
+      metaByAA.state.total_staker_fees * result.reservePriceInUsd
+    ).toPrecision(6);
   }
 
   for (let aa in meta.value) {
@@ -139,7 +148,6 @@ const poolList = computed(() => {
 onMounted(() => {
   initPools();
 });
-watch([aas, status], () => initPools);
 watch(
   () => address.value,
   () => initPools
@@ -208,12 +216,17 @@ const showManageStakeModal = (poolAA) => {
                 <th>
                   {{ !poolsListFilter ? "TVL" : "Staked balance" }}
                 </th>
+                <th>
+                  {{
+                    !poolsListFilter ? "Total fee reward" : "Your fee reward"
+                  }}
+                </th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="poolAA in poolList" :key="poolAA">
-                <td class="flex items-center h12">
+                <td class="h12">
                   {{
                     `${poolReserveNameByAA[poolAA]}/${poolSymbolAndDecimalByAA[poolAA].name}`
                   }}
@@ -229,7 +242,15 @@ const showManageStakeModal = (poolAA) => {
                     }})
                   </template>
                 </td>
-                <td class="h-12">
+                <td class="h-6">
+                  <template v-if="!poolsListFilter">
+                    ${{ rewardByAA[poolAA] }}
+                  </template>
+                  <template v-else>
+                    ${{ preparedMetaByAA[poolAA].rewardBalanceInUsd }}
+                  </template>
+                </td>
+                <td>
                   <div class="min-w-max">
                     <a
                       :href="`/stake/${poolAA}`"
@@ -244,6 +265,22 @@ const showManageStakeModal = (poolAA) => {
                     >
                       Govern
                     </RouterLink>
+                    <a
+                      v-if="
+                        address &&
+                        poolsListFilter &&
+                        preparedMetaByAA[poolAA].rewardBalanceInUsd > 0
+                      "
+                      @click="
+                        withdrawReward(
+                          preparedMetaByAA[poolAA].rawMeta,
+                          address
+                        )
+                      "
+                      class="btn btn-xs btn-primary ml-3"
+                    >
+                      Withdraw
+                    </a>
                   </div>
                 </td>
               </tr>

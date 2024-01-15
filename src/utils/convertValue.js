@@ -3,6 +3,7 @@ import Decimal from "decimal.js";
 const fieldTypes = {
   swap_fee: "percent",
   arb_profit_tax: "percent",
+  stakers_fee_share: "percent",
   adjustment_period: "date",
   presale_period: "date",
   auction_price_halving_period: "date",

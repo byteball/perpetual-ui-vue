@@ -15,6 +15,7 @@ import {
 import { generateAndFollowLinkForVoteInGovernance } from "@/utils/generateLink";
 import { getNotDefaultAssetsFromMeta } from "@/utils/assetsUtils";
 import { getVPFromNormalized } from "@/utils/getVP";
+import { withdrawReward } from "@/utils/withdrawReward";
 import { getAssetMetadataByArray, getDefinition } from "@/services/DAGApi";
 import PriceAANotFinished from "@/components/governance/PriceAANotFinished.vue";
 import { Dialog } from "@headlessui/vue";
@@ -456,6 +457,15 @@ watch(
               }})
             </div>
             <div>
+              Your reward balance: ${{ preparedMeta.rewardBalanceInUsd }}
+              <a
+                v-if="preparedMeta.rewardBalanceInUsd > 0"
+                class="link link-hover text-sky-500"
+                @click="withdrawReward(metaByActiveAA, address)"
+                >withdraw</a
+              >
+            </div>
+            <div>
               <RouterLink
                 class="link text-sky-500 link-hover font-light"
                 :to="`/stake/${perpetualAA}`"
@@ -515,6 +525,15 @@ watch(
             title="Arb profit tax"
             name="arb_profit_tax"
             :votes-by-name="votes['arb_profit_tax']"
+            :prepared-meta="preparedMeta"
+            :allowed-control="allowedControl"
+            type="percent"
+            @reqVote="reqVote"
+          />
+          <VoteBlock
+            title="Stakers fee share"
+            name="stakers_fee_share"
+            :votes-by-name="votes['stakers_fee_share']"
             :prepared-meta="preparedMeta"
             :allowed-control="allowedControl"
             type="percent"
