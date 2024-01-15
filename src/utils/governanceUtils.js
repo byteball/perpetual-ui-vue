@@ -118,6 +118,7 @@ export async function getPreparedMeta(
     allowedControl: vp > 0,
     stakeBalance,
     reservePriceAA,
+    reservePriceInUsd: reservePrice,
     reservePriceValue,
     reserve,
     reserveInUsd,

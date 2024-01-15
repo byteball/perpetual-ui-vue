@@ -35,6 +35,7 @@ const router = useRouter();
 
 const swapFee = ref("0.3");
 const arbProfitTax = ref("90");
+const stakersFeeShare = ref("50");
 const adjustmentPeriod = ref("3");
 const presalePeriod = ref("14");
 const auctionPriceHalvingPeriod = ref("3");
@@ -59,6 +60,7 @@ function getObject() {
   const obj = clearObject({
     swap_fee: swapFee.value,
     arb_profit_tax: arbProfitTax.value,
+    stakers_fee_share: stakersFeeShare.value,
     adjustment_period: adjustmentPeriod.value,
     presale_period: presalePeriod.value,
     auction_price_halving_period: auctionPriceHalvingPeriod.value,
@@ -162,6 +164,7 @@ function getMinMaxValue(name) {
   switch (name) {
     case "min_s0_share":
     case "swap_fee":
+    case "stakers_fee_share":
       min = 0;
       max = 100;
       break;
@@ -185,6 +188,7 @@ function checkInputs() {
     ["min_s0_share"]: minS0Share.value,
     ["swap_fee"]: swapFee.value,
     ["arb_profit_tax"]: arbProfitTax.value,
+    ["stakers_fee_share"]: stakersFeeShare.value,
     ["token_share_threshold"]: tokenShareThreshold.value,
     ["adjustment_period"]: adjustmentPeriod.value,
     ["presale_period"]: presalePeriod.value,
@@ -215,6 +219,7 @@ watch(
   [
     swapFee,
     arbProfitTax,
+    stakersFeeShare,
     adjustmentPeriod,
     presalePeriod,
     auctionPriceHalvingPeriod,
@@ -286,6 +291,21 @@ watch(
       <VoteInput v-model="arbProfitTax" :type="'percent'" label="%" />
       <div v-if="inputsError.arb_profit_tax" class="text-red-500 mt-1 text-xs">
         {{ inputsError.arb_profit_tax }}%
+      </div>
+    </div>
+    <div class="form-control mt-5">
+      <div class="flex items-center">
+        <label class="label">
+          <span class="label-text">Stakers fee share</span>
+        </label>
+        <TooltipComponent field-name="stakers_fee_share"> </TooltipComponent>
+      </div>
+      <VoteInput v-model="stakersFeeShare" :type="'percent'" label="%" />
+      <div
+        v-if="inputsError.stakers_fee_share"
+        class="text-red-500 mt-1 text-xs"
+      >
+        {{ inputsError.stakers_fee_share }}%
       </div>
     </div>
     <div class="form-control mt-5">
