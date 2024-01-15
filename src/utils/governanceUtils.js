@@ -3,6 +3,8 @@ import { perpDefaults } from "@/config";
 import { getVPFromNormalized } from "@/utils/getVP";
 import { getPriceByAssets, getReservePrice } from "@/services/PerpAPI";
 import dayjs from "dayjs";
+import { getDistributeStakerFees } from "@/utils/getDistributeStakerFees";
+import { toRaw } from "vue";
 
 function getMajorityThreshold(aaState, stakingVars) {
   return (
@@ -109,6 +111,18 @@ export async function getPreparedMeta(
   );
   const stakeInUsd = price[metaByAA.state.asset0] * reservePrice;
 
+  const rewardBalance = userAddress
+    ? getDistributeStakerFees(
+        metaByAA.stakingVars.state,
+        metaByAA.state,
+        structuredClone(toRaw(metaByAA.stakingVars[`user_${userAddress}_a0`]))
+      )
+    : 0;
+  let rewardBalanceInUsd = 0;
+  if (rewardBalance) {
+    rewardBalanceInUsd = +(rewardBalance * reservePrice).toPrecision(6);
+  }
+
   const meta = {
     asset0SymbolAndDecimals,
     priceAAsMeta,
@@ -119,6 +133,7 @@ export async function getPreparedMeta(
     stakeBalance,
     reservePriceAA,
     reservePriceInUsd: reservePrice,
+    rewardBalanceInUsd,
     reservePriceValue,
     reserve,
     reserveInUsd,

@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, toRaw, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 
 import { useAaInfoStore } from "@/stores/aaInfo";
@@ -9,8 +9,7 @@ import { getPreparedMeta } from "@/utils/governanceUtils";
 import { Dialog } from "@headlessui/vue";
 import ManageStakeModal from "@/components/stake/ManageStakeModal.vue";
 import { useRoute, useRouter } from "vue-router";
-import { getDistributeStakerFees } from "@/utils/getDistributeStakerFees";
-import { followLink, generateLink } from "@/utils/generateLink";
+import { withdrawReward } from "@/utils/withdrawReward";
 
 const route = useRoute();
 const router = useRouter();
@@ -28,7 +27,6 @@ const stakeBalanceByPool = ref({});
 const manageModalParams = ref({});
 
 const rewardByAA = ref({});
-const rewardByAAForCurrentUser = ref({});
 
 const preparedMetaByAA = ref({});
 
@@ -96,22 +94,10 @@ async function initPools(force = false) {
     }
 
     poolReserveNameByAA.value[aa] = result.reserveAsset.name;
-    console.log(metaByAA.state.total_staker_fees, result.reservePrice);
+
     rewardByAA.value[aa] = +(
       metaByAA.state.total_staker_fees * result.reservePriceInUsd
     ).toPrecision(6);
-
-    // fees reward
-    if (address.value) {
-      const reward = getDistributeStakerFees(
-        metaByAA.stakingVars.state,
-        metaByAA.state,
-        structuredClone(toRaw(metaByAA.stakingVars[`user_${address.value}_a0`]))
-      );
-      rewardByAAForCurrentUser.value[aa] = +(
-        reward * result.reservePriceInUsd
-      ).toPrecision(6);
-    }
   }
 
   for (let aa in meta.value) {
@@ -129,23 +115,6 @@ async function initPools(force = false) {
   ) {
     showManageStakeModal(route.params.stake);
   }
-}
-
-function withdrawReward(aa) {
-  const metaByAA = meta.value[aa];
-  const link = generateLink(
-    10000,
-    {
-      perp_asset: metaByAA.state.asset0,
-      withdraw_staker_fees: 1,
-      withdraw_rewards: 1,
-    },
-    address.value,
-    metaByAA.staking_aa,
-    "base",
-    true
-  );
-  followLink(link);
 }
 
 const changePoolFilter = (filter) => {
@@ -278,7 +247,7 @@ const showManageStakeModal = (poolAA) => {
                     ${{ rewardByAA[poolAA] }}
                   </template>
                   <template v-else>
-                    ${{ rewardByAAForCurrentUser[poolAA] }}
+                    ${{ preparedMetaByAA[poolAA].rewardBalanceInUsd }}
                   </template>
                 </td>
                 <td>
@@ -300,9 +269,14 @@ const showManageStakeModal = (poolAA) => {
                       v-if="
                         address &&
                         poolsListFilter &&
-                        rewardByAAForCurrentUser[poolAA] > 0
+                        preparedMetaByAA[poolAA].rewardBalanceInUsd > 0
                       "
-                      @click="withdrawReward(poolAA)"
+                      @click="
+                        withdrawReward(
+                          preparedMetaByAA[poolAA].rawMeta,
+                          address
+                        )
+                      "
                       class="btn btn-xs btn-primary ml-3"
                     >
                       Withdraw

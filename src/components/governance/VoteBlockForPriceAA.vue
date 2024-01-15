@@ -29,7 +29,14 @@ const props = defineProps([
   "metaByActiveAA",
 ]);
 const emit = defineEmits(["reqVote"]);
-const currentValue = props.assetMeta[props.name] || 0;
+const currentValue =
+  calcVoteValue(props.assetMeta[props.name], props.type) || 0;
+let suffix = "";
+if (props.type === "date") {
+  suffix = " days";
+} else if (props.type === "percent") {
+  suffix = "%";
+}
 
 const store = useAaInfoStore();
 const { metaByActiveAddress, timestamp } = storeToRefs(store);
@@ -55,7 +62,7 @@ const userVote = computed(() => {
 
     return {
       vp: vp.toFixed(decimals),
-      value: vote.value,
+      value: calcVoteValue(vote.value, props.type),
     };
   } else {
     return { vp: 0, value: 0 };
@@ -124,7 +131,7 @@ onMounted(async () => {
         :href="fullExplorerUrlForAddress + currentValue"
         >{{ currentValue }}</a
       >
-      <span v-else>{{ currentValue }}</span>
+      <span v-else>{{ currentValue }}{{ suffix }}</span>
     </div>
     <div v-if="name === 'price_aa'">
       <div class="mt-1">
@@ -149,15 +156,16 @@ onMounted(async () => {
           />
         </div>
         <div v-if="leaderDate" class="mt-2 text-left">
-          If no new votes are received, the voting will end on {{ leaderDate.finishDate }} and the value will
-          change to {{ calcVoteValue(votesByName[0].value, type)
+          If no new votes are received, the voting will end on
+          {{ leaderDate.finishDate }} and the value will change to
+          {{ calcVoteValue(votesByName[0].value, type)
           }}{{ type === "percent" ? "%" : "" }}
         </div>
         <div v-if="userVote?.vp" class="mt-2">
           You vote for
-          <span class="font-normal sm:font-bold text-xs sm:text-sm">{{
-            userVote.value
-          }}</span>
+          <span class="font-normal sm:font-bold text-xs sm:text-sm"
+            >{{ userVote.value }}{{ suffix }}</span
+          >
           (VP: {{ userVote.vp }})
         </div>
       </div>
