@@ -180,7 +180,7 @@ const showManageStakeModal = (poolAA) => {
       <h1 class="text-2xl font-bold leading-8">Stake</h1>
       <div class="mt-2 leading-6">
         Stake the governance asset of a futures set in order to participate in
-        the governance of the set.
+        the governance of the set. Voting power (VP) depends on the staked amount and the term left before unstaking. XX% of all trading fees are also distributed among stakers in proportion to their VP. 
       </div>
     </div>
     <div v-if="address" class="mb-2">
@@ -206,7 +206,7 @@ const showManageStakeModal = (poolAA) => {
         </div>
         <div v-else class="overflow-auto">
           <div v-if="!poolList.length" class="text-center">
-            While it's empty here
+            It's empty here
           </div>
           <table v-else class="table w-full">
             <thead>
