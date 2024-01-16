@@ -10,6 +10,7 @@ import { Dialog } from "@headlessui/vue";
 import ManageStakeModal from "@/components/stake/ManageStakeModal.vue";
 import { useRoute, useRouter } from "vue-router";
 import { withdrawReward } from "@/utils/withdrawReward";
+import TooltipComponent from "@/components/TooltipComponent.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -215,10 +216,15 @@ const showManageStakeModal = (poolAA) => {
                 <th>
                   {{ !poolsListFilter ? "TVL" : "Staked balance" }}
                 </th>
-                <th>
+                <th class="flex items-center">
                   {{
                     !poolsListFilter ? "Total fee reward" : "Your fee reward"
                   }}
+                  <TooltipComponent
+                    class="ml-1"
+                    v-show="!poolsListFilter"
+                    field-name="fee_reward_table"
+                  />
                 </th>
                 <th>Actions</th>
               </tr>
