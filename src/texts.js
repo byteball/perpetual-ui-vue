@@ -29,4 +29,5 @@ export const propertyTips = {
   max_drift_rate:
     "Maximum drift rate per year. Governance can set some assets to continuously depreciate and move their value to the governance asset holders. This is the maximum allowed depreciation speed. A reasonable maximum is important to assure the asset holders that they have protection against malicious governance.",
   stakers_fee_share: "Stacking reward from the total fees",
+  fee_reward_table: "Total earned by stakers from trading fee",
 };

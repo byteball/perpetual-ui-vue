@@ -57,7 +57,14 @@ defineProps(["preparedMeta"]);
         <GovernanceAssetField
           title="Arb profit tax"
           name="arb_profit_tax"
-          :value="`${getParam('arb_profit_tax', preparedMeta.rawMeta)}%`"
+          :value="`${getParam('arb_profit_tax', preparedMeta.rawMeta) * 100}%`"
+        />
+        <GovernanceAssetField
+          title="Stakers fee share"
+          name="stakers_fee_share"
+          :value="`${
+            getParam('stakers_fee_share', preparedMeta.rawMeta) * 100
+          }%`"
         />
         <GovernanceAssetField
           title="Adjustment period"
