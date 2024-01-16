@@ -1,4 +1,8 @@
 export function getDistributeStakerFees(state, aa_state, user_perp) {
+  if (!user_perp) {
+    return 0;
+  }
+
   const user_share = user_perp.normalized_vp / state.total_normalized_vp;
 
   if (!user_perp.last_perp_emissions.r) {

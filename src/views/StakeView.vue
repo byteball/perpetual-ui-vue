@@ -78,7 +78,6 @@ async function initPools(force = false) {
     const result = await getPreparedMeta(metaByAA, address.value, force);
     if (!result.asset0SymbolAndDecimals) return;
     preparedMetaByAA.value[aa] = result;
-    console.log(result);
 
     if (address.value) {
       stakeBalanceByPool.value[aa] =
