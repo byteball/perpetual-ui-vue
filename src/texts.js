@@ -28,6 +28,9 @@ export const propertyTips = {
   new_vp: "New voting power",
   max_drift_rate:
     "Maximum drift rate per year. Governance can set some assets to continuously depreciate and move their value to the governance asset holders. This is the maximum allowed depreciation speed. A reasonable maximum is important to assure the asset holders that they have protection against malicious governance.",
-  stakers_fee_share: "Share of the fees that goes to stakers staking the governance asset. It's then distributed among them in proportion to their voting power (VP).",
+  stakers_fee_share:
+    "Share of the fees that goes to stakers staking the governance asset. It's then distributed among them in proportion to their voting power (VP).",
   fee_reward_table: "Total earned by stakers from trading fees",
+  reward_tooltip:
+    "Stakers of {name} earn {percent}% of trading fees. This income is distributed among stakers in proportion their voting power (VP).",
 };
