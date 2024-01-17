@@ -3,15 +3,24 @@ import { onMounted, ref } from "vue";
 import { propertyTips } from "@/texts";
 import { Tooltip } from "floating-vue";
 
-const props = defineProps(["fieldName"]);
+const props = defineProps(["fieldName", "replace"]);
 
 const dataTip = ref("");
 
 onMounted(() => {
-  dataTip.value = propertyTips[props.fieldName] || "";
-  if (!dataTip.value) {
+  let text = propertyTips[props.fieldName] || "";
+  if (!text) {
     console.error("data tip error, field name: " + props.fieldName);
   }
+
+  if (props.replace && Object.keys(props.replace).length) {
+    const replace = props.replace;
+    Object.keys(replace).forEach((key) => {
+      text = text.replace(`{${key}}`, replace[key]);
+    });
+  }
+
+  dataTip.value = text;
 });
 </script>
 

@@ -29,6 +29,7 @@ import TooltipComponent from "@/components/TooltipComponent.vue";
 import { getPriceByAssets, getReservePrice } from "@/services/PerpAPI";
 import PieComponent from "@/components/PieComponent.vue";
 import Asset0ForTradingComponent from "@/components/governance/Asset0ForTradingComponent.vue";
+import { calcVoteValue } from "@/utils/voteUtils";
 
 dayjs.extend(duration);
 
@@ -456,11 +457,22 @@ watch(
                 ).toPrecision(6)
               }})
             </div>
-            <div>
-              Your reward balance: ${{ preparedMeta.rewardBalanceInUsd }}
+            <div class="flex items-center">
+              Your reward balance
+              <TooltipComponent
+                field-name="reward_tooltip"
+                :replace="{
+                  name: preparedMeta.asset0SymbolAndDecimals.name,
+                  percent: calcVoteValue(
+                    getParam('stakers_fee_share', preparedMeta.rawMeta),
+                    'percent'
+                  ),
+                }"
+                class="ml-1"
+              />: ${{ preparedMeta.rewardBalanceInUsd }}
               <a
                 v-if="preparedMeta.rewardBalanceInUsd > 0"
-                class="link link-hover text-sky-500"
+                class="link link-hover text-sky-500 ml-2"
                 @click="withdrawReward(metaByActiveAA, address)"
                 >withdraw</a
               >
