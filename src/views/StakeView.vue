@@ -181,7 +181,10 @@ const showManageStakeModal = (poolAA) => {
       <h1 class="text-2xl font-bold leading-8">Stake</h1>
       <div class="mt-2 leading-6">
         Stake the governance asset of a futures set in order to participate in
-        the governance of the set. Voting power (VP) depends on the staked amount and the term left before unstaking. A share (50% by default) of all trading fees are also distributed among stakers in proportion to their VP. 
+        the governance of the set. Voting power (VP) depends on the staked
+        amount and the term left before unstaking. A share (50% by default) of
+        all trading fees are also distributed among stakers in proportion to
+        their VP.
       </div>
     </div>
     <div v-if="address" class="mb-2">
@@ -206,9 +209,7 @@ const showManageStakeModal = (poolAA) => {
           <Loading />
         </div>
         <div v-else class="overflow-auto">
-          <div v-if="!poolList.length" class="text-center">
-            It's empty here
-          </div>
+          <div v-if="!poolList.length" class="text-center">It's empty here</div>
           <table v-else class="table w-full">
             <thead>
               <tr>
@@ -247,12 +248,27 @@ const showManageStakeModal = (poolAA) => {
                     }})
                   </template>
                 </td>
-                <td class="h-6">
+                <td class="h-12">
                   <template v-if="!poolsListFilter">
                     ${{ rewardByAA[poolAA] }}
                   </template>
                   <template v-else>
-                    ${{ preparedMetaByAA[poolAA].rewardBalanceInUsd }}
+                    ${{ preparedMetaByAA[poolAA].rewardBalanceInUsd }}<br />
+                    <a
+                      v-if="
+                        address &&
+                        preparedMetaByAA[poolAA].rewardBalanceInUsd > 0
+                      "
+                      @click="
+                        withdrawReward(
+                          preparedMetaByAA[poolAA].rawMeta,
+                          address
+                        )
+                      "
+                      class="link link-hover text-sky-500"
+                    >
+                      Withdraw
+                    </a>
                   </template>
                 </td>
                 <td>
@@ -270,22 +286,6 @@ const showManageStakeModal = (poolAA) => {
                     >
                       Govern
                     </RouterLink>
-                    <a
-                      v-if="
-                        address &&
-                        poolsListFilter &&
-                        preparedMetaByAA[poolAA].rewardBalanceInUsd > 0
-                      "
-                      @click="
-                        withdrawReward(
-                          preparedMetaByAA[poolAA].rawMeta,
-                          address
-                        )
-                      "
-                      class="btn btn-xs btn-primary ml-3"
-                    >
-                      Withdraw
-                    </a>
                   </div>
                 </td>
               </tr>
