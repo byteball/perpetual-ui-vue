@@ -1,4 +1,4 @@
-export function getDistributeStakerFees(state, aa_state, user_perp) {
+export function getStakerFees(state, aa_state, user_perp) {
   if (!user_perp) {
     return 0;
   }
