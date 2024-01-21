@@ -183,7 +183,7 @@ const showManageStakeModal = (poolAA) => {
         Stake the governance asset of a futures set in order to participate in
         the governance of the set. Voting power (VP) depends on the staked
         amount and the term left before unstaking. A share (50% by default) of
-        all trading fees are also distributed among stakers in proportion to
+        all trading fees is also distributed among stakers in proportion to
         their VP.
       </div>
     </div>

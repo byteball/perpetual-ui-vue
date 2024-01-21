@@ -244,7 +244,7 @@ onMounted(() => {
         trading in the set. The earnings are automatically reflected in the
         price of the governance token &mdash; by adjusting the parameters
         <FormulaComponent formula="$a_0$" :inline="true" /> and
-        <FormulaComponent formula="$c$" :inline="true" /> after each trade.
+        <FormulaComponent formula="$c$" :inline="true" /> after each trade. Those holders who also stake (lock) their governance tokens to participate in governance earn a bigger share of the fees. Longer locking periods yield a larger share of the fees.
       </div>
       <div>
         However, holders of the governance token bear the risks of the price of
@@ -256,7 +256,7 @@ onMounted(() => {
         Holders of the governance token can participate in
         <RouterLink :to="`/governance`">governance</RouterLink>
         of the set by locking their tokens for a certain time and voting about
-        changing the set's parameters and adding new futures tokens.
+        changing the set's parameters and adding new futures tokens. In exchange for participation in governance, they earn a bigger share of the trading fees.
       </div>
     </div>
     <div class="card bg-base-200 shadow-xl mb-4 p-6 sm:p-8">
@@ -276,14 +276,32 @@ onMounted(() => {
         >.
       </div>
       <div>
+        Governance participants receive a portion (50% by default) of all trading fees, and these earnings are distributed among them in proportion to their VP. So, those who have more skin in the game by locking more tokens for longer terms, get a larger share of the fees.
+      </div>
+      <div>
         Governance gets to decide the parameters of their futures set, such as
         trading fees. It also votes about adding new futures tokens and can
-        later change their parameters such as the oracle used to obtain the
+        later change their parameters, for example, introduce an oracle used to obtain the
         target price.
       </div>
       <div>
         Every futures set has its own governance independent of all other
         futures sets.
+      </div>
+    </div>
+    <div class="card bg-base-200 shadow-xl mb-4 p-6 sm:p-8">
+      <h2 class="card-title mb-4">Why stake governance tokens?</h2>
+      <div>
+        To get a portion of the trading fees and participate in <RouterLink :to="`/governance`">governance</RouterLink>.
+      </div>
+      <div>
+        A portion of the trading fees (by default, 50%) goes to stakers and is distributed among them in proportion to their VP. If a relatively small share of the governance tokens is staked, this means that 50% (by default) of all fees would be distributed among a small number of stakers.
+      </div>
+      <div>
+        Among stakers, the earnings are distributed in proportion to their VP, meaning that longer locking term yields more earnings (it also yields more weight in governance decisions).
+      </div>
+      <div>
+        The accumulated fees can be withdrawn at any time at <RouterLink :to="`/governance`">governance</RouterLink> or <RouterLink :to="`/stake`">staking</RouterLink> pages.
       </div>
     </div>
     <div class="card bg-base-200 shadow-xl mb-4 p-6 sm:p-8">
@@ -362,8 +380,8 @@ onMounted(() => {
         arb profit tax is 90%.
       </p>
       <p>
-        All the collected fees benefit the governance token holders and are
-        reflected in the increase of their token's price.
+        All the collected fees benefit the governance token holders. A part of them (50% by default) is
+        reflected in the increase of their token's price, while the other part is distributed among those governance token holders who stake (lock) their tokens for some time to participate in governance.
       </p>
     </div>
     <div class="card bg-base-200 shadow-xl mb-4 p-6 sm:p-8">
@@ -402,7 +420,7 @@ onMounted(() => {
         movements and depegged many stablecoins. In contrast, Pythagorean
         bonding curves are zero-sum, meaning that the total value of all issued
         tokens is equal to the locked reserve. We believe there are no
-        destabilzing incentives in the Pythagorean futures and expect them to
+        destabilizing incentives in the Pythagorean futures and expect them to
         closely follow the benchmark prices.
       </div>
       <div>
@@ -509,6 +527,18 @@ onMounted(() => {
         Each futures token has its own price oracle and traders can assess their
         reliability before buying the tokens. To prevent the risk of rug pull,
         oracles cannot be changed by governance.
+      </div>
+    </div>
+    <div class="card bg-base-200 shadow-xl mb-4 p-6 sm:p-8">
+      <h2 class="card-title mb-4">How to make money in Pyth?</h2>
+      <div>
+        <b>Trading perpetual futures.</b> If you want to bet on the price of a particular asset going higher, you can buy the corresponding futures token now and sell it later after its price grows. Risks: a futures token might lose its peg (see above).
+      </div>
+      <div>
+        <b>Arbitrage.</b> If you see that the price of a particular futures token deviates from its target (the price of the asset it is tracking), you can take advantage of the Pyth's price correction mechanism. For example, if the futures price is below the target, you can buy the futures tokens now, wait for the price to correct to the target (higher), then sell the tokens at the higher price. To avoid exposure to the asset, you can simultaneously short the underlying asset on other markets.  Risks: a futures token might lose its peg (see above) and the price never corrects.
+      </div>
+      <div>
+        <b>Trading fees.</b> Buy the governance tokens of a futures set and just hold them. Part of the collected trading fees goes to the governance token holders by increasing the price of their token after each trade. To earn more, stake these tokens in <RouterLink :to="`/governance`">governance</RouterLink> to get a share of the other part of the trading fees which goes to stakers. This part is distributed among stakers in proportion to their VP, so you gain more by locking your governance tokens for a longer term. Risks: 1) governance tokens are inherently volatile; 2) they might significantly depreciate if the price of one of the futures assets grows too fast relative to the price of the reserve asset.
       </div>
     </div>
     <div class="card bg-base-200 shadow-xl mb-4 p-6 sm:p-8">
