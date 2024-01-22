@@ -637,7 +637,6 @@ p {
 
 .card > div {
   @apply my-2;
-  font-weight: 300;
 }
 
 h2 {
