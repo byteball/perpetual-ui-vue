@@ -27,6 +27,10 @@ body {
   font-weight: 200;
 }
 
+b {
+  font-weight: bold;
+}
+
 .form {
   padding: 24px 8px 8px 8px;
 }
