@@ -646,8 +646,4 @@ h2 {
 ul {
   @apply ml-4 list-disc list-inside;
 }
-
-b {
-  font-weight: 900;
-}
 </style>
