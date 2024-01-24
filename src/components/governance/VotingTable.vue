@@ -29,6 +29,7 @@ defineEmits(["voteFromTable"]);
             v-if="type === 'address'"
             class="link text-sky-500 link-hover block sm:inline-block text-xs sm:text-sm"
             target="_blank"
+            rel="noopener"
             :href="fullExplorerUrlForAddress + v.value"
           >
             {{ v.value }}

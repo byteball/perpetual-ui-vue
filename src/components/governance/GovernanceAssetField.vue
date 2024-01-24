@@ -23,6 +23,7 @@ defineProps([
       class="link text-sky-500 link-hover font-light text-sm"
       :href="valueLink"
       target="_blank"
+      rel="noopener"
       >{{ value }}</a
     >
     <span v-else>{{ value }}</span>
@@ -32,6 +33,7 @@ defineProps([
       (<a
         class="link text-sky-500 link-hover font-light"
         target="_blank"
+        rel="noopener"
         :href="subValueLink"
         >{{ subValue }}</a
       >)

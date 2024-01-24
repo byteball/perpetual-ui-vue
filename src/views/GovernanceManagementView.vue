@@ -412,6 +412,7 @@ watch(
             <a
               :href="fullExplorerUrlForAddress + preparedMeta.reservePriceAA"
               target="_blank"
+              rel="noopener"
               class="link text-sky-500 link-hover"
               >{{ preparedMeta.reservePriceAA }}</a
             >&nbsp;

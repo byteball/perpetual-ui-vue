@@ -39,6 +39,7 @@ defineProps(["preparedMeta"]);
           <a
             :href="fullExplorerUrlForAddress + preparedMeta.reservePriceAA"
             target="_blank"
+            rel="noopener"
             class="link text-sky-500 link-hover font-light text-sm"
             >{{ preparedMeta.reservePriceAA }}</a
           >&nbsp;<span class="inline-flex text-sm">

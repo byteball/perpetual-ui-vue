@@ -112,7 +112,7 @@ const links = [
     </aside>
     <aside>
       <p class="text-sm">
-        Copyright © 2023 <a href="https://obyte.org" target="_blank">Obyte</a>,
+        Copyright © 2024 <a href="https://obyte.org" target="_blank" rel="noopener">Obyte</a>,
         all rights reserved
       </p>
     </aside>

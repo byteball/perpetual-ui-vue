@@ -264,6 +264,7 @@ watch(
       <a
         class="link text-sky-500 link-hover"
         target="_blank"
+        rel="noopener"
         :href="fullExplorerUrlForAddress + reservePriceAA"
         >{{ reservePriceAA }}</a
       >

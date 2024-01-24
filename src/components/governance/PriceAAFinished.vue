@@ -108,6 +108,7 @@ onMounted(async () => {
         <span class="font-light text-sm">
           <a
             target="_blank"
+            rel="noopener"
             :href="fullExplorerUrlForAsset + asset"
             class="link link-hover text-sky-500"
             >{{ asset }}</a
@@ -179,6 +180,7 @@ onMounted(async () => {
             <a
               :href="fullExplorerUrlForAddress + priceAa"
               target="_blank"
+              rel="noopener"
               class="link text-sky-500 link-hover"
               >{{ priceAa }}</a
             >
