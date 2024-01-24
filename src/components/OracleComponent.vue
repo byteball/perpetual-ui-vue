@@ -3,6 +3,7 @@ import { ref, watch } from "vue";
 import TextInput from "@/components/inputs/TextInput.vue";
 import AutocompleteComponent from "@/components/AutocompleteComponent.vue";
 import feedNamesByOracle from "@/feedNamesByOracle";
+import { ADDRESSES } from "@/config";
 
 import {
   getAssetBySymbol,
@@ -15,7 +16,7 @@ import debounce from "lodash.debounce";
 const props = defineProps(["symbol", "withoutMetadata", "bigMargin"]);
 const emit = defineEmits(["dataUpdated"]);
 
-const oracleAddress = ref("F4KHJUCLJKY4JV7M5F754LAJX4EB7M4N");
+const oracleAddress = ref(ADDRESSES.default_oracle);
 const addressIsValid = ref(false);
 const dataFeed = ref("");
 

@@ -12,6 +12,7 @@ import emitter from "@/services/emitter";
 import TooltipComponent from "@/components/TooltipComponent.vue";
 import NumberInput from "@/components/inputs/NumberInput.vue";
 import OracleComponent from "@/components/OracleComponent.vue";
+import { ADDRESSES } from "@/config";
 
 let intervalId = 0;
 const step = ref(1);
@@ -297,8 +298,7 @@ onBeforeRouteLeave(() => {
                     Current value:
                     <span
                       v-if="
-                        oracleResult.oracleAddress ===
-                        'F4KHJUCLJKY4JV7M5F754LAJX4EB7M4N'
+                        oracleResult.oracleAddress === ADDRESSES.default_oracle
                       "
                       >${{ +oracleResult.value.toFixed(2) }}</span
                     >

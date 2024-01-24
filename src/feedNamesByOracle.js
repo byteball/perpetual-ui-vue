@@ -1,5 +1,7 @@
+import { ADDRESSES } from "@/config";
+
 export default {
-  F4KHJUCLJKY4JV7M5F754LAJX4EB7M4N: [
+  [ADDRESSES.default_oracle]: [
     "BTC_USD",
     "1INCH_USD",
     "AAVE_USD",

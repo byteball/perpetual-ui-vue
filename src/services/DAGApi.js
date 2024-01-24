@@ -158,7 +158,7 @@ export async function getOracleData(priceAA) {
   const { oracle, feed_name } = definition[1].params;
   let name = feed_name;
   let value = await getDataFeed(oracle, feed_name);
-  if (oracle === "F4KHJUCLJKY4JV7M5F754LAJX4EB7M4N") {
+  if (oracle === ADDRESSES.default_oracle) {
     name = name.split("_")[0];
     value = +value.toFixed(2);
   }
