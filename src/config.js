@@ -6,6 +6,7 @@ const factory_aa = import.meta.env.VITE_FACTORY_AA;
 const reserve_price_usd = import.meta.env.VITE_RESERVE_PRICE_USD;
 const reserve_price_oswap = import.meta.env.VITE_RESERVE_PRICE_OSWAP;
 const registry_aa = import.meta.env.VITE_REGISTRY_AA;
+const default_oracle = import.meta.env.VITE_DEFAULT_ORACLE;
 
 export const ADDRESSES = {
   base_aas,
@@ -14,6 +15,7 @@ export const ADDRESSES = {
   reserve_price_usd,
   reserve_price_oswap,
   registry_aa,
+  default_oracle,
 };
 
 export const network = import.meta.env.VITE_NETWORK || "mainnet";
