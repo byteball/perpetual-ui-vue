@@ -1,0 +1,23 @@
+{
+  "version": "1.0",
+  "description": "Pythagorean perpetual futures factory",
+  "homepage_url": "https://pyth.ooo",
+  "source_url": "https://github.com/byteball/perpetual-aa",
+  "field_descriptions": {
+    "reserve_asset": "Reserve asset of the new futures set",
+    "reserve_price_aa": "Price AA of the reserve asset",
+    "swap_fee": "Swap fee",
+    "arb_profit_tax": "Arbitrageur profit tax",
+    "stakers_fee_share": "Share of the fees that goes to stakers",
+    "adjustment_period": "Price adjustment period",
+    "presale_period": "Presale period",
+    "auction_price_halving_period": "Action price halving period in pre-IPOs",
+    "token_share_threshold": "Max share of the new asset out of all assets",
+    "min_s0_share": "Min share of the governance asset",
+    "max_drift_rate": "Max allowed drift rate",
+    "challenging_period": "Challenging period in governance",
+    "max_term": "Max locking term",
+    "min_term": "Min locking term",
+    "decay_factor": "Decay factor of VP"
+  }
+}

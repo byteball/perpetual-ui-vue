@@ -1,0 +1,17 @@
+{
+  "version": "1.0",
+  "description": "Pythagorean perpetual futures",
+  "homepage_url": "https://pyth.ooo",
+  "source_url": "https://github.com/byteball/perpetual-aa",
+  "field_descriptions": {
+    "define": "Define the governance asset",
+    "asset": "Asset to buy or sell",
+    "to": "Address to send tokens to",
+    "claim": "Claim asset from a completed presale",
+    "presale": "Buy asset on a presale",
+    "withdraw_amount": "Amount to withdraw from a presale",
+    "min_reserve_tokens": "Minimum amount to receive from selling tokens",
+    "max_fee_percent": "Max acceptable fee %",
+    "hops": "Where to send the output tokens to"
+  }
+}
