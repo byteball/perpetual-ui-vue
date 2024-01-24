@@ -230,7 +230,7 @@ onMounted(async () => {
           {{ "presale" }}
         </span>
         <span v-else class="font-light text-sm">
-          voting is completed, but need register symbol
+          voting is completed, but need to register a symbol
         </span>
       </div>
       <div
