@@ -2,7 +2,11 @@
 import { onBeforeMount, onMounted, ref } from "vue";
 import { storeToRefs } from "pinia";
 import { getOracleData } from "@/services/DAGApi";
-import { generateAndFollowLinkForVoteAddPriceAA } from "@/utils/generateLink";
+import {
+  followLink,
+  generateAndFollowLinkForVoteAddPriceAA,
+  generateLink,
+} from "@/utils/generateLink";
 import LinkIcon from "@/components/icons/LinkIcon.vue";
 import VoteBlockForPriceAA from "@/components/governance/VoteBlockForPriceAA.vue";
 import { fullExplorerUrlForAddress, fullExplorerUrlForAsset } from "@/config";
@@ -10,6 +14,9 @@ import { getParam } from "@/utils/governanceUtils";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import dayjs from "dayjs";
 import { useAddressStore } from "@/stores/addressStore";
+import duration from "dayjs/plugin/duration";
+
+dayjs.extend(duration);
 
 const props = defineProps([
   "perpetualAa",
@@ -59,9 +66,8 @@ function setPresaleData() {
   const currentPresaleAmount =
     meta.value[aa][`asset_${props.asset}`].presale_amount;
 
-  const finishDate = dayjs((presaleAssetIssue + presalePeriod) * 1000).format(
-    "MMMM D, YYYY HH:mm"
-  );
+  const finishDateRaw = dayjs((presaleAssetIssue + presalePeriod) * 1000);
+  const finishDate = finishDateRaw.format("MMMM D, YYYY HH:mm");
   const targetPresaleAmount = tokenShareThreshold * reserve;
 
   let contributionAmount = 0;
@@ -75,7 +81,12 @@ function setPresaleData() {
       contributionAmount / 10 ** props.reserveAssetMeta.decimals;
   }
 
+  const isPresaleFinished =
+    targetPresaleAmount < currentPresaleAmount ||
+    finishDateRaw.diff(dayjs()) < 0;
+
   presaleData.value = {
+    isPresaleFinished,
     finishDate,
     currentAmount: currentPresaleAmount / 10 ** props.reserveAssetMeta.decimals,
     targetAmount: targetPresaleAmount / 10 ** props.reserveAssetMeta.decimals,
@@ -83,6 +94,15 @@ function setPresaleData() {
     contributionAmount,
   };
 }
+
+const openClaimLink = (presaleAsset, aa) => {
+  const data = {
+    asset: presaleAsset,
+    claim: 1,
+  };
+
+  followLink(generateLink(10000, data, null, aa, "base", true));
+};
 
 onBeforeMount(() => {
   if (props.assetMeta.presale) {
@@ -198,7 +218,10 @@ onMounted(async () => {
             {{ selectedOracleData.value }}
           </div>
         </div>
-        <div class="font-medium text-sm mb-1">
+        <div
+          class="font-medium text-sm mb-1"
+          v-if="!presaleData.isPresaleFinished"
+        >
           Presale ends on:
           <div class="font-light text-sm inline-block">
             {{ presaleData.finishDate }}
@@ -227,7 +250,16 @@ onMounted(async () => {
       <div class="font-medium text-sm mb-2 mt-4">
         Status:
         <span v-if="assetMeta.assetMetaData" class="font-light text-sm">
-          {{ "presale" }}
+          <template v-if="!presaleData.isPresaleFinished">
+            {{ "presale" }}
+          </template>
+          <template v-else>
+            {{
+              presaleData.contributionAmount
+                ? "finished, available for claim"
+                : "finished, available for purchase"
+            }}
+          </template>
         </span>
         <span v-else class="font-light text-sm">
           voting is completed, but need to register a symbol
@@ -254,18 +286,36 @@ onMounted(async () => {
           <LinkIcon />
           Vote for add
         </button>
-        <RouterLink
+        <template
           v-if="
             assetMeta.assetMetaData?.name &&
             assetMeta.metaByPriceAA.result === 'yes' &&
             assetMeta.presale
           "
-          class="btn btn-sm gap-2 mt-4"
-          :to="`/presale/${asset}`"
         >
-          <LinkIcon />
-          Buy on presale
-        </RouterLink>
+          <RouterLink
+            class="btn btn-sm gap-2 mt-4"
+            :to="`/presale/${asset}`"
+            v-if="!presaleData.isPresaleFinished"
+          >
+            <LinkIcon />
+            Buy on presale
+          </RouterLink>
+          <a
+            v-else-if="
+              presaleData.isPresaleFinished && presaleData.contributionAmount
+            "
+            class="btn btn-sm gap-2 mt-4"
+            @click="openClaimLink(asset, perpetualAa)"
+          >
+            <LinkIcon />
+            Claim
+          </a>
+          <RouterLink class="btn btn-sm gap-2 mt-4" :to="'/'" v-else>
+            <LinkIcon />
+            Open market
+          </RouterLink>
+        </template>
       </div>
     </div>
   </div>
