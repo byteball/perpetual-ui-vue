@@ -470,7 +470,13 @@ watch(
                   ),
                 }"
                 class="ml-1"
-              />: {{ preparedMeta.rewardBalance }}
+              />:
+              {{
+                +(
+                  preparedMeta.rewardBalance /
+                  10 ** preparedMeta.reserveAsset.decimals
+                ).toPrecision(6)
+              }}
               {{ preparedMeta.reserveAsset.name }} (${{
                 preparedMeta.rewardBalanceInUsd
               }})
