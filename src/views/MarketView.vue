@@ -47,8 +47,6 @@ const metaByActiveAA = ref();
 const modalForAsset1 = ref();
 const modalForAsset2 = ref();
 const searchAsset1 = ref("");
-const targetAsset = ref("");
-const targetAssetName = ref("");
 
 const balanceByAsset = computed(() => {
   if (!asset1.value) return 0;
@@ -68,6 +66,8 @@ const link = ref("");
 const feeInPercent = ref(0);
 const newPrice = ref(0);
 const targetPrice = ref(0);
+const targetAsset = ref("");
+const targetAssetName = ref("");
 const diff = ref("");
 const nameAssetForPrice = ref("");
 
@@ -265,7 +265,6 @@ async function getAssetNameFromPriceAA(priceAA) {
   return name;
 }
 async function setTargetAsset() {
-  console.log("qq");
   let asset = "";
 
   const isAsset1Actual =
