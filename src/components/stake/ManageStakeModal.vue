@@ -332,7 +332,7 @@ onMounted(() => {
                 {{ amount.error }}
               </span>
             </div>
-            <div class="form-control mt-2">
+            <div class="form-control mt-4">
               <label class="label">
                 <span class="label-text"
                   >Term, in days. Longer term gives you more voting power in
@@ -350,7 +350,7 @@ onMounted(() => {
               >
                 {{ term.error }}
               </span>
-              <div v-if="term.value" class="mt-2 text-sm">
+              <div v-if="term.value" class="mt-2 text-sm text-gray-500">
                 Will be locked until
                 {{ dayjs().add(term.value, "day").format("DD MMM YYYY HH:mm") }}
                 (this applies to the previously locked tokens too)

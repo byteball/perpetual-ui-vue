@@ -133,6 +133,7 @@ export async function getPreparedMeta(
     stakeBalance,
     reservePriceAA,
     reservePriceInUsd: reservePrice,
+    rewardBalance,
     rewardBalanceInUsd,
     reservePriceValue,
     reserve,

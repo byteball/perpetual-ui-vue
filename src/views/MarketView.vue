@@ -24,6 +24,7 @@ import {
 } from "@/services/PerpAPI";
 import FeeViewComponent from "@/components/FeeViewComponent.vue";
 import { adjustPrices } from "@/utils/adjustPrices";
+import { getOracleData } from "@/services/DAGApi";
 
 const store = useAaInfoStore();
 const { aas, meta, status } = storeToRefs(store);
@@ -46,6 +47,8 @@ const metaByActiveAA = ref();
 const modalForAsset1 = ref();
 const modalForAsset2 = ref();
 const searchAsset1 = ref("");
+const targetAsset = ref("");
+const targetAssetName = ref("");
 
 const balanceByAsset = computed(() => {
   if (!asset1.value) return 0;
@@ -65,7 +68,6 @@ const link = ref("");
 const feeInPercent = ref(0);
 const newPrice = ref(0);
 const targetPrice = ref(0);
-const targetAsset = ref("");
 const diff = ref("");
 const nameAssetForPrice = ref("");
 
@@ -111,10 +113,6 @@ function asset1Handler() {
 
 function asset2Handler() {
   metaByActiveAA.value = meta.value[pairedAssets.value[asset2.value]];
-
-  if (asset1.value) {
-    calcAndSetDataForMetaAndLink();
-  }
 }
 
 function setAmount1ByBalance() {
@@ -255,25 +253,47 @@ async function calcDataForSell() {
   };
 }
 
-function setTargetAsset() {
-  targetAsset.value = "";
+const cacheForAssetName = {};
+
+async function getAssetNameFromPriceAA(priceAA) {
+  if (cacheForAssetName[priceAA]) {
+    return cacheForAssetName[priceAA];
+  }
+
+  const { name } = await getOracleData(priceAA);
+  cacheForAssetName[priceAA] = name;
+  return name;
+}
+async function setTargetAsset() {
+  console.log("qq");
+  let asset = "";
 
   const isAsset1Actual =
     asset1.value !== metaByActiveAA.value.reserve_asset &&
     asset1.value !== metaByActiveAA.value.state.asset0;
 
   if (isAsset1Actual) {
-    targetAsset.value = asset1.value;
+    asset = asset1.value;
+  } else {
+    const isAsset2Actual =
+      asset2.value !== metaByActiveAA.value.reserve_asset &&
+      asset2.value !== metaByActiveAA.value.state.asset0;
+
+    if (isAsset2Actual) {
+      asset = asset2.value;
+    }
+  }
+
+  if (asset) {
+    const priceAA = metaByActiveAA.value[`asset_${asset}`].price_aa;
+    const name = await getAssetNameFromPriceAA(priceAA);
+    targetAsset.value = asset;
+    targetAssetName.value = name;
     return;
   }
 
-  const isAsset2Actual =
-    asset2.value !== metaByActiveAA.value.reserve_asset &&
-    asset2.value !== metaByActiveAA.value.state.asset0;
-
-  if (isAsset2Actual) {
-    targetAsset.value = asset2.value;
-  }
+  targetAsset.value = "";
+  targetAssetName.value = "";
 }
 
 async function calcAndSetDataForMetaAndLink() {
@@ -342,8 +362,6 @@ async function calcAndSetDataForMetaAndLink() {
 
   targetPrice.value = 0;
 
-  setTargetAsset();
-
   const rawTargetPrice = targetAsset.value
     ? await getTargetPriceByPresaleAsset(
         metaByActiveAA.value.aa,
@@ -404,6 +422,11 @@ watch(status, initSelectedAA);
 
 watch(asset1, asset1Handler);
 watch(asset2, asset2Handler);
+watch([asset1, asset2], async () => {
+  if (!asset1.value || !asset2.value) return;
+  await setTargetAsset();
+  calcAndSetDataForMetaAndLink();
+});
 watch(
   [asset1Amount, asset2Amount, balanceByAsset],
   calcAndSetDataForMetaAndLink
@@ -547,7 +570,7 @@ watch(meta, asset2Handler, { deep: true });
             <div v-if="targetPrice">Target price: ${{ targetPrice }}</div>
             <div v-if="targetPrice">
               Target asset:
-              {{ assets.nameAndDecimalsByAsset[targetAsset].name }}
+              {{ targetAssetName }}
             </div>
             <div></div>
           </div>
