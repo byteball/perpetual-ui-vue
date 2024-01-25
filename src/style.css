@@ -35,6 +35,10 @@ b {
   padding: 24px 8px 8px 8px;
 }
 
+.label-text {
+  @apply text-gray-100;
+}
+
 #app {
   position: absolute;
   min-height: 100%;

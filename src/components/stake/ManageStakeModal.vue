@@ -350,7 +350,7 @@ onMounted(() => {
               >
                 {{ term.error }}
               </span>
-              <div v-if="term.value" class="mt-2 text-sm text-gray-500">
+              <div v-if="term.value" class="mt-2 text-sm text-gray-400">
                 Will be locked until
                 {{ dayjs().add(term.value, "day").format("DD MMM YYYY HH:mm") }}
                 (this applies to the previously locked tokens too)
