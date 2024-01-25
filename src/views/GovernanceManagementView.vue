@@ -470,7 +470,10 @@ watch(
                   ),
                 }"
                 class="ml-1"
-              />: ${{ preparedMeta.rewardBalanceInUsd }}
+              />: {{ preparedMeta.rewardBalance }}
+              {{ preparedMeta.reserveAsset.name }} (${{
+                preparedMeta.rewardBalanceInUsd
+              }})
               <a
                 v-if="preparedMeta.rewardBalanceInUsd > 0"
                 class="link link-hover text-sky-500 ml-2"

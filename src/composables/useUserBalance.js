@@ -19,8 +19,7 @@ export function useUserBalance(address) {
     }
 
     if (b) {
-      balance.value = b;
-      balance.value = b[address.value];
+      balance.value = b[address.value] || {};
     }
     balanceIsLoaded.value = true;
   }
