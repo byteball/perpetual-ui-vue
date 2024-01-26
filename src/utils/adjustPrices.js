@@ -21,7 +21,7 @@ export const adjustPrices = async (asset, asset_info, state, varsAndParams) => {
   const timestamp = Math.floor(Date.now() / 1000);
   if (state.asset0 === asset) return;
 
-  const elapsed = timestamp - asset_info.last_ts;
+  const elapsed = timestamp - (asset_info.last_ts || 0);
   let target_price, price_aa, new_reserve;
   asset_info.last_ts = timestamp;
 

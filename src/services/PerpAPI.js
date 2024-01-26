@@ -6,6 +6,7 @@ import {
 } from "@/services/DAGApi";
 import { small_pow } from "@/utils/smallPow";
 import { adjustPrices } from "@/utils/adjustPrices";
+import { cloneProxyToRaw } from "@/utils/cloneProxyToRaw";
 
 export async function getReservePrice(aa) {
   const def = (await getDefinition(aa)).definition;
@@ -78,10 +79,10 @@ export async function getPriceByAssets(aa, assets, varsAndParams) {
   const priceByAsset = {};
 
   for (let asset of assets) {
-    const state = { ..._state };
+    const state = cloneProxyToRaw(_state);
     const bAsset0 = state.asset0 === asset;
-    const assetInfo = vars["asset_" + asset];
-    await adjustPrices(asset, assetInfo, state, varsAndParams);
+    const assetInfo = cloneProxyToRaw(vars["asset_" + asset]);
+    await adjustPrices(asset, assetInfo, state, cloneProxyToRaw(varsAndParams));
     if (!bAsset0 && !assetInfo) continue;
 
     const r = state.reserve;
@@ -106,14 +107,16 @@ export async function getPriceByData(
   assetInfo,
   varsAndParams
 ) {
-  const _state = { ...state };
-  const bAsset0 = _state.asset0 === asset;
-  await adjustPrices(asset, assetInfo, _state, varsAndParams);
-  const r = _state.reserve;
+  state = cloneProxyToRaw(state);
+  assetInfo = cloneProxyToRaw(assetInfo);
+  varsAndParams = cloneProxyToRaw(varsAndParams);
+  const bAsset0 = state.asset0 === asset;
+  await adjustPrices(asset, assetInfo, state, varsAndParams);
+  const r = state.reserve;
   if (!r) return 0;
 
-  const c = _state.coef;
-  const s = bAsset0 ? _state.s0 : assetInfo.supply;
-  const a = bAsset0 ? _state.a0 : assetInfo.a;
+  const c = state.coef;
+  const s = bAsset0 ? state.s0 : assetInfo.supply;
+  const a = bAsset0 ? state.a0 : assetInfo.a;
   return (c * c * a * s) / r;
 }

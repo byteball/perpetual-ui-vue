@@ -330,9 +330,9 @@ export const getExchangeResultByState = (
     state.total_staker_fees = 0;
   }
 
-  state.total_staker_fees = new Decimal(state.total_staker_fees).plus(
-    stakerFee
-  );
+  state.total_staker_fees = new Decimal(state.total_staker_fees)
+    .plus(stakerFee)
+    .toNumber();
 
   const timestamp = Math.floor(Date.now() / 1000);
   if (bAsset0) {
