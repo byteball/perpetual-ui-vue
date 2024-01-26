@@ -25,6 +25,7 @@ import {
 import FeeViewComponent from "@/components/FeeViewComponent.vue";
 import { adjustPrices } from "@/utils/adjustPrices";
 import { getOracleData } from "@/services/DAGApi";
+import { cloneProxyToRaw } from "@/utils/cloneProxyToRaw";
 
 const store = useAaInfoStore();
 const { aas, meta, status } = storeToRefs(store);
@@ -179,14 +180,19 @@ async function calcDataForBuy() {
     true
   );
 
-  const s = { ...state };
+  const s = cloneProxyToRaw(state);
   const assetInfo =
     asset2.value === asset0
       ? null
-      : { ...getAssetInfoFromMeta(asset2.value, aa, meta.value) };
+      : cloneProxyToRaw(getAssetInfoFromMeta(asset2.value, aa, meta.value));
 
   if (asset2.value !== state.asset0) {
-    await adjustPrices(asset2.value, assetInfo, s, metaByActiveAA.value);
+    await adjustPrices(
+      asset2.value,
+      assetInfo,
+      s,
+      cloneProxyToRaw(metaByActiveAA.value)
+    );
   }
 
   const r = getExchangeResultByState(
@@ -195,7 +201,7 @@ async function calcDataForBuy() {
     asset2.value,
     assetInfo,
     s,
-    metaByActiveAA.value
+    cloneProxyToRaw(metaByActiveAA.value)
   );
 
   if (isNaN(r.delta_s)) {
@@ -227,11 +233,16 @@ async function calcDataForSell() {
   const assetInfo =
     asset1.value === asset0
       ? null
-      : { ...getAssetInfoFromMeta(asset1.value, aa, meta.value) };
-  const s = { ...state };
+      : cloneProxyToRaw(getAssetInfoFromMeta(asset1.value, aa, meta.value));
+  const s = cloneProxyToRaw(state);
 
-  if (asset2.value !== state.asset0) {
-    await adjustPrices(asset2.value, assetInfo, s, metaByActiveAA.value);
+  if (asset1.value !== state.asset0) {
+    await adjustPrices(
+      asset1.value,
+      assetInfo,
+      s,
+      cloneProxyToRaw(metaByActiveAA.value)
+    );
   }
 
   const r = getExchangeResultByState(
@@ -240,7 +251,7 @@ async function calcDataForSell() {
     asset1.value,
     assetInfo,
     s,
-    metaByActiveAA.value
+    cloneProxyToRaw(metaByActiveAA.value)
   );
 
   if (r.payout === undefined || isNaN(r.payout)) {
@@ -297,7 +308,7 @@ async function setTargetAsset() {
 
 async function calcAndSetDataForMetaAndLink() {
   if (!asset1.value || !asset2.value || !balanceIsLoaded.value) return;
-
+  const metaByActiveAAClone = cloneProxyToRaw(metaByActiveAA.value);
   resultError.value = "";
 
   if (
@@ -312,7 +323,7 @@ async function calcAndSetDataForMetaAndLink() {
   let data;
   let assetForPrice = "";
   let assetAmount = 0;
-  if (metaByActiveAA.value.reserve_asset === asset1.value) {
+  if (metaByActiveAAClone.reserve_asset === asset1.value) {
     assetForPrice = asset2.value;
     data = await calcDataForBuy();
     assetAmount =
@@ -331,20 +342,20 @@ async function calcAndSetDataForMetaAndLink() {
     return;
   }
 
-  const reservePriceAa = metaByActiveAA.value.reserve_price_aa;
+  const reservePriceAa = metaByActiveAAClone.reserve_price_aa;
   const reservePrice = await getReservePrice(reservePriceAa);
   const r = await getPriceByAssets(
-    metaByActiveAA.value.aa,
+    metaByActiveAAClone.aa,
     [assetForPrice],
-    metaByActiveAA.value
+    metaByActiveAAClone
   );
   const oldPrice = r[assetForPrice];
   const price = await getPriceByData(
-    metaByActiveAA.value.aa,
+    metaByActiveAAClone.aa,
     assetForPrice,
     data.result.state,
-    { ...data.result.asset_info },
-    metaByActiveAA.value
+    cloneProxyToRaw(data.result.asset_info),
+    metaByActiveAAClone
   );
 
   const d = ((price - oldPrice) / oldPrice) * 100;
@@ -363,7 +374,7 @@ async function calcAndSetDataForMetaAndLink() {
 
   const rawTargetPrice = targetAsset.value
     ? await getTargetPriceByPresaleAsset(
-        metaByActiveAA.value.aa,
+        metaByActiveAAClone.aa,
         targetAsset.value,
         true
       )
