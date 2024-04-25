@@ -116,10 +116,19 @@ function asset1Handler() {
     asset1.value,
     assets.value.assetsByAA
   );
+  findAndSetActiveAA(pairedAssets.value);
 }
 
 function asset2Handler() {
   metaByActiveAA.value = meta.value[pairedAssets.value[asset2.value]];
+}
+
+function findAndSetActiveAA(pairedAssets) {
+  const keys = Object.keys(pairedAssets);
+  if (Object.keys(pairedAssets).length === 1) {
+    const aa = pairedAssets[keys[0]];
+    metaByActiveAA.value = meta.value[aa];
+  }
 }
 
 function setAmount1ByBalance() {
@@ -449,6 +458,21 @@ watch([asset1, asset2], async () => {
   await setTargetAsset();
   calcAndSetDataForMetaAndLink();
 });
+watch([asset1, asset2, metaByActiveAA], () => {
+  if (!metaByActiveAA.value) return;
+
+  if (asset1.value && metaByActiveAA.value.reserve_asset !== asset1.value) {
+    assetForPriceRef.value = asset1.value;
+    return;
+  }
+
+  if (asset2.value && metaByActiveAA.value.reserve_asset !== asset2.value) {
+    assetForPriceRef.value = asset2.value;
+    return;
+  }
+
+  assetForPriceRef.value = false;
+});
 watch(
   [asset1Amount, asset2Amount, balanceByAsset],
   calcAndSetDataForMetaAndLink
@@ -502,7 +526,7 @@ watch([assetForPriceRef, chartPeriod], async () => {
                   {{
                     assetForPriceRef
                       ? assets.nameAndDecimalsByAsset[assetForPriceRef].name
-                      : "-"
+                      : "Select asset"
                   }}
                 </div>
                 <div class="mt-2.5">
