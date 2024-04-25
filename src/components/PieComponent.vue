@@ -1,19 +1,8 @@
 <script setup>
-import {
-  Chart as ChartJS,
-  ArcElement,
-  Tooltip,
-  Legend,
-  Colors,
-} from "chart.js";
-import { Pie } from "vue-chartjs";
-import ChartDataLabels from "chartjs-plugin-datalabels";
 import { computed } from "vue";
+import { Pie } from "vue-chartjs";
 
 const props = defineProps(["data"]);
-
-ChartJS.register(ArcElement, Tooltip, Legend, Colors, ChartDataLabels);
-ChartJS.defaults.color = "#e2e8f0";
 
 const dataRef = computed(() => {
   const ls = [];

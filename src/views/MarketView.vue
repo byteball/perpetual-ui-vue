@@ -4,10 +4,10 @@ import { storeToRefs } from "pinia";
 import { event } from "vue-gtag";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import {
-  getAssetsFromMeta,
-  getPairedAssetsByAsset,
   getAssetInfoFromMeta,
+  getAssetsFromMeta,
   getAssetsOnlyWithSymbolsAndDecimals,
+  getPairedAssetsByAsset,
 } from "@/utils/assetsUtils";
 import { useAddressStore } from "@/stores/addressStore";
 import { useUserBalance } from "@/composables/useUserBalance";
@@ -23,9 +23,11 @@ import {
   getTargetPriceByPresaleAsset,
 } from "@/services/PerpAPI";
 import FeeViewComponent from "@/components/FeeViewComponent.vue";
+import LineChartComponent from "@/components/LineChartComponent.vue";
 import { adjustPrices } from "@/utils/adjustPrices";
 import { getOracleData } from "@/services/DAGApi";
 import { cloneProxyToRaw } from "@/utils/cloneProxyToRaw";
+import { statsUrl } from "@/config";
 
 const store = useAaInfoStore();
 const { aas, meta, status } = storeToRefs(store);
@@ -33,6 +35,8 @@ const addressStore = useAddressStore();
 const { address } = storeToRefs(addressStore);
 
 const { balance, balanceIsLoaded } = useUserBalance(address);
+
+const line = ref([]);
 
 const assets = ref({
   assetList: [],
@@ -71,6 +75,8 @@ const targetAsset = ref("");
 const targetAssetName = ref("");
 const diff = ref("");
 const nameAssetForPrice = ref("");
+const assetForPriceRef = ref("");
+const chartPeriod = ref("1W");
 
 const resultError = ref("");
 
@@ -337,6 +343,8 @@ async function calcAndSetDataForMetaAndLink() {
       10 ** assets.value.nameAndDecimalsByAsset[asset2.value].decimals;
   }
 
+  assetForPriceRef.value = assetForPrice;
+
   if (data.result.error) {
     resultError.value = data.result.error;
     return;
@@ -419,6 +427,10 @@ function buyEvent() {
   });
 }
 
+function setPeriod(period) {
+  chartPeriod.value = period;
+}
+
 onMounted(() => {
   initSelectedAA();
   window.addEventListener("keydown", keyDownHandler);
@@ -442,6 +454,20 @@ watch(
   calcAndSetDataForMetaAndLink
 );
 watch(meta, asset2Handler, { deep: true });
+
+watch([assetForPriceRef, chartPeriod], async () => {
+  line.value = [];
+  const period = chartPeriod.value === "1W" ? "lastWeek" : "lastMonth";
+  const res = await fetch(
+    `https://${statsUrl}/${period}?asset=` + assetForPriceRef.value
+  );
+
+  try {
+    line.value = await res.json();
+  } catch (e) {
+    line.value = [];
+  }
+});
 </script>
 <style>
 .disabled-card-input {
@@ -449,7 +475,7 @@ watch(meta, asset2Handler, { deep: true });
 }
 </style>
 <template>
-  <div class="container w-full sm:w-[512px] m-auto mt-2 p-6 sm:p-8">
+  <div class="container w-full sm:w-[1000px] m-auto mt-2 p-6 sm:p-8">
     <div class="p-2 mb-6">
       <h1 class="text-2xl font-bold leading-8">Trade Decentralized Futures</h1>
       <div class="mt-2 leading-6">
@@ -465,136 +491,180 @@ watch(meta, asset2Handler, { deep: true });
         <div v-if="!assets.assetList.length" class="text-center">
           <Loading />
         </div>
-        <div class="form-control" v-if="assets.assetList.length">
-          <label class="label">
-            <span class="label-text"
-              >You pay
-              <template v-if="balanceByAsset > 0">
-                <a class="link link-hover text-sky-500" @click="setMyBalance"
-                  >(Balance: {{ formattedBalanceByAsset }})</a
-                ></template
-              ></span
+        <div
+          v-if="assets.assetList.length"
+          class="flex flex-col items-center lg:items-start lg:flex-row"
+        >
+          <div class="block w-full lg:w-1 lg:flex-auto">
+            <div class="mb-4 flex justify-between">
+              <div>
+                <div class="text-2xl">
+                  {{
+                    assetForPriceRef
+                      ? assets.nameAndDecimalsByAsset[assetForPriceRef].name
+                      : "-"
+                  }}
+                </div>
+                <div class="mt-2.5">
+                  <span v-if="line.length"
+                    >${{ line[line.length - 1].price.toPrecision(6) }}</span
+                  >
+                  <span v-else>&nbsp;</span>
+                </div>
+              </div>
+              <div class="pt-1.5">
+                <a
+                  class="btn btn-xs"
+                  :class="chartPeriod === '1W' ? 'btn-primary' : ''"
+                  @click="setPeriod('1W')"
+                  >1W</a
+                >&nbsp;
+                <a
+                  class="btn btn-xs"
+                  :class="chartPeriod === '1M' ? 'btn-primary' : ''"
+                  @click="setPeriod('1M')"
+                  >1M</a
+                >
+              </div>
+            </div>
+            <LineChartComponent
+              :period="chartPeriod"
+              :name="assets.nameAndDecimalsByAsset[assetForPriceRef]?.name"
+              :data="line"
+              class="!h-[18rem]"
+            />
+          </div>
+          <div class="form-control ml-6 w-full lg:w-[336px]">
+            <label class="label">
+              <span class="label-text"
+                >You pay
+                <template v-if="balanceByAsset > 0">
+                  <a class="link link-hover text-sky-500" @click="setMyBalance"
+                    >(Balance: {{ formattedBalanceByAsset }})</a
+                  ></template
+                ></span
+              >
+            </label>
+            <div class="join">
+              <NumberInput
+                class="join-item sh-disabled"
+                v-model="asset1Amount"
+                :decimals="assets.nameAndDecimalsByAsset[asset1]?.decimals"
+                :disabled="!asset1"
+              />
+              <label for="asset1Modal" class="btn btn-primary join-item"
+                >{{
+                  asset1
+                    ? assets.nameAndDecimalsByAsset[asset1].name
+                    : "Select asset"
+                }}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="w-5 h-5"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+                  />
+                </svg>
+              </label>
+            </div>
+            <div class="mt-4 flex justify-center">
+              <button @click="swapPair()" class="btn btn-circle swap-btn">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="w-5 h-5"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M3 7.5L7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5"
+                  />
+                </svg>
+              </button>
+            </div>
+            <label class="label">
+              <span class="label-text">You receive</span>
+            </label>
+            <div class="join !border-gray-600">
+              <TextInput
+                class="join-item sh-disabled"
+                placeholder="0"
+                :disabled="!asset2"
+                v-model.number="asset2Amount"
+                readonly
+              />
+              <label
+                for="asset2Modal"
+                class="btn btn-primary border-gray-600 join-item"
+                :class="{ '!btn-disabled': !asset1 }"
+                >{{
+                  asset2
+                    ? assets.nameAndDecimalsByAsset[asset2].name
+                    : "Select asset"
+                }}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="w-5 h-5"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+                  />
+                </svg>
+              </label>
+            </div>
+            <span
+              v-if="resultError"
+              class="flex tracking-wide text-red-500 text-sm mt-2 ml-2"
             >
-          </label>
-          <div class="join">
-            <NumberInput
-              class="join-item sh-disabled"
-              v-model="asset1Amount"
-              :decimals="assets.nameAndDecimalsByAsset[asset1]?.decimals"
-              :disabled="!asset1"
-            />
-            <label for="asset1Modal" class="btn btn-primary join-item"
-              >{{
-                asset1
-                  ? assets.nameAndDecimalsByAsset[asset1].name
-                  : "Select asset"
-              }}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                stroke="currentColor"
-                class="w-5 h-5"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M19.5 8.25l-7.5 7.5-7.5-7.5"
-                />
-              </svg>
-            </label>
-          </div>
-          <div class="mt-4 flex justify-center">
-            <button @click="swapPair()" class="btn btn-circle swap-btn">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                stroke="currentColor"
-                class="w-5 h-5"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M3 7.5L7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5"
-                />
-              </svg>
-            </button>
-          </div>
-          <label class="label">
-            <span class="label-text">You receive</span>
-          </label>
-          <div class="join !border-gray-600">
-            <TextInput
-              class="join-item sh-disabled"
-              placeholder="0"
-              :disabled="!asset2"
-              v-model.number="asset2Amount"
-              readonly
-            />
-            <label
-              for="asset2Modal"
-              class="btn btn-primary border-gray-600 join-item"
-              :class="{ '!btn-disabled': !asset1 }"
-              >{{
-                asset2
-                  ? assets.nameAndDecimalsByAsset[asset2].name
-                  : "Select asset"
-              }}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                stroke="currentColor"
-                class="w-5 h-5"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M19.5 8.25l-7.5 7.5-7.5-7.5"
-                />
-              </svg>
-            </label>
-          </div>
-          <span
-            v-if="resultError"
-            class="flex tracking-wide text-red-500 text-sm mt-2 ml-2"
-          >
-            {{ resultError }}
-          </span>
-          <div v-if="asset2Amount > 0" class="mt-4">
-            <div>Fee: <FeeViewComponent :fee="Number(feeInPercent)" /></div>
-            <div>
-              New price of
-              {{ nameAssetForPrice }}: ${{ newPrice.toPrecision(6) }}
-              <template v-if="isFinite(diff)"
-                >(<FeeViewComponent
-                  :fee="Number(diff)"
-                  :with-diff="true"
-                />)</template
+              {{ resultError }}
+            </span>
+            <div v-if="asset2Amount > 0" class="mt-4">
+              <div>Fee: <FeeViewComponent :fee="Number(feeInPercent)" /></div>
+              <div>
+                New price of
+                {{ nameAssetForPrice }}: ${{ newPrice.toPrecision(6) }}
+                <template v-if="isFinite(diff)"
+                  >(<FeeViewComponent
+                    :fee="Number(diff)"
+                    :with-diff="true"
+                  />)</template
+                >
+              </div>
+              <div v-if="targetPrice">Target price: ${{ targetPrice }}</div>
+              <div v-if="targetPrice">
+                Target asset:
+                {{ targetAssetName }}
+              </div>
+              <div></div>
+            </div>
+            <div class="form-control mt-8 text-center">
+              <a
+                class="btn btn-primary"
+                :href="link"
+                @click="buyEvent"
+                :class="{
+                  '!btn-disabled':
+                    resultError || !link || !(Number(asset2Amount) > 0),
+                }"
+                >Exchange</a
               >
             </div>
-            <div v-if="targetPrice">Target price: ${{ targetPrice }}</div>
-            <div v-if="targetPrice">
-              Target asset:
-              {{ targetAssetName }}
-            </div>
-            <div></div>
-          </div>
-          <div class="form-control mt-8 text-center">
-            <a
-              class="btn btn-primary"
-              :href="link"
-              @click="buyEvent"
-              :class="{
-                '!btn-disabled':
-                  resultError || !link || !(Number(asset2Amount) > 0),
-              }"
-              >Exchange</a
-            >
           </div>
         </div>
       </div>

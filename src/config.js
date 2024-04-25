@@ -33,6 +33,9 @@ export const tokenUrl = `https://${
   network === "mainnet" ? "" : "testnet."
 }tokens.ooo/`;
 
+export const statsUrl =
+  network === "mainnet" ? "pyth.aa-dev.net" : "pyth-t.aa-dev.net";
+
 export const perpDefaults = {
   swap_fee: 0.003,
   arb_profit_tax: 0.9,

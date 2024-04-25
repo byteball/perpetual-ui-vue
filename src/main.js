@@ -3,6 +3,20 @@ import { createPinia } from "pinia";
 import FloatingVue from "floating-vue";
 import VueGtag from "vue-gtag";
 
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Colors,
+  ArcElement,
+} from "chart.js";
+import ChartDataLabels from "chartjs-plugin-datalabels";
+
 import App from "./App.vue";
 import router from "./router";
 
@@ -17,6 +31,20 @@ FloatingVue.options.themes.tooltip.triggers = [
   "focus",
   "touch",
 ];
+
+ChartJS.register(
+  ArcElement,
+  ChartDataLabels,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Colors
+);
+ChartJS.defaults.color = "#e2e8f0";
 
 const app = createApp(App);
 app.use(createPinia());
