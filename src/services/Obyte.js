@@ -7,6 +7,7 @@ import {
 import emitter from "@/services/emitter";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import { ADDRESSES } from "@/config";
+import { getInitData } from "@/services/MetaService";
 
 const aasForWatch = [
   ADDRESSES.factory_aa,
@@ -54,14 +55,12 @@ client.onConnect(async () => {
   const { setAAs, setStatus, setMeta } = store;
 
   if (isFirstConnect) {
-    aas = await getAasCreatedByFactory();
+    const { aas, metaByAA, stakingAAs } = await getInitData();
     setAAs(aas);
 
-    const meta = await getMetaForPerpAAs(aas);
-    const stakeAAs = Object.values(meta).map((v) => v.staking_aa);
-    allPerpAAs = [...aas, ...stakeAAs];
+    allPerpAAs = [...aas, ...stakingAAs];
     setAAs(aas);
-    setMeta(meta);
+    setMeta(metaByAA);
     setStatus("initialized");
     isFirstConnect = false;
   }

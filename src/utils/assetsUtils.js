@@ -1,4 +1,5 @@
-import { executeAAGetter, getAssetMetadataByArray } from "@/services/DAGApi";
+import odapp from "@/services/odapp";
+import { executeAAGetter } from "@/services/DAGApi";
 import { fullExplorerUrlForAsset, fullExplorerUrlForUnit } from "@/config";
 import { getParam } from "@/utils/governanceUtils";
 import dayjs from "dayjs";
@@ -109,7 +110,7 @@ export async function getAssetsOnlyWithSymbolsAndDecimals(assets, meta) {
   const assetsByAA = {};
   const reservePairs = {};
 
-  const metadataByAsset = await getAssetMetadataByArray(assets.assetList);
+  const metadataByAsset = await odapp.getAssetsMetadata(assets.assetList);
   for (let asset in metadataByAsset) {
     nameAndDecimalsByAsset[asset] = metadataByAsset[asset];
     assetList.push(asset);
