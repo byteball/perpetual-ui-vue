@@ -73,10 +73,10 @@ const links = [
 
 <template>
   <footer
-    class="footer footer-center p-10 bg-base-200 text-base-content rounded absolute bottom-0 text-sm gap-y-6"
+    class="absolute bottom-0 p-10 text-sm rounded footer footer-center bg-base-200 text-base-content gap-y-6"
   >
     <nav>
-      <div class="flex justify-center flex-wrap sm:grid grid-flow-col gap-4">
+      <div class="flex flex-wrap justify-center grid-flow-col gap-4 sm:grid">
         <a
           v-for="link in links"
           :key="link.name"
@@ -112,8 +112,7 @@ const links = [
     </aside>
     <aside>
       <p class="text-sm">
-        Copyright © 2024 <a href="https://obyte.org" target="_blank" rel="noopener">Obyte</a>,
-        all rights reserved
+        <a href="https://obyte.org" target="_blank" rel="noopener">Built on Obyte</a>
       </p>
     </aside>
   </footer>
