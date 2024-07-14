@@ -7,6 +7,7 @@ const reserve_price_usd = import.meta.env.VITE_RESERVE_PRICE_USD;
 const reserve_price_oswap = import.meta.env.VITE_RESERVE_PRICE_OSWAP;
 const registry_aa = import.meta.env.VITE_REGISTRY_AA;
 const default_oracle = import.meta.env.VITE_DEFAULT_ORACLE;
+const stats_url = import.meta.env.VITE_STATS_URL;
 
 export const ADDRESSES = {
   base_aas,
@@ -33,8 +34,7 @@ export const tokenUrl = `https://${
   network === "mainnet" ? "" : "testnet."
 }tokens.ooo/`;
 
-export const statsUrl =
-  network === "mainnet" ? "pyth.aa-dev.net" : "pyth-t.aa-dev.net";
+export const statsUrl = stats_url;
 
 export const perpDefaults = {
   swap_fee: 0.003,
