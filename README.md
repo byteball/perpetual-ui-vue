@@ -33,3 +33,9 @@ npm run build
 ```sh
 npm run lint
 ```
+
+## Donations
+
+We accept donations through [Kivach](https://kivach.org) and forward a portion of the donations to other open-source projects that made Pyth possible.
+
+[![Kivach](https://kivach.org/api/banner?repo=byteball/perpetual-ui-vue)](https://kivach.org/repo/byteball/perpetual-ui-vue)
