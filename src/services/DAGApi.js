@@ -1,7 +1,6 @@
-import client from "./Obyte.js";
 import CacheService from "@/services/CacheService";
-import Client from "@/services/Obyte";
 import { ADDRESSES } from "@/config";
+import odapp from "@/services/odapp";
 
 const definitionCache = new CacheService(5 * 60 * 1000);
 const stateVarsCache = new CacheService();
@@ -13,38 +12,32 @@ const jointCache = new CacheService();
 const metaCache = new CacheService();
 const balanceCache = new CacheService(30 * 1000);
 
-export async function getAasCreatedByFactory() {
-  const result = await client.api.getAasByBaseAas({
-    base_aas: ADDRESSES.base_aas,
-  });
-
-  return result.map((v) => v.address);
-}
-
 export async function getDefinition(aa) {
   if (definitionCache.exists(aa)) {
     return { aa, definition: definitionCache.getValue(aa) };
   }
 
-  let definition;
-
   try {
-    definition = await client.api.getDefinition(aa);
+    const definition = await odapp.getDefinition(aa);
+
     definitionCache.setValue(aa, definition);
+
+    return { aa, definition };
   } catch (e) {
-    console.log(e);
     return { aa, definition: null };
   }
+}
 
-  return { aa, definition };
+export async function getBalances(address) {
+  return odapp.getBalances(address);
 }
 
 export async function getAllBalances(address) {
   const key = address;
   if (balanceCache.exists(key)) return balanceCache.getValue(key);
 
-  const b = await client.api.getBalances([address]);
-  const balanceByAddress = b[address];
+  const result = await getBalances(address);
+  const balanceByAddress = result[address];
   const balances = {};
 
   for (const asset in balanceByAddress) {
@@ -56,9 +49,11 @@ export async function getAllBalances(address) {
 }
 
 export async function isUnitStable(unit) {
-  const joint = (await getJoint(unit))?.joint;
+  const joint = await getJoint(unit);
+
   return !!joint.ball;
 }
+
 export async function getAaStateVars(aa, prefix) {
   const key = `${aa}_${prefix || "_"}`;
   if (stateVarsCache.exists(key)) return stateVarsCache.getValue(key);
@@ -68,7 +63,7 @@ export async function getAaStateVars(aa, prefix) {
     params.prefix = prefix;
   }
 
-  const vars = await client.api.getAaStateVars(params);
+  const vars = await odapp.getAAStateVars(aa, prefix);
   stateVarsCache.setValue(key, vars);
   return vars;
 }
@@ -86,13 +81,13 @@ async function getMeta(aa) {
     meta = { ...meta, ...vars };
 
     const stakingDefinition = (await getDefinition(meta.staking_aa)).definition;
+
     meta.stakingParams = stakingDefinition[1].params;
-
     meta.stakingVars = await getAaStateVars(meta.staking_aa);
-
     meta.aa = aa;
 
     metaCache.setValue(key, meta);
+
     return meta;
   } catch (e) {
     console.error(e);
@@ -122,7 +117,7 @@ export async function getJoint(unit) {
   if (jointCache.exists(key)) return jointCache.getValue(key);
 
   try {
-    const joint = await client.api.getJoint(unit);
+    const joint = await odapp.getJoint(unit);
 
     if (joint.joint_not_found) {
       return null;
@@ -139,14 +134,11 @@ export async function getDataFeed(oracle, feedName) {
   const key = `${oracle}_${feedName}`;
   if (dataFeedCache.exists(key)) return dataFeedCache.getValue(key);
 
-  const params = {
-    oracles: [oracle],
-    feed_name: feedName,
-  };
-
   try {
-    const result = await client.api.getDataFeed(params);
+    const result = await odapp.getDataFeed(oracle, feedName);
+
     dataFeedCache.setValue(key, result);
+
     return result;
   } catch (e) {
     return null;
@@ -178,13 +170,11 @@ export async function getAssetMetadata(asset) {
     return assetMetadataCache.getValue(asset);
   }
   try {
-    const registryUnit = await client.api.getAssetMetadata(asset);
+    const registryUnit = await odapp.getAssetMetadata(asset);
 
-    const result = await client.api.getJoint(registryUnit.metadata_unit);
+    const result = await getJoint(registryUnit.metadata_unit);
 
-    const metadata = result.joint.unit.messages.find(
-      (item) => item.app === "data"
-    );
+    const metadata = result.unit.messages.find((item) => item.app === "data");
 
     assetMetadataCache.setValue(asset, metadata.payload);
     return { ...metadata.payload, asset };
@@ -214,14 +204,17 @@ export async function getAssetBySymbol(symbol) {
     return assetBySymbolCache.getValue(symbol);
   }
 
-  const registry = Client.api.getOfficialTokenRegistryAddress();
-  const asset = await Client.api.getAssetBySymbol(registry, symbol);
-  assetBySymbolCache.setValue(symbol, asset);
+  try {
+    const asset = await odapp.getAssetBySymbol(symbol);
 
-  return asset || null;
+    assetBySymbolCache.setValue(symbol, asset);
+    return asset;
+  } catch (e) {
+    return null;
+  }
 }
 
-export async function executeAAGetter(aa, getter, returnError, returnAA) {
+export async function executeAAGetter(aa, getter, args, returnError, returnAA) {
   const key = `${aa}_${getter}`;
   if (getterCache.exists(key)) return getterCache.getValue(key);
 
@@ -232,19 +225,27 @@ export async function executeAAGetter(aa, getter, returnError, returnAA) {
   };
 
   try {
-    const result = await client.api.executeGetter(params);
-    if (result?.result) {
-      getterCache.setValue(key, result.result);
+    const result = await odapp.executeGetter(params);
+
+    if (result) {
+      getterCache.setValue(key, result);
     }
 
     if (returnAA) {
-      return { aa, result: result?.result || null };
+      return { aa, result: result || null };
     }
-    return result?.result;
+    return result;
   } catch (e) {
-    console.error(aa, e);
     if (returnError) return { error: e };
     return null;
+  }
+}
+
+export async function getAAsByBaseAAs(baseAAs) {
+  try {
+    return await odapp.getAAsByBaseAAs(baseAAs);
+  } catch (e) {
+    return [];
   }
 }
 

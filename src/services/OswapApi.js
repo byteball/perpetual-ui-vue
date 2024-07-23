@@ -1,13 +1,10 @@
-import Client from "@/services/Obyte";
-import { getAssetMetadata } from "@/services/DAGApi";
+import { getAaStateVars, getAssetMetadata } from "@/services/DAGApi";
 
 export async function getOswapPoolsWithSymbols() {
   const assetsBySymbol = {};
   const metaByAsset = {};
 
-  const vars = await Client.api.getAaStateVars({
-    address: import.meta.env.VITE_OSWAP_FACTORY,
-  });
+  const vars = await getAaStateVars(import.meta.env.VITE_OSWAP_FACTORY);
 
   for (let k in vars) {
     if (k.startsWith("pool_")) {

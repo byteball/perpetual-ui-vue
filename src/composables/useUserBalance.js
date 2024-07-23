@@ -1,5 +1,5 @@
 import { onBeforeMount, onUnmounted, ref, watch } from "vue";
-import client from "@/services/Obyte";
+import { getBalances } from "@/services/DAGApi";
 
 export function useUserBalance(address) {
   let intervalId;
@@ -13,7 +13,7 @@ export function useUserBalance(address) {
     }
     let b;
     try {
-      b = await client.api.getBalances([address.value]);
+      b = await getBalances(address.value);
     } catch (e) {
       //
     }

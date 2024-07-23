@@ -3,16 +3,20 @@ import { ref, watch } from "vue";
 import { onBeforeRouteLeave, useRoute, useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { event } from "vue-gtag";
-import Client from "@/services/Obyte";
 import { generateDefinitionLink, generateLink } from "@/utils/generateLink";
 import { parseDataFromRequest } from "@/utils/parseDataFromRequest";
 import { useAaInfoStore } from "@/stores/aaInfo";
-import { getAssetMetadata } from "@/services/DAGApi";
+import {
+  executeAAGetter,
+  getAAsByBaseAAs,
+  getAssetMetadata,
+} from "@/services/DAGApi";
 import emitter from "@/services/emitter";
 import TooltipComponent from "@/components/TooltipComponent.vue";
 import NumberInput from "@/components/inputs/NumberInput.vue";
 import OracleComponent from "@/components/OracleComponent.vue";
 import { ADDRESSES } from "@/config";
+import { getDefinition } from "@/services/DAGApi";
 
 let intervalId = 0;
 const step = ref(1);
@@ -56,27 +60,29 @@ function setLinkForPriceAA() {
 
 async function checkExistsPriceAA() {
   const { oracleAddress, dataFeed } = oracleResult.value;
-  const result = await Client.api.executeGetter({
-    address: "TWV4APP6EM6AFEJNHWTATHAIBQVU4IAS",
-    getter: "getAAAddressByDefinition",
-    args: [
-      [
-        "autonomous agent",
-        {
-          base_aa: import.meta.env.VITE_BASE_PRICE_AA,
-          params: {
-            oracle: oracleAddress,
-            feed_name: dataFeed,
-            multiplier: multiplier.value,
-          },
+
+  const address = "TWV4APP6EM6AFEJNHWTATHAIBQVU4IAS";
+  const getter = "getAAAddressByDefinition";
+  const args = [
+    [
+      "autonomous agent",
+      {
+        base_aa: import.meta.env.VITE_BASE_PRICE_AA,
+        params: {
+          oracle: oracleAddress,
+          feed_name: dataFeed,
+          multiplier: multiplier.value,
         },
-      ],
+      },
     ],
-  });
+  ];
+
+  const result = await executeAAGetter(address, getter, args);
 
   priceAA.value = result.result;
-  const def = await Client.api.getDefinition(result.result);
-  if (def) {
+  const defResult = await getDefinition(result.result);
+
+  if (defResult.definition) {
     step.value = 4;
   } else {
     step.value = 2;
@@ -92,11 +98,9 @@ function clearPriceInterval() {
 
 async function checkPriceAA() {
   console.log("check checkPriceAA");
-  const q = await Client.api.getAasByBaseAas({
-    base_aa: import.meta.env.VITE_BASE_PRICE_AA,
-  });
+  const result = await getAAsByBaseAAs(import.meta.env.VITE_BASE_PRICE_AA);
 
-  const addressExists = !!q.find((v) => {
+  const addressExists = !!result.find((v) => {
     return v.address === priceAA.value;
   });
 
