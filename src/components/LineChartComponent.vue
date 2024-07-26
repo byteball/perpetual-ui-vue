@@ -43,10 +43,19 @@ const options = {
   },
   scales: {
     x: {
-      display: false,
+      display: true,
+      ticks: {
+        callback: function (_v, index) {
+          if (props.period === "1W") {
+            return index % 2 !== 0 ? dataRef.value.labels[index] : "";
+          }
+
+          return dataRef.value.labels[index];
+        },
+      },
     },
     y: {
-      display: false,
+      display: true,
     },
   },
   plugins: {
@@ -70,7 +79,7 @@ const options = {
 
 <template>
   <div class="relative">
-    <Line :data="dataRef" :options="options" />
+    <Line v-show="data.length" :data="dataRef" :options="options" />
   </div>
 </template>
 

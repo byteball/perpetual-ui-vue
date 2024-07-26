@@ -536,7 +536,7 @@ watch([assetForPriceRef, chartPeriod], async () => {
                   <span v-else>&nbsp;</span>
                 </div>
               </div>
-              <div class="pt-1.5">
+              <div class="pt-1.5" v-show="line.length">
                 <a
                   class="btn btn-xs"
                   :class="chartPeriod === '1W' ? 'btn-primary' : ''"
@@ -555,7 +555,7 @@ watch([assetForPriceRef, chartPeriod], async () => {
               :period="chartPeriod"
               :name="assets.nameAndDecimalsByAsset[assetForPriceRef]?.name"
               :data="line"
-              class="!h-[18rem]"
+              :class="line.length ? '!h-[22rem]' : ''"
             />
           </div>
           <div class="form-control ml-6 w-full lg:w-[336px]">
