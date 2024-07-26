@@ -5,8 +5,12 @@ import { event } from "vue-gtag";
 import { useCreatePerpStore } from "@/stores/createPerpStore";
 import emitter from "@/services/emitter";
 
-import Client from "@/services/Obyte";
-import { getAssetMetadata, getMetaForPerpAAs } from "@/services/DAGApi";
+import {
+  getAssetBySymbol,
+  getAssetMetadata,
+  getDefinition,
+  getMetaForPerpAAs,
+} from "@/services/DAGApi";
 import { generateLink } from "@/utils/generateLink";
 import { parseDataFromRequest } from "@/utils/parseDataFromRequest";
 import IntegerInput from "@/components/inputs/IntegerInput.vue";
@@ -45,17 +49,13 @@ const fillInputsForStep = async (assetUnit) => {
 
 const suggestValueForSymbolField = async (reserveSymbol) => {
   if (route.query.step !== "2") return;
-  const registryAA = Client.api.getOfficialTokenRegistryAddress();
 
   let index = 1;
   let newSymbolSuggestion = `${reserveSymbol}_G${index}`;
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    const asset = await Client.api.getAssetBySymbol(
-      registryAA,
-      newSymbolSuggestion
-    );
+    const asset = await getAssetBySymbol(newSymbolSuggestion);
 
     if (!asset) break;
 
@@ -153,17 +153,13 @@ function regGovernanceSymbolEvent() {
 }
 
 watch([asset, symbol, decimals, description], async () => {
-  const registryAA = Client.api.getOfficialTokenRegistryAddress();
   buttonEnabled.value = false;
 
   if (!symbol.value) {
     return;
   }
 
-  const isSymbolTaken = await Client.api.getAssetBySymbol(
-    registryAA,
-    symbol.value
-  );
+  const isSymbolTaken = await getAssetBySymbol(symbol.value);
 
   if (isSymbolTaken) {
     isSymbolExists.value = true;
@@ -192,11 +188,10 @@ watch([asset, symbol, decimals, description], async () => {
   buttonEnabled.value = true;
 });
 
-onMounted(() => {
-  Client.api.getDefinition(currentAA.value, function (err, result) {
-    if (err) return console.error(err);
-    exists.value = !!result;
-  });
+onMounted(async () => {
+  const result = await getDefinition(currentAA.value);
+
+  exists.value = !!result.definition;
 });
 </script>
 

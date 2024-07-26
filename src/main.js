@@ -24,6 +24,7 @@ import "./style.css";
 import "floating-vue/dist/style.css";
 
 import "@/services/Obyte";
+import { getAndSetInitData } from "@/services/odapp";
 
 FloatingVue.options.themes.tooltip.triggers = [
   "click",
@@ -60,3 +61,5 @@ app.use(
 );
 
 app.mount("#app");
+
+await getAndSetInitData();

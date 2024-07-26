@@ -5,11 +5,10 @@ import { generateLink } from "@/utils/generateLink";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import { storeToRefs } from "pinia";
 import { event } from "vue-gtag";
-import Client from "@/services/Obyte";
 import debounce from "lodash.debounce";
 import TextInput from "@/components/inputs/TextInput.vue";
 import NumberInput from "@/components/inputs/NumberInput.vue";
-import { getAssetBySymbol } from "@/services/DAGApi";
+import { getAssetBySymbol, getDefinition } from "@/services/DAGApi";
 import { getMetadataForSymbolByDataFeed } from "@/services/SymbolAPI";
 
 const store = useAaInfoStore();
@@ -78,7 +77,6 @@ watch(
 );
 
 const suggestValueForSymbolField = async (feedName) => {
-  registryAA.value = Client.api.getOfficialTokenRegistryAddress();
   const reserveAssetSymbol = feedName.split("_")[0];
 
   let index = 1;
@@ -86,10 +84,7 @@ const suggestValueForSymbolField = async (feedName) => {
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    const asset = await Client.api.getAssetBySymbol(
-      registryAA.value,
-      newSymbolSuggestion
-    );
+    const asset = await getAssetBySymbol(newSymbolSuggestion);
 
     if (!asset) break;
 
@@ -118,8 +113,9 @@ async function setDecimalsAndName(feedName) {
 onMounted(async () => {
   const priceAA = meta.value[props.perpAa][`asset_${props.asset}`].price_aa;
 
-  const priceAADefinition = await Client.api.getDefinition(priceAA);
-  const feedName = priceAADefinition[1].params.feed_name;
+  const result = await getDefinition(priceAA);
+
+  const feedName = result.definition[1].params.feed_name;
   await Promise.all([
     suggestValueForSymbolField(feedName),
     setDecimalsAndName(feedName),

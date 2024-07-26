@@ -48,6 +48,7 @@ watch(
     value.value = 0;
 
     const result = await getDataFeed(oracleAddress.value, dataFeed.value);
+
     if (!result) {
       return emit("dataUpdated", {
         error: "Data not found",

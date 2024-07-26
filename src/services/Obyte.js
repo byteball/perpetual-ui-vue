@@ -1,13 +1,9 @@
 import obyte from "obyte";
-import {
-  getMetaForPerpAAs,
-  getAasCreatedByFactory,
-  clearCache,
-} from "@/services/DAGApi";
+import { getMetaForPerpAAs, clearCache } from "@/services/DAGApi";
 import emitter from "@/services/emitter";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import { ADDRESSES } from "@/config";
-import { getInitData } from "@/services/MetaService";
+import { storeToRefs } from "pinia";
 
 const aasForWatch = [
   ADDRESSES.factory_aa,
@@ -16,9 +12,6 @@ const aasForWatch = [
   ADDRESSES.reserve_price_oswap,
 ];
 
-let aas = [];
-let allPerpAAs = [];
-let isFirstConnect = true;
 const aaEventNames = {};
 
 function generateEventNames(aas) {
@@ -42,34 +35,23 @@ const client = new obyte.Client(
   }
 );
 
-async function updateMeta() {
-  const store = useAaInfoStore();
-  const { setMeta } = store;
-  clearCache();
-  const meta = await getMetaForPerpAAs(aas);
-  setMeta(meta);
-}
-
 client.onConnect(async () => {
   const store = useAaInfoStore();
-  const { setAAs, setStatus, setMeta } = store;
-
-  if (isFirstConnect) {
-    const { aas, metaByAA, stakingAAs } = await getInitData();
-    setAAs(aas);
-
-    allPerpAAs = [...aas, ...stakingAAs];
-    setAAs(aas);
-    setMeta(metaByAA);
-    setStatus("initialized");
-    isFirstConnect = false;
-  }
+  const { aas, allPerpAAs } = storeToRefs(store);
 
   const heartbeat = setInterval(async () => {
     client.api.heartbeat();
   }, 10 * 1000);
 
-  const allAA = [...aasForWatch, ...allPerpAAs];
+  async function updateMeta() {
+    const store = useAaInfoStore();
+    const { setMeta } = store;
+    clearCache();
+    const meta = await getMetaForPerpAAs(aas.value);
+    setMeta(meta);
+  }
+
+  const allAA = [...aasForWatch, ...allPerpAAs.value];
   generateEventNames(allAA);
   allAA.forEach((aa) => {
     client.justsaying("light/new_aa_to_watch", {
@@ -91,7 +73,7 @@ client.onConnect(async () => {
     }
 
     if (subject === "light/aa_response") {
-      if (allPerpAAs.includes(body.aa_address)) {
+      if (allPerpAAs.value.includes(body.aa_address)) {
         updateMeta();
       }
 

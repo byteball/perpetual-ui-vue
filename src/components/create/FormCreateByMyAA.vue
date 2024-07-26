@@ -17,6 +17,7 @@ async function checkGetterInAA() {
   const targetPrice = await executeAAGetter(
     address.value,
     "get_reserve_price",
+    [],
     true
   );
   if (targetPrice.error) {
