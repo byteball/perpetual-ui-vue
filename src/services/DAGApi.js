@@ -221,7 +221,7 @@ export async function executeAAGetter(aa, getter, args, returnError, returnAA) {
   const params = {
     address: aa,
     getter,
-    args: [],
+    args: args || [],
   };
 
   try {

@@ -79,8 +79,8 @@ async function checkExistsPriceAA() {
 
   const result = await executeAAGetter(address, getter, args);
 
-  priceAA.value = result.result;
-  const defResult = await getDefinition(result.result);
+  priceAA.value = result;
+  const defResult = await getDefinition(result);
 
   if (defResult.definition) {
     step.value = 4;

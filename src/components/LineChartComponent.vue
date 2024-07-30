@@ -87,6 +87,12 @@ const options = computed(() => {
       },
       y: {
         display: true,
+        beginAtZero: props.data.every((v) => v.price === 0),
+        ticks: {
+          callback: function (_v) {
+            return `${+_v.toPrecision(6)}`;
+          },
+        },
       },
     },
     plugins: {
