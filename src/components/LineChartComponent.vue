@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import { Line } from "vue-chartjs";
 import { formatIsoDate } from "@/utils/formatIsoDate";
+import { getDay, getTime } from "@/utils/dateFormat";
 
 const props = defineProps(["data", "name", "period"]);
 
@@ -9,16 +10,31 @@ const dataRef = computed(() => {
   const ls = [];
   const ds = [];
 
-  let i = 6;
-  props.data.forEach((v) => {
-    if (props.period === "1W" && i < 5) {
+  let i = 0;
+  let lastDay = 0;
+  props.data.forEach((v, idx) => {
+    const date = props.period === "1W" ? formatIsoDate(v.date) : v.date;
+    if (props.period === "1W") {
+      const day = new Date(date).getDate();
+      if (day !== lastDay || idx === props.data.length - 1) {
+        i = 0;
+        lastDay = day;
+        ls.push(date);
+        ds.push(v.price);
+        return;
+      }
+
       i++;
+      if (i % 5 === 0) {
+        ls.push(date);
+        ds.push(v.price);
+      }
       return;
     }
-    const date = props.period === "1W" ? formatIsoDate(v.date) : v.date;
+
+    // 1M
     ls.push(date);
     ds.push(v.price);
-    i = 0;
   });
 
   return {
@@ -46,12 +62,26 @@ const options = {
       display: true,
       ticks: {
         callback: function (_v, index) {
-          if (props.period === "1W") {
-            return index % 2 !== 0 ? dataRef.value.labels[index] : "";
+          const date = dataRef.value.labels[index];
+          if (props.period === "1M") {
+            return index % 2 !== 0 ? "" : getDay(date);
           }
 
-          return dataRef.value.labels[index];
+          // 1W
+          if (index === 0) {
+            return getDay(date);
+          }
+
+          const oldDate = new Date(dataRef.value.labels[index - 1]);
+          const newDate = new Date(date);
+          if (oldDate.getDay() !== newDate.getDay()) {
+            return getDay(date);
+          }
+
+          return getTime(date);
         },
+        maxRotation: 0,
+        minRotation: 0,
       },
     },
     y: {
