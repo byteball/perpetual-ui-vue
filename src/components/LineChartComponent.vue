@@ -25,7 +25,7 @@ const dataRef = computed(() => {
       }
 
       i++;
-      if (i % 5 === 0) {
+      if (i % 12 === 0) {
         ls.push(date);
         ds.push(v.price);
       }
@@ -51,60 +51,62 @@ const dataRef = computed(() => {
   };
 });
 
-const options = {
-  responsive: true,
-  maintainAspectRatio: false,
-  interaction: {
-    intersect: false,
-  },
-  scales: {
-    x: {
-      display: true,
-      ticks: {
-        callback: function (_v, index) {
-          const date = dataRef.value.labels[index];
-          if (props.period === "1M") {
-            return index % 2 !== 0 ? "" : getDay(date);
-          }
-
-          // 1W
-          if (index === 0) {
-            return getDay(date);
-          }
-
-          const oldDate = new Date(dataRef.value.labels[index - 1]);
-          const newDate = new Date(date);
-          if (oldDate.getDay() !== newDate.getDay()) {
-            return getDay(date);
-          }
-
-          return getTime(date);
-        },
-        maxRotation: 0,
-        minRotation: 0,
-      },
+const options = computed(() => {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: {
+      intersect: false,
     },
-    y: {
-      display: true,
-    },
-  },
-  plugins: {
-    legend: false,
-    tooltip: {
-      boxWidth: 0,
-      boxHeight: 0,
-      boxPadding: 0,
-      callbacks: {
-        label: function (ctx) {
-          return `$${ctx.formattedValue}`;
+    scales: {
+      x: {
+        display: true,
+        ticks: {
+          callback: function (_v, index) {
+            const date = dataRef.value.labels[index];
+            if (props.period === "1M") {
+              return index % 2 !== 0 ? "" : getDay(date);
+            }
+
+            // 1W
+            if (index === 0) {
+              return getDay(date);
+            }
+
+            const oldDate = new Date(dataRef.value.labels[index - 1]);
+            const newDate = new Date(date);
+            if (oldDate.getDate() !== newDate.getDate()) {
+              return getDay(date);
+            }
+
+            return getTime(date);
+          },
+          maxRotation: props.period === "1M" ? 0 : 50,
+          minRotation: props.period === "1M" ? 0 : 50,
         },
       },
+      y: {
+        display: true,
+      },
     },
-    datalabels: {
-      display: false,
+    plugins: {
+      legend: false,
+      tooltip: {
+        boxWidth: 0,
+        boxHeight: 0,
+        boxPadding: 0,
+        callbacks: {
+          label: function (ctx) {
+            return `$${ctx.formattedValue}`;
+          },
+        },
+      },
+      datalabels: {
+        display: false,
+      },
     },
-  },
-};
+  };
+});
 </script>
 
 <template>
