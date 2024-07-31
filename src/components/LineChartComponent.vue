@@ -1,8 +1,8 @@
 <script setup>
 import { computed } from "vue";
 import { Line } from "vue-chartjs";
-import { formatIsoDate } from "@/utils/formatIsoDate";
 import { getDay, getTime } from "@/utils/dateFormat";
+import dayjs from "dayjs";
 
 const props = defineProps(["data", "name", "period"]);
 
@@ -13,27 +13,28 @@ const dataRef = computed(() => {
   let i = 0;
   let lastDay = 0;
   props.data.forEach((v, idx) => {
-    const date = props.period === "1W" ? formatIsoDate(v.date) : v.date;
+    const date = dayjs(v.date);
     if (props.period === "1W") {
-      const day = new Date(date).getDate();
+      const formatedDate = date.format("YYYY-MM-DD HH:mm");
+      const day = date.date();
       if (day !== lastDay || idx === props.data.length - 1) {
         i = 0;
         lastDay = day;
-        ls.push(date);
+        ls.push(formatedDate);
         ds.push(v.price);
         return;
       }
 
       i++;
       if (i % 12 === 0) {
-        ls.push(date);
+        ls.push(formatedDate);
         ds.push(v.price);
       }
       return;
     }
 
     // 1M
-    ls.push(date);
+    ls.push(date.format("YYYY-MM-DD"));
     ds.push(v.price);
   });
 
