@@ -104,7 +104,10 @@ const options = computed(() => {
         boxPadding: 0,
         callbacks: {
           label: function (ctx) {
-            return `$${ctx.formattedValue}`;
+            return `$${new Intl.NumberFormat("en-US", {
+              style: "decimal",
+              maximumFractionDigits: 15,
+            }).format(+ctx.raw.toPrecision(6))}`;
           },
         },
       },
