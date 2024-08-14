@@ -483,7 +483,7 @@ watch([assetForPriceRef, chartPeriod], async () => {
   line.value = [];
   const period = chartPeriod.value === "1W" ? "lastWeek" : "lastMonth";
   const res = await fetch(
-    `https://${statsUrl}/${period}?asset=${
+    `${statsUrl}/${period}?asset=${
       assetForPriceRef.value
     }&tzOffset=${new Date().getTimezoneOffset()}`
   );
