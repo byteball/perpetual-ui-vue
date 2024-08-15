@@ -14,6 +14,7 @@ const dataRef = computed(() => {
   let lastDay = 0;
   props.data.forEach((v, idx) => {
     const date = dayjs(v.date);
+    v.price = +v.price.toPrecision(6);
     if (props.period === "1W") {
       const formatedDate = date.format("YYYY-MM-DD HH:mm");
       const day = date.date();
@@ -89,11 +90,6 @@ const options = computed(() => {
       y: {
         display: true,
         beginAtZero: props.data.every((v) => v.price === 0),
-        ticks: {
-          callback: function (_v) {
-            return `${+_v.toPrecision(6)}`;
-          },
-        },
       },
     },
     plugins: {
