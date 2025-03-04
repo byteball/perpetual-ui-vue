@@ -13,7 +13,7 @@ const dataRef = computed(() => {
   let i = 0;
   let lastDay = 0;
   props.data.forEach((v, idx) => {
-    const date = dayjs(v.date);
+    const date = dayjs.unix(v.timestamp);
     v.price = +v.price.toPrecision(6);
     if (props.period === "1W") {
       const formatedDate = date.format("YYYY-MM-DD HH:mm");
@@ -90,6 +90,14 @@ const options = computed(() => {
       y: {
         display: true,
         beginAtZero: props.data.every((v) => v.price === 0),
+        ticks: {
+          callback: function (v) {
+            return `$${new Intl.NumberFormat("en-US", {
+              style: "decimal",
+              maximumFractionDigits: 15,
+            }).format(+v)}`;
+          },
+        },
       },
     },
     plugins: {
