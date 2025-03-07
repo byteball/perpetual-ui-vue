@@ -160,8 +160,8 @@ async function prepareDataForPie() {
 }
 
 function isBrokenPresale(meta, presalePeriod) {
-  const presaleAssetIssue = meta.creation_ts;
-  const finishDate = dayjs((presaleAssetIssue + presalePeriod) * 1000);
+  const presaleStartTimestamp = meta.creation_ts;
+  const finishDate = dayjs((presaleStartTimestamp + presalePeriod) * 1000);
   return !meta.presale_amount && finishDate.diff(dayjs()) < 0;
 }
 
