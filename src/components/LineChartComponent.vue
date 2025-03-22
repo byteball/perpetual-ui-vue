@@ -39,6 +39,8 @@ const dataRef = computed(() => {
     ds.push(v.price);
   });
 
+  console.log("prices", ds);
+
   return {
     labels: ls,
     datasets: [
@@ -91,11 +93,13 @@ const options = computed(() => {
         display: true,
         beginAtZero: props.data.every((v) => v.price === 0),
         ticks: {
-          callback: function (v) {
-            return `$${new Intl.NumberFormat("en-US", {
+          callback: function (v, index) {
+            const f = new Intl.NumberFormat("en-US", {
               style: "decimal",
               maximumFractionDigits: 15,
-            }).format(+v)}`;
+            }).format(+v);
+            console.log("ticks", v, +v, f, index);
+            return `$${f}`;
           },
         },
       },
