@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from "vue";
 import { Line } from "vue-chartjs";
+import { Ticks } from "chart.js";
 import { getDay, getTime } from "@/utils/dateFormat";
 import dayjs from "dayjs";
 
@@ -38,8 +39,6 @@ const dataRef = computed(() => {
     ls.push(date.format("YYYY-MM-DD"));
     ds.push(v.price);
   });
-
-  console.log("prices", ds);
 
   return {
     labels: ls,
@@ -93,12 +92,16 @@ const options = computed(() => {
         display: true,
         beginAtZero: props.data.every((v) => v.price === 0),
         ticks: {
-          callback: function (v, index) {
+          callback: function (v, index, ticks) {
+            const value = Ticks.formatters.numeric.apply(this, [
+              v,
+              index,
+              ticks,
+            ]);
             const f = new Intl.NumberFormat("en-US", {
               style: "decimal",
               maximumFractionDigits: 15,
-            }).format(+v);
-            console.log("ticks", v, +v, f, index);
+            }).format(value);
             return `$${f}`;
           },
         },
