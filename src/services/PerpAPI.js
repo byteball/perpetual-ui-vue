@@ -3,6 +3,7 @@ import {
   getAllBalances,
   getDataFeed,
   getDefinition,
+  executeAAGetter,
 } from "@/services/DAGApi";
 import { small_pow } from "@/utils/smallPow";
 import { adjustPrices } from "@/utils/adjustPrices";
@@ -11,6 +12,18 @@ import { cloneProxyToRaw } from "@/utils/cloneProxyToRaw";
 export async function getReservePrice(aa) {
   const def = (await getDefinition(aa)).definition;
   const params = def[1].params;
+  const getters = def[1].getters;
+
+  if (getters) {
+    try {
+      const reservePrice = await executeAAGetter(aa, "get_reserve_price", []);
+      return reservePrice;
+    } catch (e) {
+      console.error(e);
+      return 0;
+    }
+  }
+
   if (params.oswap_aa) {
     const oswap_params = (await getDefinition(params.oswap_aa)).definition[1]
       .params;
