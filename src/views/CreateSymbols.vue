@@ -50,7 +50,7 @@ const fillInputsForStep = async (assetUnit) => {
 const suggestValueForSymbolField = async (reserveSymbol) => {
   if (route.query.step !== "2") return;
 
-  let index = 0;
+  let index = 1;
   let newSymbolSuggestion = `${reserveSymbol}_G${index}`;
 
   // eslint-disable-next-line no-constant-condition
