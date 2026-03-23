@@ -4,9 +4,9 @@ import { getAaStateVars, getAssetMetadata } from "@/services/DAGApi";
 export async function getOswapPoolsWithSymbols() {
   const assetsBySymbol = {};
   const metaByAsset = {};
-  const { oswap_factories } = ADDRESSES;
+  const { oswap_factory } = ADDRESSES;
 
-  if (!oswap_factories.length) {
+  if (!oswap_factory.length) {
     return {
       assetsBySymbol,
       metaByAsset,
@@ -14,7 +14,7 @@ export async function getOswapPoolsWithSymbols() {
   }
 
   const varsByFactory = await Promise.all(
-    oswap_factories.map((factoryAA) => getAaStateVars(factoryAA))
+    oswap_factory.map((factoryAA) => getAaStateVars(factoryAA))
   );
 
   const pools = varsByFactory.flatMap((vars, index) => {
@@ -23,7 +23,7 @@ export async function getOswapPoolsWithSymbols() {
       .map(([key, value]) => ({
         ...value,
         address: key.split("_")[1],
-        factory_aa: oswap_factories[index],
+        factory_aa: oswap_factory[index],
       }));
   });
 
