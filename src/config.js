@@ -1,7 +1,13 @@
-const base_aas = import.meta.env.VITE_BASE_AAS.split(",").filter(
-  (v) => v !== ""
-);
+function parseArrayEnv(value = "") {
+  return value
+    .split(",")
+    .map((v) => v.trim())
+    .filter(Boolean);
+}
+
+const base_aas = parseArrayEnv(import.meta.env.VITE_BASE_AAS);
 const base_aa = base_aas.at(-1);
+const oswap_factories = parseArrayEnv(import.meta.env.VITE_OSWAP_FACTORY);
 const factory_aa = import.meta.env.VITE_FACTORY_AA;
 const reserve_price_usd = import.meta.env.VITE_RESERVE_PRICE_USD;
 const reserve_price_oswap = import.meta.env.VITE_RESERVE_PRICE_OSWAP;
@@ -12,6 +18,7 @@ const stats_url = import.meta.env.VITE_STATS_URL;
 export const ADDRESSES = {
   base_aas,
   base_aa,
+  oswap_factories,
   factory_aa,
   reserve_price_usd,
   reserve_price_oswap,
