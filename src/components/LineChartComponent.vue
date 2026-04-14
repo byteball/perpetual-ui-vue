@@ -1,11 +1,31 @@
 <script setup>
 import { computed } from "vue";
 import { Line } from "vue-chartjs";
-import { Ticks } from "chart.js";
 import { getDay, getTime } from "@/utils/dateFormat";
 import dayjs from "dayjs";
 
 const props = defineProps(["data", "name", "period"]);
+
+function normalizeNumericValue(value, significantDigits = 15) {
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue)) {
+    return null;
+  }
+
+  return Number.parseFloat(numericValue.toPrecision(significantDigits));
+}
+
+function formatDollarValue(value) {
+  const numericValue = normalizeNumericValue(value);
+  if (numericValue === null) {
+    return "";
+  }
+
+  return `$${new Intl.NumberFormat("en-US", {
+    style: "decimal",
+    maximumFractionDigits: 15,
+  }).format(numericValue)}`;
+}
 
 const dataRef = computed(() => {
   const ls = [];
@@ -15,7 +35,10 @@ const dataRef = computed(() => {
   let lastDay = 0;
   props.data.forEach((v, idx) => {
     const date = dayjs.unix(v.timestamp);
-    v.price = +v.price.toPrecision(6);
+    const normalizedPrice = normalizeNumericValue(v.price, 6);
+    if (normalizedPrice === null) {
+      return;
+    }
     if (props.period === "1W") {
       const formatedDate = date.format("YYYY-MM-DD HH:mm");
       const day = date.date();
@@ -23,21 +46,21 @@ const dataRef = computed(() => {
         i = 0;
         lastDay = day;
         ls.push(formatedDate);
-        ds.push(v.price);
+        ds.push(normalizedPrice);
         return;
       }
 
       i++;
       if (i % 12 === 0) {
         ls.push(formatedDate);
-        ds.push(v.price);
+        ds.push(normalizedPrice);
       }
       return;
     }
 
     // 1M
     ls.push(date.format("YYYY-MM-DD"));
-    ds.push(v.price);
+    ds.push(normalizedPrice);
   });
 
   return {
@@ -92,17 +115,8 @@ const options = computed(() => {
         display: true,
         beginAtZero: props.data.every((v) => v.price === 0),
         ticks: {
-          callback: function (v, index, ticks) {
-            const value = Ticks.formatters.numeric.apply(this, [
-              v,
-              index,
-              ticks,
-            ]);
-            const f = new Intl.NumberFormat("en-US", {
-              style: "decimal",
-              maximumFractionDigits: 15,
-            }).format(value);
-            return `$${f}`;
+          callback: function (v) {
+            return formatDollarValue(v);
           },
         },
       },
@@ -115,10 +129,7 @@ const options = computed(() => {
         boxPadding: 0,
         callbacks: {
           label: function (ctx) {
-            return `$${new Intl.NumberFormat("en-US", {
-              style: "decimal",
-              maximumFractionDigits: 15,
-            }).format(+ctx.raw.toPrecision(6))}`;
+            return formatDollarValue(ctx.raw);
           },
         },
       },
