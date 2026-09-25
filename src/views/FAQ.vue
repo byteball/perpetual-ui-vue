@@ -205,10 +205,10 @@ onMounted(() => {
         <a href="https://oswap.io" target="_blank" rel="noopener">Oswap</a> pool
         token, such as
         <a
-          href="https://oswap.io/#/add-liquidity/MBTF5GG44S3ARJHIZH3DEAB4DGUCHCF6"
+          href="https://oswap.io/#/add-liquidity/WQA2UDP5R5FTHBNA5QMKW63QKSEMJM3G"
           target="_blank"
           rel="noopener"
-          >O-GBYTE-USDC</a
+          >O-GBYTE-USDC_2</a
         >, as reserve asset, then issuing futures assets pegged to the pool's
         constituent tokens, such as GBYTE and USDC. Thus, the pool token holders
         would be able to gain exposure to their preferred asset in the pool.
