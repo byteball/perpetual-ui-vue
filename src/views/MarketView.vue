@@ -2,6 +2,7 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { event } from "vue-gtag";
+import dayjs from "dayjs";
 import { useAaInfoStore } from "@/stores/aaInfo";
 import {
   getAssetInfoFromMeta,
@@ -77,6 +78,19 @@ const diff = ref("");
 const nameAssetForPrice = ref("");
 const assetForPriceRef = ref("");
 const chartPeriod = ref("1W");
+const currentPrices = ref({});
+const chartLine = computed(() => {
+  if (line.value.length) return line.value;
+  const price = currentPrices.value[assetForPriceRef.value];
+  if (!Number.isFinite(price)) return [];
+
+  const end = dayjs();
+  const start = end.subtract(1, chartPeriod.value === "1W" ? "week" : "month");
+  return Array.from({ length: end.diff(start, "day") + 1 }, (_, day) => ({
+    timestamp: start.add(day, "day").unix(),
+    price,
+  }));
+});
 
 const resultError = ref("");
 
@@ -381,6 +395,7 @@ async function calcAndSetDataForMetaAndLink() {
     10 ** assets.value.nameAndDecimalsByAsset[assetForPrice].decimals;
   nameAssetForPrice.value =
     assets.value.nameAndDecimalsByAsset[assetForPrice].name;
+  currentPrices.value[assetForPrice] = amount * oldPrice * reservePrice;
   newPrice.value = amount * price * reservePrice;
   diff.value = d.toFixed(3);
   link.value = data.link;
@@ -532,13 +547,15 @@ watch([assetForPriceRef, chartPeriod], async () => {
                   }}
                 </div>
                 <div class="mt-2.5">
-                  <span v-if="line.length"
-                    >${{ line[line.length - 1].price.toPrecision(6) }}</span
+                  <span v-if="chartLine.length"
+                    >${{
+                      chartLine[chartLine.length - 1].price.toPrecision(6)
+                    }}</span
                   >
                   <span v-else>&nbsp;</span>
                 </div>
               </div>
-              <div class="pt-1.5" v-show="line.length">
+              <div class="pt-1.5" v-show="chartLine.length">
                 <a
                   class="btn btn-xs"
                   :class="chartPeriod === '1W' ? 'btn-primary' : ''"
@@ -556,8 +573,8 @@ watch([assetForPriceRef, chartPeriod], async () => {
             <LineChartComponent
               :period="chartPeriod"
               :name="assets.nameAndDecimalsByAsset[assetForPriceRef]?.name"
-              :data="line"
-              :class="line.length ? '!h-[22rem]' : ''"
+              :data="chartLine"
+              :class="chartLine.length ? '!h-[22rem]' : ''"
             />
           </div>
           <div class="form-control ml-6 w-full lg:w-[336px]">
