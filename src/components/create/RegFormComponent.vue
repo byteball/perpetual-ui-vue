@@ -94,7 +94,7 @@ async function getNameForExistsAA(address) {
 async function checkAAForAlreadyExisting() {
   const result = await Client.api.dryRunAa({
     trigger: {
-      address: import.meta.env.VITE_FACTORY_AA,
+      address: "FOPUBEUPBC6YLIQDLKL6EW775BMV7YOH",
       outputs: {
         base: 10000,
       },
